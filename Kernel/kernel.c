@@ -2,6 +2,9 @@
 #include <lib.h>
 #include <moduleLoader.h>
 #include <idtLoader.h>
+#include "fl_allocator.h"
+#include "IO.h"
+#include "test_mm.h"
 
 extern void test_int_80h();
 
@@ -49,7 +52,12 @@ void *initializeKernelBinary() {
 
 int main() {
     load_idt();
+    initialize_allocator();
 
+    printf("iniciando mem test\n");
+    test_mm();
+    printf("mem test finalizado\n");
+    // while(1);
     // sys_registers();     // descomentar para ver registros del kernel
 
     ((EntryPoint) sampleCodeModuleAddress)();

@@ -293,3 +293,4 @@ fabric.properties
 # End of https://mrkandreev.name/snippets/gitignore-generator/#C,CMake,Python,Assembler,JetBrains
 /compile_and_run.sh
 /clean.sh
+/.vscode
