@@ -6,11 +6,11 @@ void sys_hlt() {
 }
 
 int sys_read(int fd, char * buf, int count){
-    return syscall(SYS_READ, fd, buf, count);
+    return syscall(SYS_READ, fd, (void *) buf, count);
 }
 
 void sys_write(int fd, char * buf, int count){
-    syscall(SYS_WRITE, fd, buf, count);
+    syscall(SYS_WRITE, fd, (void *) buf, count);
 }
 
 uint64_t sys_time(int d) {
@@ -38,7 +38,7 @@ void sys_new_size(int newSize){
 }
 
 void sys_putPixel(uint32_t hexColor, uint64_t x, uint64_t y){
-    syscall(SYS_PUT_PIXEL, hexColor, x, y);
+    syscall(SYS_PUT_PIXEL, hexColor, (void *) x, y);
 }
 
 int sys_secondsElapsed(){

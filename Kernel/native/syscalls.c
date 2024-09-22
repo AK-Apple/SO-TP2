@@ -31,10 +31,10 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
             nosound();
             return 1;
         case SYS_WRITE:
-            sys_write(param_1, param_2, param_3);
+            sys_write(param_1, (char *) param_2, param_3);
             return 1;
         case SYS_READ:
-            return sys_read(param_1, param_2, param_3);
+            return sys_read(param_1, (char *) param_2, param_3);
         case SYS_CLEAR_SCREEN:
             sys_clearScreen();
             return 1;

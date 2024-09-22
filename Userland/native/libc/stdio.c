@@ -4,7 +4,7 @@
 
 #define MAX_BUF 1024
 
-void scanf(const char * fmt, ...) {
+void scanf(char * fmt, ...) {
     va_list args;
     va_start(args, fmt);
 
@@ -17,7 +17,7 @@ void scanf(const char * fmt, ...) {
                     gets(va_arg(args, char *), MAX_BUF);
                     break;
                 case 'c':
-                    gets(va_arg(args, char), 1);
+                    gets(va_arg(args, char *), 1);
                     break;
                 case 'd':
                     gets(buf, MAX_BUF);
@@ -40,9 +40,9 @@ static void print_str(const char * str, uint64_t foreground, uint64_t background
     }
 }
 
-uint64_t printf_color(const char * fmt, uint64_t foreground, uint64_t background, ...) {
+uint64_t printf_color(char * fmt, uint64_t foreground, uint64_t background, ...) {
     va_list args;
-    va_start(args, fmt);
+    va_start(args, background);  
 
     uint64_t i = 0;
 
@@ -55,7 +55,7 @@ uint64_t printf_color(const char * fmt, uint64_t foreground, uint64_t background
                     print_str(buf, foreground, background);
                     break;
                 case 's':
-                    print_str(buf, foreground, background);
+                    print_str(va_arg(args, char*), foreground, background);  // You should pass the string argument here
                     break;
                 case '%':
                     putchar('%');
@@ -67,12 +67,12 @@ uint64_t printf_color(const char * fmt, uint64_t foreground, uint64_t background
             putchar(fmt[i]);
         }
         i++;
-        va_end(args);
     }
+    va_end(args);  
     return i;
 }
 
-void printf(const char * fmt, ...) {
+void printf(char * fmt, ...) {
     va_list args;
     va_start(args, fmt);
     printf_color(fmt, 0xFFFFFF, 0x000000, args);

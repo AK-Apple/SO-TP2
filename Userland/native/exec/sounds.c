@@ -48,7 +48,7 @@ void initializeQueue() {
     not_played_yet.size = 0;
 }
 
-void initializeQueueWithArray(int arr[], int n) {
+void initializeQueueWithArray(MusicalNote * arr, int n) {
     if (n >= MAX_SIZE) return;
     not_played_yet.front = 0;
     not_played_yet.rear = n - 1; // Rear points to the last element
@@ -104,15 +104,13 @@ char dequeue(MusicalNote* value) {
 
 // ---------------------------------------------------------------------------------
 
-
-
 void play_song(int song_id){
     switch(song_id){
         case 1: initializeQueueWithArray(retro_song, RETRO_SONG_LENGHT); break;
         case 2: initializeQueueWithArray(os_initiating, OS_INITIALIZING_LENGTH); break;
         case 3: initializeQueueWithArray(you_lost, YOU_LOST_LENGTH); break;
         default: initializeQueue(); break;
-        last_note_ticks = sys_ticks_elapsed;
+        last_note_ticks = sys_ticks_elapsed();
     }
 }
 
