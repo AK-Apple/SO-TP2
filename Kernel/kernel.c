@@ -50,7 +50,7 @@ void *initializeKernelBinary() {
 
 int main() {
     load_idt();
-    initialize_allocator();
+    initialize_allocator(sampleDataModuleAddress);
 
     printf("iniciando mem test\n");
     test_mm();

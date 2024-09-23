@@ -22,7 +22,6 @@ uint8_t memcheck(void *start, uint8_t value, uint32_t size) {
 }
 
 uint64_t test_mm() {
-  initialize_allocator();
   mm_rq mm_rqs[MAX_BLOCKS];
   uint8_t rq;
   uint32_t total;
@@ -33,13 +32,15 @@ uint64_t test_mm() {
 
   // if ((max_memory = satoi(argv[0])) <= 0)
     // return -1;
-  max_memory = TOTAL_MEMORY_BYTES;
-    
-  while (1) {
+
+  max_memory = fl_total_memory();
+  
+  int test_iterations = 2048;
+  while (test_iterations--) {
     rq = 0;
     printf("memory manager cycle\n"); 
     total = 0;
-  // puts("\nA");
+
     // Request as many blocks as we can
     while (rq < MAX_BLOCKS && total < max_memory) {
     //   mm_rqs[rq].size = GetUniform(max_memory - total - 1) + 1;

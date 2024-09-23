@@ -8,10 +8,13 @@ typedef struct FreeListMemoryManager {
 } FreeListMemoryManager;
 
 static FreeListMemoryManager fl_memory_manager = {0};
-// static char managed_memory[TOTAL_MEMORY_BYTES] = {0};
-#define MEMEM (void*)0x500000
-void initialize_allocator() {
-    fl_memory_manager.base_adress = MEMEM;
+
+int fl_total_memory() {
+    return BLOCK_COUNT * BLOCK_SIZE;
+}
+
+void initialize_allocator(void* heap) {
+    fl_memory_manager.base_adress = heap;
     for(uint32_t i = 0; i < BLOCK_COUNT; i++) {
         fl_memory_manager.free_pointers[i] = fl_memory_manager.base_adress + i * BLOCK_SIZE;
     }
@@ -29,3 +32,4 @@ void *fl_malloc() {
 void fl_free(void *pointer) {
     fl_memory_manager.free_pointers[--fl_memory_manager.current_free_index] = pointer;
 }
+

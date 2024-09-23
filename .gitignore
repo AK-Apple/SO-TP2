@@ -294,3 +294,6 @@ fabric.properties
 /compile_and_run.sh
 /clean.sh
 /.vscode
+
+# momento mac
+*/.DS_Store
