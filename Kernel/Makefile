@@ -7,13 +7,17 @@ SOURCES_ASM=$(wildcard asm/*.asm)
 SOURCES_DRIVERS=$(wildcard drivers/*.c)
 SOURCES_NATIVE=$(wildcard native/*.c)
 SOURCES_IDT=$(wildcard idt/*.c)
+SOURCES_HEAP=$(wildcard heap/*.c)		# NEW (Added in SO)
+SOURCES_TESTS=$(wildcard tests/*.c)
 
 OBJECTS=$(SOURCES:.c=.o)
 OBJECTS_DRIVERS=$(SOURCES_DRIVERS:.c=.o)
 OBJECTS_ASM=$(SOURCES_ASM:.asm=.o)
 OBJECTS_NATIVE=$(SOURCES_NATIVE:.c=.o)
 OBJECTS_IDT=$(SOURCES_IDT:.c=.o)
-TOTAL_OBJ = $(OBJECTS) $(OBJECTS_DRIVERS) $(OBJECTS_ASM) $(OBJECTS_NATIVE) $(OBJECTS_IDT)
+OBJECTS_HEAP=$(SOURCES_HEAP:.c=.o) 		# NEW (Added in SO)
+OBJECTS_TESTS=$(SOURCES_TESTS:.c=.o)
+TOTAL_OBJ = $(OBJECTS) $(OBJECTS_DRIVERS) $(OBJECTS_ASM) $(OBJECTS_NATIVE) $(OBJECTS_IDT)  $(OBJECTS_HEAP) $(OBJECTS_TESTS)
 
 LOADERSRC=loader.asm
 LOADEROBJECT=$(LOADERSRC:.asm=.o)
@@ -34,9 +38,7 @@ $(LOADEROBJECT):
 	$(ASM) $(ASMFLAGS) $(LOADERSRC) -o $(LOADEROBJECT)
 
 clean:
-	rm -rf asm/*.o drivers/*.o *.o *.bin
-	rm -rf idt/*.o drivers/*.o *.o *.bin
-	rm -rf drivers/*.o drivers/*.o *.o *.bin
-	rm -rf native/*.o drivers/*.o *.o *.bin
+	rm -rf asm/*.o drivers/*.o *.o *.bin idt/*.o native/*.o
+	rm -rf heap/*.o
 
 .PHONY: all clean
