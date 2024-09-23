@@ -41,16 +41,16 @@ void *initializeKernelBinary() {
             sampleDataModuleAddress
     };
 
-    loadModules(&endOfKernelBinary, moduleAddresses);
+    uint64_t userlandModuleSize = loadModules(&endOfKernelBinary, moduleAddresses);
 
     clearBSS(&bss, &endOfKernel - &bss);
+    initialize_allocator(sampleDataModuleAddress + userlandModuleSize);
 
     return getStackBase();
 }
 
 int main() {
     load_idt();
-    initialize_allocator(sampleDataModuleAddress);
 
     printf("iniciando mem test\n");
     test_mm();

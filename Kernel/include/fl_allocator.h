@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define BLOCK_COUNT 256
+#define BLOCK_COUNT 128
 #define BLOCK_SIZE 256
 
 void initialize_allocator(void* heap);
