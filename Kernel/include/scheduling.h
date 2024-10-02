@@ -5,6 +5,7 @@
 
 #define MAX_PROCESS_BLOCKS 64 /* <--- esto puede ir en .h */
 #define STACK_SIZE (1 << 12) /* 4KB */
+#define INVALID_PID (-1)
 
 void create_process(uint64_t parent_pid, char **argv);
 
