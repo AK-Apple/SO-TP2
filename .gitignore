@@ -295,5 +295,5 @@ fabric.properties
 /clean.sh
 /.vscode
 
-# momento mac
-*/.DS_Store
+# mac
+*.DS_Store
