@@ -8,6 +8,7 @@ static unsigned long ticks = 0;
 
 void timer_handler() {
 	ticks++;
+    // _change_process();   // Este comando lo cambia todo
 }
 
 int ticks_elapsed() {

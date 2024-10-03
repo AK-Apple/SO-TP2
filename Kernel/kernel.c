@@ -50,6 +50,7 @@ void *initializeKernelBinary() {
 }
 
 int main() {
+    create_init_process();
     load_idt();
 
     printf("iniciando mem test\n");

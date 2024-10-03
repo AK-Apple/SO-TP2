@@ -277,6 +277,29 @@ _int80Handler:
 	popStateWithoutRax
 	iretq
 
+; ------------ Sección SO -----------
+
+
+
+EXTERN schedule
+GLOBAL _change_process
+
+_change_process:
+	pushState
+
+	mov rdi, rsp
+	call schedule
+	mov rsp, rax
+
+	mov al, 20h
+	out 20h, al
+
+	popState
+
+	iretq
+
+; ------------ Fin Sección SO -----------
+
 haltcpu:
 	cli
 	hlt
