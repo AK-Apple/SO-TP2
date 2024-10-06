@@ -35,6 +35,8 @@ void picSlaveMask(uint8_t mask);
 
 // assembler (iterrupts.c)
 
+uint64_t _get_starting_point();
+
 // void _change_process();
 
 // -------- Fin SO

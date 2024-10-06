@@ -167,6 +167,12 @@ SECTION .text
 	iretq
 %endmacro
 
+GLOBAL _get_starting_point
+
+_get_starting_point:
+	mov rax, [rsp]
+	ret
+
 ; ------------ Fin Sección SO -----------
 
 %macro exceptionHandler 1
