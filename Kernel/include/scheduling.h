@@ -46,7 +46,7 @@ typedef struct StackedRegisters {
 
 // ------- Assembler Section ---------
 
-void _change_process(void);
+// void _change_process(void);
 
 // -------- end SO -------
 

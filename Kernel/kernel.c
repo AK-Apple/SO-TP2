@@ -5,6 +5,7 @@
 #include "fl_allocator.h"
 #include "IO.h"
 #include "test_mm.h"
+#include "scheduling.h"
 
 extern void test_int_80h();
 
@@ -49,9 +50,8 @@ void *initializeKernelBinary() {
     return getStackBase();
 }
 
-void test(){
+void test_processes(){
     char ** argvaux = {"30"};
-    printf("Proceso INIT creado\n");
 
     create_process("endless_loop_print\n", 0, argvaux);
     printf("Primer proceso creado");
@@ -71,6 +71,8 @@ int main() {
     printf("iniciando mem test\n");
     test_mm();
     printf("mem test finalizado\n");
+
+    // test_processes();
     // while(1);
     // sys_registers();     // descomentar para ver registros del kernel
 

@@ -3,6 +3,7 @@
 #include "naiveConsole.h"
 #include "interrupts.h"
 #include "scheduling.h"
+#include "IO.h"
 
 static unsigned long ticks = 0;
 

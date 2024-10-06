@@ -51,7 +51,8 @@ ProcessBlock blocks[MAX_PROCESS_BLOCKS] = {0};
 
 
 void create_process(char *name, int argc, char **argv) {
-    process_initializer(name, argc, argv);
+    uint64_t return_value = process_initializer(name, argc, argv);
+    // exit(return_value);
 }
 
 void kill_process(uint64_t pid) {
@@ -71,15 +72,15 @@ void store_context() {
 #define ALIGN 4
 
 
-void initializeRegisters(uint64_t rip, uint64_t rsp, uint64_t stack_base){
+void initializeRegisters(uint64_t rsp){
     StackedRegisters stackedRegisters = (StackedRegisters){0};
     stackedRegisters.rflags = 0x202;
     stackedRegisters.cs = 0x8;
-    stackedRegisters.rip = rip;
+    stackedRegisters.rip = get_rip();
     stackedRegisters.rsp = rsp;
 
     // TODO: revisar esto, porque tengo un mal presentimiento de esto
-    memcpy( (void*) stack_base, &stackedRegisters, sizeof(struct StackedRegisters));
+    memcpy( (void*) rsp, &stackedRegisters, sizeof(struct StackedRegisters));
 }
 
 uint64_t running_pid; 
@@ -87,9 +88,9 @@ uint64_t running_pid;
 CircularList round_robin = {0};
 
 uint64_t schedule(uint64_t running_stack_pointer){
-    printf("llego al schedule\n");
+    // printf("llego al schedule\n");
 
-    k_print_int_dec(running_stack_pointer);
+    // k_print_int_dec(running_stack_pointer);
 
     blocks[running_pid].stack_pointer = running_stack_pointer;
     blocks[running_pid].process_state = READY;
@@ -98,8 +99,8 @@ uint64_t schedule(uint64_t running_stack_pointer){
 
     running_pid = next_pid;
 
-    k_print_int_dec(getpid());
-    k_print_int_dec(blocks[next_pid].stack_pointer);
+    // k_print_int_dec(getpid());
+    // k_print_int_dec(blocks[next_pid].stack_pointer);
 
     blocks[next_pid].process_state = RUNNING;
     return blocks[next_pid].stack_pointer;
@@ -127,18 +128,22 @@ void create_init_process(){
 }
 
 void create_process_beta(uint64_t rip) {
-    uint64_t pid = request_pid();
-    uint64_t rsp = stacks[pid] + STACK_SIZE - ALIGN;      // TODO: no sé si va este - 64
+    uint64_t new_pid = request_pid();
+    uint64_t rsp = stacks[new_pid] + STACK_SIZE - ALIGN;      // TODO: no sé si va este - 64
+    
     // arriba del RSP, hay que poner los valores de RAX, RBX, etc.
-    initializeRegisters(rip, rsp, rsp);
+    initializeRegisters(rsp);
 
-    blocks[pid].pid = pid;
-    blocks[pid].stack_pointer = rsp;
-    blocks[pid].process_state = READY;
-    blocks[pid].parent_pid = running_pid;
-    blocks[pid].priority = 1;
+    blocks[new_pid].pid = new_pid;
+    blocks[new_pid].stack_pointer = rsp;
+    blocks[new_pid].process_state = READY;
+    blocks[new_pid].parent_pid = running_pid;
+    blocks[new_pid].priority = 1;
 
-    add(&round_robin, pid);
+    add(&round_robin, new_pid);
+
+    // forzar timer-tick
+    
 }
 
 int64_t getpid() {

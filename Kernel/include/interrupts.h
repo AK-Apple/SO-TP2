@@ -30,6 +30,15 @@ void picMasterMask(uint8_t mask);
 
 void picSlaveMask(uint8_t mask);
 
+
+// -------- SO
+
+// assembler (iterrupts.c)
+
+// void _change_process();
+
+// -------- Fin SO
+
 //Termina la ejecución de la cpu.
 void haltcpu(void);
 

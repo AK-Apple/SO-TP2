@@ -143,6 +143,32 @@ SECTION .text
 	iretq
 %endmacro
 
+; ------------ Sección SO -----------
+
+
+
+
+
+%macro change_process 0
+	pushState
+
+	mov rdi, 0 ; pasaje de parametro
+	call irqDispatcher
+
+	mov rdi, rsp
+	call schedule
+	mov rsp, rax
+
+	mov al, 20h
+	out 20h, al
+
+	popState
+
+	iretq
+%endmacro
+
+; ------------ Fin Sección SO -----------
+
 %macro exceptionHandler 1
 	pushAndSaveState	; guarda registros en updating_regex
 
@@ -225,10 +251,11 @@ picSlaveMask:
     pop     rbp
     retn
 
+EXTERN schedule
 
 ;8254 Timer (Timer Tick)
 _irq00Handler:
-	irqHandlerMaster 0
+	change_process
 
 ;Keyboard
 _irq01Handler:
@@ -277,28 +304,7 @@ _int80Handler:
 	popStateWithoutRax
 	iretq
 
-; ------------ Sección SO -----------
 
-
-
-EXTERN schedule
-GLOBAL _change_process
-
-_change_process:
-	pushState
-
-	mov rdi, rsp
-	call schedule
-	mov rsp, rax
-
-	mov al, 20h
-	out 20h, al
-
-	popState
-
-	iretq
-
-; ------------ Fin Sección SO -----------
 
 haltcpu:
 	cli

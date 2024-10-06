@@ -1,7 +1,6 @@
 #include "process.h"
 #include "lib.h"
 #include "IO.h"
-#include "scheduling.h"
 
 // diccionario con nombres de funciones y funciones
 // int64_t function(int argc, char* argv[]);
@@ -12,6 +11,8 @@
 // TODO: realizar exit, strcmp y printf con %d
 
 #define SIZE_DICTIONARY 64
+
+
 
 
 // Funciones:
@@ -41,9 +42,24 @@ FunctionPointer findFunctionByName(const char* name) {
     return NULL;  // Return NULL if the name is not found
 }
 
-void process_initializer(char* name, int argc, char* argv[]) {
+uint64_t default_rip = 0;
+
+// TODO: crear un initializer para no tener que estar haciendo comparaciones todo el tiempo
+uint64_t get_rip() {
+  if (!default_rip) {
+    process_initializer(0, 0, 0);
+  }
+  return default_rip;
+}
+
+
+uint64_t process_initializer(char* name, int argc, char* argv[]) {
+  if (!default_rip) {
+    return 0;
+  }
+
     FunctionPointer func = findFunctionByName(name);
-    uint64_t return_value = func(argc, argv);
+    return func(argc, argv);
     // exit(return_value);
 }
 

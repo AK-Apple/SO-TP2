@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
-void process_initializer(char* name, int argc, char* argv[]);
+uint64_t get_rip();
+uint64_t process_initializer(char* name, int argc, char* argv[]);
 
 #endif
