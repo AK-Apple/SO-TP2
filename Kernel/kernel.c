@@ -51,13 +51,16 @@ void *initializeKernelBinary() {
 }
 
 void test_processes(){
-    char ** argvaux = {"30"};
+    char * argvaux[1] = {"500"};
 
-    create_process("endless_loop_print", 0, argvaux);
+    create_process("endless_loop_print", 1, argvaux);
     printf("Primer proceso creado\n");
 
-    create_process("endless_loop_print", 0, argvaux);
+    create_process("endless_loop_print", 1, argvaux);
     printf("Segundo proceso creado\n");
+
+    create_process("endless_loop_print", 1, argvaux);
+    printf("Tercer proceso creado\n");
 }
 
 
@@ -72,8 +75,8 @@ int main() {
     // test_mm();
     // printf("mem test finalizado\n");
 
-    test_processes();
-    while(1);
+    // test_processes();
+    // while(1);
     // sys_registers();     // descomentar para ver registros del kernel
 
     ((EntryPoint) sampleCodeModuleAddress)();

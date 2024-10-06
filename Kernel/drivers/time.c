@@ -12,7 +12,6 @@ void timer_handler() {
 	ticks++;
 
     // printf("A continuacion: cambio de proceso\n");
-    // _change_process();   // Este comando lo cambia todo
     // k_print_int_dec(getpid());
 
 }

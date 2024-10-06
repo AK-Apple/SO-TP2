@@ -52,7 +52,9 @@ void free_pid(int pid) {
 ProcessBlock blocks[MAX_PROCESS_BLOCKS] = {0};
 //TODO: hacer que tire error cuando pid > 64
 
-
+void exit(uint64_t return_value){
+    return;
+};
 
 
 void kill_process(uint64_t pid) {
@@ -101,7 +103,7 @@ uint64_t schedule(uint64_t running_stack_pointer){
 
 // ------- Principio de un proceso --------
 
-#define ALIGN 8
+#define ALIGN 40
 
 uint64_t default_rip = 0;
 
@@ -111,17 +113,16 @@ void initializer(){
     printf("Empezo el proceso nro ");
     k_print_int_dec(running_pid); putChar('\n');
 
-    char* name = blocks[running_pid].p_name;
+    // Ojo: acá NO SE PUEDEN asigar variables
 
-    putChar('a');
-
-    int argc = blocks[running_pid].argc;
-    char** argv = blocks[running_pid].argv;
-    printf(blocks[running_pid].p_name); putChar('\n'); putChar('a');
-
-    if (name == 0) return;   // para el proceso init
-    uint64_t return_value = process_initializer(name, argc, argv);
-    // exit(return_value);
+    if (blocks[running_pid].p_name == 0) return;   // para el proceso init
+    exit(
+        process_initializer(
+            blocks[running_pid].p_name, 
+            blocks[running_pid].argc, 
+            blocks[running_pid].argv
+        )
+    );
 
     // Cosas que pueden estar mal:
     // 1. El orden del struct de StackedRegisters
@@ -163,7 +164,7 @@ void create_process(char *name, int argc, char **argv) {
 }
 
 void create_init_process(){
-    blocks[0].pid = 0;
+    blocks[0].pid = request_pid();  // Should be 0
     blocks[0].stack_pointer = 0;    // Se va a actualizar. El valor no importa
     blocks[0].process_state = RUNNING;
     blocks[0].parent_pid = -1;       // TODO: designarle un valor. Por ahora, no importa mucho

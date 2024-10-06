@@ -74,10 +74,13 @@ int64_t endless_loop(int argc, char* argv[]) {
 }
 
 int64_t endless_loop_print(int argc, char* argv[]) {
+  k_print_int_dec(argc); putChar('\n');
   if (argc != 1) return 1;
   
-
+  printf(argv[0]);
   uint64_t wait = k_atoi(argv[0]);
+  k_print_int_dec(wait);
+
 
   int64_t pid = getpid();
 
