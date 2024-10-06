@@ -18,4 +18,15 @@ char * cpuVendor(char *result);
 void outb (unsigned char __value, unsigned short int __port);
 unsigned char inb (unsigned short int __port);
 
+
+// -------- Funciones auxiliares para el kernel ---------
+
+#define NULL 0
+
+int k_strcmp(const char *str1, const char *str2);
+
+void k_print_int_dec(int64_t number);
+
+int64_t k_atoi(const char* str);
+
 #endif

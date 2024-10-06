@@ -7,13 +7,15 @@
 #define STACK_SIZE (1 << 12) /* 4KB */
 #define INVALID_PID (-1)
 
-void create_process(uint64_t parent_pid, char **argv);
+void create_process(char* name, int argc, char** argv);
 
 void create_init_process();
 
 void kill_process(uint64_t pid);
 
 void store_context();
+
+int64_t getpid();
 
 
 

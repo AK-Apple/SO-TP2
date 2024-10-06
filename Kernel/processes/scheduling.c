@@ -1,15 +1,18 @@
 #include "scheduling.h"
 #include "round_robin.h"
 #include "lib.h"
+#include "IO.h"
+#include "process.h"
 
 typedef uint64_t Stack[STACK_SIZE];
 Stack stacks[MAX_PROCESS_BLOCKS] = {0};
 
 
 typedef enum {
-    RUNNING,  // Typically assigned 0 by default
-    READY,    // Assigned 1
-    BLOCKED   // Assigned 2
+    UNAVAILABLE,    // Assigned 0 by default
+    RUNNING,
+    READY,
+    BLOCKED
 } State;
 
 typedef struct ProcessBlock {
@@ -47,8 +50,8 @@ ProcessBlock blocks[MAX_PROCESS_BLOCKS] = {0};
 
 
 
-void create_process(uint64_t parent_pid, char **argv) {
-
+void create_process(char *name, int argc, char **argv) {
+    process_initializer(name, argc, argv);
 }
 
 void kill_process(uint64_t pid) {
@@ -84,12 +87,20 @@ uint64_t running_pid;
 CircularList round_robin = {0};
 
 uint64_t schedule(uint64_t running_stack_pointer){
+    printf("llego al schedule\n");
+
+    k_print_int_dec(running_stack_pointer);
+
     blocks[running_pid].stack_pointer = running_stack_pointer;
     blocks[running_pid].process_state = READY;
 
     uint64_t next_pid = next(&round_robin);
 
     running_pid = next_pid;
+
+    k_print_int_dec(getpid());
+    k_print_int_dec(blocks[next_pid].stack_pointer);
+
     blocks[next_pid].process_state = RUNNING;
     return blocks[next_pid].stack_pointer;
 
@@ -105,8 +116,10 @@ void create_init_process(){
     blocks[0].pid = 0;
     blocks[0].stack_pointer = 0;    // Se va a actualizar. El valor no importa
     blocks[0].process_state = RUNNING;
-    blocks[0].parent_pid = 0;       // TODO: designarle un valor. Por ahora, no importa mucho
+    blocks[0].parent_pid = -1;       // TODO: designarle un valor. Por ahora, no importa mucho
     blocks[0].priority = 1;
+
+    running_pid = 0;
 
     add(&round_robin, 0);
 
@@ -128,8 +141,8 @@ void create_process_beta(uint64_t rip) {
     add(&round_robin, pid);
 }
 
-void getpid() {
-    // running --> pcb --> pid
+int64_t getpid() {
+    return running_pid;
 }
 
 void info_processes() {

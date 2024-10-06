@@ -101,3 +101,74 @@ void sys_registers() {
     }
     regsCaptured = 0;
 }
+
+//TODO: cambiar sys_registers() para que acepte procesos
+
+// ------- Funciones auxiliares para el Kernel -------
+
+int k_strcmp(const char *str1, const char *str2) {
+    while (*str1 && (*str1 == *str2)) {
+        str1++;
+        str2++;
+    }
+    return *(unsigned char*)str1 - *(unsigned char*)str2;
+}
+
+
+
+void k_print_int_dec(int64_t number) {
+    if (number < 0) {
+        putChar('-');  // Handle negative sign for negative numbers
+        number = -number;  // Convert to positive for easier handling
+    }
+
+    if (number == 0) {
+        putChar('0');  // Special case for 0
+        return;
+    }
+
+    // Calculate and store the digits in reverse order
+    char buffer[20];  // Buffer to hold the digits (enough for a 64-bit integer)
+    int index = 0;
+
+    while (number > 0) {
+        buffer[index++] = (number % 10) + '0';  // Store the least significant digit as a character
+        number /= 10;  // Remove the last digit
+    }
+
+    // Print the digits in the correct order
+    while (index > 0) {
+        putChar(buffer[--index]);  // Print the digits from most significant to least significant
+    }
+}
+
+
+int64_t k_atoi(const char *str) {
+    int64_t result = 0;
+    int sign = 1;  // Positive by default
+
+    // Skip any leading white space characters
+    while (*str == ' ' || *str == '\t' || *str == '\n' || *str == '\r' || *str == '\f' || *str == '\v') {
+        str++;
+    }
+
+    // Check if the number is negative
+    if (*str == '-') {
+        sign = -1;
+        str++;
+    } else if (*str == '+') {
+        str++;
+    }
+
+    // Convert characters to integer
+    while (*str >= '0' && *str <= '9') {
+        result = result * 10 + (*str - '0');
+        str++;
+    }
+
+    return result * sign;
+}
+
+int arrange(char* str, char* argv[]) {
+
+}

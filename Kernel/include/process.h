@@ -3,5 +3,6 @@
 
 #include <stdint.h>
 
+void process_initializer(char* name, int argc, char* argv[]);
 
 #endif

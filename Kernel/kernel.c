@@ -49,9 +49,24 @@ void *initializeKernelBinary() {
     return getStackBase();
 }
 
+void test(){
+    char ** argvaux = {"30"};
+    printf("Proceso INIT creado\n");
+
+    create_process("endless_loop_print\n", 0, argvaux);
+    printf("Primer proceso creado");
+
+    create_process("endless_loop_print\n", 0, argvaux);
+    printf("Segundo proceso creado\n");
+}
+
+
 int main() {
+    printf("Voy a crear algo\n");
     create_init_process();
+    printf("init creado\n");
     load_idt();
+    
 
     printf("iniciando mem test\n");
     test_mm();
