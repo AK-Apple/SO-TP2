@@ -297,3 +297,6 @@ fabric.properties
 
 # mac
 *.DS_Store
+
+# gdb
+.gdbinit

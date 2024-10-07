@@ -17,7 +17,7 @@ docker stop $NOMBRE
 
 # Set FLAG based on the input argument
 FLAG=""
-[[ "$1" = "-d" ]] && FLAG="-s -S"
+[[ "$1" = "-d" ]] && FLAG="-s -S -d int"
 
 # Set common qemu options
 QEMU_CMD="qemu-system-x86_64 $FLAG -hda Image/x64BareBonesImage.qcow2 -m 512"
