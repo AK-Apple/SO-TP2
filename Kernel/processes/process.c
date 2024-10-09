@@ -2,6 +2,7 @@
 #include "lib.h"
 #include "IO.h"
 #include "interrupts.h"
+#include "scheduling.h"
 
 // diccionario con nombres de funciones y funciones
 // int64_t function(int argc, char* argv[]);
@@ -82,7 +83,7 @@ int64_t endless_loop_print(int argc, char* argv[]) {
   k_print_int_dec(wait);
 
 
-  int64_t pid = getpid();
+  int64_t pid = get_pid();
 
   while (1) {
     // printf("%d ", pid);

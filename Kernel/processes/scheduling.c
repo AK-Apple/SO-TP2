@@ -5,9 +5,10 @@
 #include "process.h"
 #include "interrupts.h"
 
-typedef uint64_t Stack[STACK_SIZE];
 Stack stacks[MAX_PROCESS_BLOCKS] = {0};
 
+uint64_t running_pid = 0; 
+CircularList round_robin = {0};
 
 typedef enum {
     UNAVAILABLE,    // Assigned 0 by default
@@ -56,15 +57,37 @@ void exit(uint64_t return_value){
     return;
 };
 
+void reasign_children(uint64_t pid) {
+    for(int i = 0; i < MAX_PROCESS_BLOCKS; i++) {
+        if(blocks[i].parent_pid == pid) {
+            blocks[i].parent_pid = 0;
+        }
+    }
+}
 
 void kill_process(uint64_t pid) {
-    
+    delete_value(&round_robin, pid);
+    reasign_children(pid);
+
+    memset(stacks[pid], 0, sizeof(Stack));
+    blocks[pid].argc = 0;
+    blocks[pid].argv = NULL;
+    blocks[pid].p_name = NULL;
+    blocks[pid].parent_pid = 0;
+    blocks[pid].pid = INVALID_PID;
+    blocks[pid].priority = 0;
+    blocks[pid].process_state = UNAVAILABLE;
+    blocks[pid].stack_pointer = 0;
+    free_pid(pid);
 }
 
 void store_context() {
     
 }
 
+int get_process_status(uint64_t pid) {
+    return blocks[pid].process_state;
+}
 
 
 
@@ -72,10 +95,6 @@ void store_context() {
 // --------- scheduler --------
 
 
-
-uint64_t running_pid; 
-
-CircularList round_robin = {0};
 
 uint64_t schedule(uint64_t running_stack_pointer){
     // printf("llego al schedule\n");
@@ -200,11 +219,23 @@ void create_process_beta(uint64_t rip) {
 
 // ------- End --------
 
+// ------- Utilities --------
+
+int get_processes_count() {
+    int count = 0;
+    for(int i = 0; i < MAX_PROCESS_BLOCKS; i++) {
+        if(blocks[i].process_state != UNAVAILABLE) {
+            count++;
+        }
+    }
+    return count;
+}
+ 
 /// --------- Syscalls --------
 
 
 
-int64_t getpid() {
+int64_t get_pid() {
     return running_pid;
 }
 
@@ -212,10 +243,31 @@ void info_processes() {
     // ready --> pcb
 }
 
-void get_all_processes() {
-    // recorro todo y voy calculando
+void * get_all_processes() {
+    if (free_pid == 0) {
+        printf("No hay procesos\n");
+        return;
+    }
+    ProcessSnapshot toReturn[get_processes_count()];
+    for (int i = 0; i < MAX_PROCESS_BLOCKS; i++) {
+        if (blocks[i].process_state != UNAVAILABLE) {
+            toReturn[i] = (ProcessSnapshot) {
+                .p_name = blocks[i].p_name,
+                .pid = blocks[i].pid,
+                .priority = blocks[i].priority,
+                .stack = stacks[i],
+                .base_pointer = blocks[i].stack_pointer,
+                .foreground = 0
+                /* ACA HAY QUE PONER CREO LOS FD DE LOS HIJOS? */
+            };
+        }
+    }
+    return toReturn;
 }
 
+void yield() {
+    
+}
 
 void change_priority(uint64_t pid, int value) {
     if(value == 0) return;
@@ -229,18 +281,21 @@ void change_priority(uint64_t pid, int value) {
 
 void block() {
     // manda proceso de RUNNING a BLOCKED
+    blocks[running_pid].process_state = BLOCKED;
 }
 
 void unlock(uint64_t pid) {
     // manda proceso de BLOCKED a READY con prioridad = 1
+    blocks[pid].process_state = READY;
 }
 
 void resume() {
     // ni idea lo que hace
 }
 
-void waitpid() {
+void wait_pid() {
     // ni idea cómo hacer este
 }
 
 // --------- end syscalls --------
+

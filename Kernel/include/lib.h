@@ -21,7 +21,7 @@ unsigned char inb (unsigned short int __port);
 
 // -------- Funciones auxiliares para el kernel ---------
 
-#define NULL 0
+#define NULL ((void *) 0)
 
 int k_strcmp(const char *str1, const char *str2);
 
