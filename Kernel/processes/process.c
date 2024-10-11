@@ -14,19 +14,16 @@
 
 #define SIZE_DICTIONARY 64
 
-
-
-
 // Funciones:
-int64_t endless_loop(int argc, char* argv[]);
-int64_t endless_loop_print(int argc, char* argv[]);
+int64_t endless_loop(int argc, char *argv[]);
+int64_t endless_loop_print(int argc, char *argv[]);
 
+typedef int64_t (*FunctionPointer)(int argc, char *argv[]);
 
-typedef int64_t (*FunctionPointer)(int argc, char* argv[]);
-
-struct DictionaryEntry {
-    char* name;
-    FunctionPointer function;
+struct DictionaryEntry
+{
+  char *name;
+  FunctionPointer function;
 };
 
 struct DictionaryEntry dictionary[SIZE_DICTIONARY] = {
@@ -35,13 +32,16 @@ struct DictionaryEntry dictionary[SIZE_DICTIONARY] = {
     // Add up to 64 entries
 };
 
-FunctionPointer findFunctionByName(const char* name) {
-    for (int i = 0; i < SIZE_DICTIONARY; i++) {
-        if (dictionary[i].name != NULL && k_strcmp(dictionary[i].name, name) == 0) {
-            return dictionary[i].function;  // Return the function pointer if the name matches
-        }
+FunctionPointer findFunctionByName(const char *name)
+{
+  for (int i = 0; i < SIZE_DICTIONARY; i++)
+  {
+    if (dictionary[i].name != NULL && k_strcmp(dictionary[i].name, name) == 0)
+    {
+      return dictionary[i].function; // Return the function pointer if the name matches
     }
-    return NULL;  // Return NULL if the name is not found
+  }
+  return NULL; // Return NULL if the name is not found
 }
 
 // uint64_t default_rip = 0;
@@ -54,14 +54,15 @@ FunctionPointer findFunctionByName(const char* name) {
 //   return default_rip;
 // }
 
-
-uint64_t process_initializer(char* name, int argc, char* argv[]) {
+uint64_t process_initializer(char *name, int argc, char *argv[])
+{
   printf(name);
   FunctionPointer func = findFunctionByName(name);
   return func(argc, argv);
   // exit(return_value);
 }
 
+/*
 // Dummies
 void bussy_wait(uint64_t n) {
   uint64_t i;
@@ -77,7 +78,7 @@ int64_t endless_loop(int argc, char* argv[]) {
 int64_t endless_loop_print(int argc, char* argv[]) {
   k_print_int_dec(argc); putChar('\n');
   if (argc != 1) return 1;
-  
+
   printf(argv[0]);
   uint64_t wait = k_atoi(argv[0]);
   k_print_int_dec(wait);
@@ -91,4 +92,4 @@ int64_t endless_loop_print(int argc, char* argv[]) {
     printf(" ");
     bussy_wait(wait);
   }
-}
+}*/

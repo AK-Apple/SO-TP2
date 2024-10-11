@@ -19,11 +19,19 @@ typedef struct ProcessSnapshot
     uint64_t foreground;
 } ProcessSnapshot;
 
-void create_process(char *name, int argc, char **argv);
+typedef enum
+{
+    UNAVAILABLE, // Assigned 0 by default
+    RUNNING,
+    READY,
+    BLOCKED
+} State;
+
+int create_process(char *name, int argc, char **argv);
 
 void create_init_process();
 
-void kill_process(uint64_t pid);
+int kill_process(uint64_t pid);
 
 void store_context();
 
@@ -37,9 +45,9 @@ void yield();
 
 void change_priority(uint64_t pid, int value);
 
-void block();
+int block(int pid);
 
-void unlock(uint64_t pid);
+int unlock(int pid);
 
 void resume();
 

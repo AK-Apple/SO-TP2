@@ -91,7 +91,7 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
             change_priority(param_1, param_2);
             return 1;
         case SYS_BLOCK:
-            block();
+            block(param_1);
             return 1;
         case SYS_UNLOCK:
             unlock(param_1);

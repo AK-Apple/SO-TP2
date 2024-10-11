@@ -10,14 +10,6 @@ Stack stacks[MAX_PROCESS_BLOCKS] = {0};
 uint64_t running_pid = 0;
 CircularList round_robin = {0};
 
-typedef enum
-{
-    UNAVAILABLE, // Assigned 0 by default
-    RUNNING,
-    READY,
-    BLOCKED
-} State;
-
 typedef struct ProcessBlock
 {
     uint64_t stack_pointer;
@@ -74,8 +66,10 @@ void reasign_children(uint64_t pid)
     }
 }
 
-void kill_process(uint64_t pid)
+int kill_process(uint64_t pid)
 {
+    if (pid > 64 || pid < 1)
+        return -1;
     delete_value(&round_robin, pid);
     reasign_children(pid);
 
@@ -89,6 +83,7 @@ void kill_process(uint64_t pid)
     blocks[pid].process_state = UNAVAILABLE;
     blocks[pid].stack_pointer = 0;
     free_pid(pid);
+    return pid;
 }
 
 void store_context()
@@ -168,9 +163,13 @@ void initializeRegisters(uint64_t rsp)
     memcpy((void *)rsp, &stackedRegisters, sizeof(struct StackedRegisters));
 }
 
-void create_process(char *name, int argc, char **argv)
+int create_process(char *name, int argc, char **argv)
 {
     uint64_t new_pid = request_pid();
+    if (new_pid == INVALID_PID)
+    {
+        return -1;
+    }
     uint64_t rsp = stacks[new_pid] + STACK_SIZE - ALIGN; // TODO: no sé si va este - 64
 
     // arriba del RSP, hay que poner los valores de RAX, RBX, etc.
@@ -186,7 +185,7 @@ void create_process(char *name, int argc, char **argv)
     blocks[new_pid].argv = argv;
 
     add(&round_robin, new_pid);
-
+    return new_pid;
     // forzar timer-tick
 }
 
@@ -300,16 +299,22 @@ void change_priority(uint64_t pid, int value)
     }
 }
 
-void block()
+int block(int pid)
 {
+    if (pid > 64 || pid < 1)
+        return -1;
     // manda proceso de RUNNING a BLOCKED
     blocks[running_pid].process_state = BLOCKED;
+    return pid;
 }
 
-void unlock(uint64_t pid)
+int unlock(int pid)
 {
+    if (pid > 64 || pid < 1)
+        return -1;
     // manda proceso de BLOCKED a READY con prioridad = 1
     blocks[pid].process_state = READY;
+    return pid;
 }
 
 void resume()
