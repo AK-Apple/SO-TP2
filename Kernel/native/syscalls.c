@@ -87,7 +87,6 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
         case SYS_GET_ALL_PROCESSES:
             get_all_processes();
             return 1; 
-
         case SYS_CHANGE_PRIORITY:
             change_priority(param_1, param_2);
             return 1;
@@ -101,7 +100,7 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
             yield();
             return 1;
         case SYS_WAITPID:
-            wait_pid();
+            wait_pid(param_1, (int *) param_2, param_3);
             return 1;
     }
     return 0;

@@ -4,21 +4,22 @@
 #include <stdint.h>
 
 #define MAX_PROCESS_BLOCKS 64 /* <--- esto puede ir en .h */
-#define STACK_SIZE (1 << 12) /* 4KB */
+#define STACK_SIZE (1 << 12)  /* 4KB */
 #define INVALID_PID (-1)
 
 typedef uint64_t Stack[STACK_SIZE];
 
-typedef struct ProcessSnapshot {
-    char * p_name;
+typedef struct ProcessSnapshot
+{
+    char *p_name;
     uint64_t pid;
     uint64_t priority;
     Stack stack;
-    void * base_pointer;
+    void *base_pointer;
     uint64_t foreground;
 } ProcessSnapshot;
 
-void create_process(char* name, int argc, char** argv);
+void create_process(char *name, int argc, char **argv);
 
 void create_init_process();
 
@@ -30,7 +31,7 @@ int64_t get_pid();
 
 int get_process_status(uint64_t pid);
 
-void * get_all_processes();
+void *get_all_processes();
 
 void yield();
 
@@ -42,11 +43,12 @@ void unlock(uint64_t pid);
 
 void resume();
 
-void wait_pid();
+uint64_t wait_pid(uint64_t pid, int *status, int options);
 
 // -------- SO ----------
 
-typedef struct StackedRegisters {
+typedef struct StackedRegisters
+{
     uint64_t r15;
     uint64_t r14;
     uint64_t r13;
@@ -74,6 +76,5 @@ typedef struct StackedRegisters {
 // void _change_process(void);
 
 // -------- end SO -------
-
 
 #endif
