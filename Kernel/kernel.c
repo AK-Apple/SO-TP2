@@ -50,7 +50,7 @@ void *initializeKernelBinary()
     return getStackBase();
 }
 
-int main(int argc, char *argv[])
+int main()
 {
     printf("Voy a crear algo\n");
     create_init_process();
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     load_idt();
 
     printf("iniciando test de procesos\n");
-    test_processes(argc, argv);
+    test_processes();
     printf("test finalizado\n");
     // while(1);
     // sys_registers();     // descomentar para ver registros del kernel

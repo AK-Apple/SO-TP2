@@ -33,7 +33,7 @@ uint64_t request_pid()
     {
         if (biggest_pid >= MAX_PROCESS_BLOCKS)
         {
-            // printf("MEMORY RUN OUT!!\n");    // Por alguna razón no anda
+            printf("RAN OUT OF PID!!\n");    // Por alguna razón no anda
             return INVALID_PID;
         }
         biggest_pid++;
@@ -254,30 +254,38 @@ void info_processes()
     // ready --> pcb
 }
 
-void *get_all_processes()
+void get_all_processes()
 {
     if (free_pid == 0)
     {
         printf("No hay procesos\n");
         return;
     }
-    ProcessSnapshot toReturn[get_processes_count()];
+    printf("pid process_name priority rsp \n");
     for (int i = 0; i < MAX_PROCESS_BLOCKS; i++)
     {
         if (blocks[i].process_state != UNAVAILABLE)
         {
-            toReturn[i] = (ProcessSnapshot){
-                .p_name = blocks[i].p_name,
-                .pid = blocks[i].pid,
-                .priority = blocks[i].priority,
-                .stack = stacks[i],
-                .base_pointer = blocks[i].stack_pointer,
-                .foreground = 0
-                /* ACA HAY QUE PONER CREO LOS FD DE LOS HIJOS? */
-            };
+            k_print_int_dec(blocks[i].pid);
+            putChar(' ');
+            printf(blocks[i].p_name);
+            k_print_int_dec(blocks[i].priority);
+            // print stack
+
+            k_print_int_dec(blocks[i].stack_pointer);
+            putChar('\n');
+            // toReturn[i] = (ProcessSnapshot){
+            //     .p_name = blocks[i].p_name,
+            //     .pid = blocks[i].pid,
+            //     .priority = blocks[i].priority,
+            //     .stack = stacks[i],
+            //     .base_pointer = blocks[i].stack_pointer,
+            //     .foreground = 0
+            //     /* ACA HAY QUE PONER CREO LOS FD DE LOS HIJOS? */
+            // };
         }
     }
-    return toReturn;
+    // return toReturn;
 }
 
 void yield()

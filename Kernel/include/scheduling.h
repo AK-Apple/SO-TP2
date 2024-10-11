@@ -39,7 +39,7 @@ int64_t get_pid();
 
 int get_process_status(uint64_t pid);
 
-void *get_all_processes();
+void get_all_processes();
 
 void yield();
 

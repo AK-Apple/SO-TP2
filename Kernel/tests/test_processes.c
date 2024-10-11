@@ -8,7 +8,7 @@ typedef struct P_rq
     State state;
 } p_rq;
 
-int64_t test_processes(uint64_t argc, char *argv[])
+int64_t test_processes()
 {
     uint8_t rq;
     uint8_t alive = 0;
@@ -16,11 +16,7 @@ int64_t test_processes(uint64_t argc, char *argv[])
     uint64_t max_processes;
     char *argvAux[] = {0};
 
-    if (argc != 1)
-        return -1;
-
-    if ((max_processes = satoi(argv[0])) <= 0)
-        return -1;
+    max_processes = MAX_PROCESS_BLOCKS - 1;
 
     p_rq p_rqs[max_processes];
 
@@ -43,8 +39,8 @@ int64_t test_processes(uint64_t argc, char *argv[])
                 alive++;
             }
         }
-
         // Randomly kills, blocks or unblocks processes until every one has been killed
+        get_all_processes();
         while (alive > 0)
         {
 
@@ -93,5 +89,6 @@ int64_t test_processes(uint64_t argc, char *argv[])
                     p_rqs[rq].state = RUNNING;
                 }
         }
+       
     }
 }
