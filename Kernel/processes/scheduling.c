@@ -319,7 +319,7 @@ void resume()
 
 uint64_t wait_pid(uint64_t pid, int *status, int options)
 {
-    if (pid > 0 || pid < -1)
+    if ((pid > 0 || pid < -1) && blocks[pid].parent_pid == get_pid())
     {
         return blocks[pid < 0 ? pid * -1 : pid].process_state == UNAVAILABLE ? (pid < 0 ? pid * -1 : pid) : -1;
     }
