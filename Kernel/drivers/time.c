@@ -10,10 +10,6 @@ static unsigned long ticks = 0;
 
 void timer_handler() {
 	ticks++;
-
-    // printf("A continuacion: cambio de proceso\n");
-    // k_print_int_dec(getpid());
-
 }
 
 int ticks_elapsed() {

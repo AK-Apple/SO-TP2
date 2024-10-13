@@ -159,7 +159,7 @@ SECTION .text
 	call schedule
 	mov rsp, rax
 
-	mov al, 20h
+	mov al, 20h ; fin de interrupcion
 	out 20h, al
 
 	popState

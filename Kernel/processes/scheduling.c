@@ -9,6 +9,7 @@ Stack stacks[MAX_PROCESS_BLOCKS] = {0};
 
 uint64_t running_pid = 0;
 CircularList round_robin = {0};
+int remaining_quantum = 0;
 
 typedef struct ProcessBlock
 {
@@ -49,7 +50,8 @@ ProcessBlock blocks[MAX_PROCESS_BLOCKS] = {0};
 
 void exit(uint64_t return_value)
 {
-    return;
+    kill_process(get_pid());
+    force_timer_tick();
 };
 
 void reasign_children(uint64_t pid)
@@ -65,12 +67,11 @@ void reasign_children(uint64_t pid)
 
 int kill_process(uint64_t pid)
 {
-    if (pid > 64 || pid < 1)
+    if (pid > MAX_PROCESS_BLOCKS || pid < 1)
         return -1;
     delete_value(&round_robin, pid);
     reasign_children(pid);
 
-    memset(stacks[pid], 0, sizeof(Stack));
     blocks[pid].argc = 0;
     blocks[pid].argv = NULL;
     blocks[pid].p_name = NULL;
@@ -87,28 +88,31 @@ int get_process_status(uint64_t pid)
     return blocks[pid].process_state;
 }
 
-// --------- scheduler --------
 
 uint64_t schedule(uint64_t running_stack_pointer)
 {
+    if(remaining_quantum > 0) {
+        remaining_quantum--;
+        return running_stack_pointer;
+    }
+    remaining_quantum = 2;
     blocks[running_pid].stack_pointer = running_stack_pointer;
     blocks[running_pid].process_state = READY;
 
-    uint64_t next_pid = next(&round_robin);
+    uint64_t next_pid = 0;
+    do {
+        next_pid = next(&round_robin);
+    } while(blocks[next_pid].process_state == BLOCKED);
 
     running_pid = next_pid;
 
     blocks[next_pid].process_state = RUNNING;
     return blocks[next_pid].stack_pointer;
-
-    // TODO: ver si cambiar otras variables también
 }
 
-/// --------- end scheduling --------
 
 // ------- Principio de un proceso --------
 
-#define ALIGN 16
 
 uint64_t default_rip = 0;
 
@@ -120,20 +124,16 @@ void initializer()
     k_print_int_dec(running_pid);
     putChar('\n');
 
-    // Ojo: acá NO SE PUEDEN asigar variables
+    // TODO: RBP = 0, arreglarlo
+    // Ojo: esto implica que NO SE PUEDEN crear variables en este stackframe  
 
     if (blocks[running_pid].p_name == 0)
         return; // para el proceso init
-    exit(
-        process_initializer(
-            blocks[running_pid].p_name,
-            blocks[running_pid].argc,
-            blocks[running_pid].argv));
-
-    // Cosas que pueden estar mal:
-    // 1. El orden del struct de StackedRegisters
-    // 2. El valor de RSP
-    // 4. Algo del timertick
+    
+    process_initializer(
+        blocks[running_pid].p_name,
+        blocks[running_pid].argc,
+        blocks[running_pid].argv);
 }
 
 void initializeRegisters(uint64_t rsp)
@@ -155,9 +155,16 @@ int create_process(char *name, int argc, char **argv)
     {
         return -1;
     }
-    uint64_t rsp = stacks[new_pid] + STACK_SIZE - ALIGN; 
+    memset(stacks[new_pid], 0, sizeof(Stack));
+    uint64_t rsp = stacks[new_pid] + STACK_SIZE; 
+    for(int i = 0; i < argc; i++) {
+        rsp -= sizeof(char *);
+        char **stack_argument = (char **)rsp;
+        *stack_argument = argv[argc - i - 1];
+    }
+    blocks[new_pid].argv = rsp;
+    rsp -= sizeof(StackedRegisters);
 
-    // arriba del RSP, hay que poner los valores de RAX, RBX, etc.
     initializeRegisters(rsp);
 
     blocks[new_pid].stack_pointer = rsp;
@@ -166,11 +173,9 @@ int create_process(char *name, int argc, char **argv)
     blocks[new_pid].priority = 1;
     blocks[new_pid].p_name = name;
     blocks[new_pid].argc = argc;
-    blocks[new_pid].argv = argv;
 
     add(&round_robin, new_pid);
     return new_pid;
-    // force_timer_tick();
 }
 
 void create_init_process()
@@ -183,7 +188,6 @@ void create_init_process()
     blocks[0].priority = 1;
     blocks[0].p_name = 0;
     running_pid = 0;
-    printf("Voy a inicializar\n");
     initializer();
 
     add(&round_robin, 0);
@@ -214,7 +218,8 @@ int64_t get_pid()
 
 void get_all_processes()
 {
-    printf("pid process_name priority rsp \n");
+    static char *PROCESS_STATE_STRING[] = {"U", "RUNNING", "READY", "BLOCKED"};
+    printf("pid process_name priority rsp state\n");
     for (int i = 0; i < MAX_PROCESS_BLOCKS; i++)
     {
         if (blocks[i].process_state != UNAVAILABLE)
@@ -222,10 +227,13 @@ void get_all_processes()
             k_print_int_dec(i);
             putChar(' ');
             printf(blocks[i].p_name);
+            putChar(' ');
             k_print_int_dec(blocks[i].priority);
-            // print stack
+            putChar(' ');
 
             k_print_int_dec(blocks[i].stack_pointer);
+            putChar(' ');
+            printf(PROCESS_STATE_STRING[blocks[i].process_state]);
             putChar('\n');
         }
     }
@@ -233,30 +241,37 @@ void get_all_processes()
 
 void yield()
 {
-    next(&round_robin);
     force_timer_tick();
 }
 
-void change_priority(uint64_t pid, int value)
-{ // no estoy seguro de que esté bien
-    if (value == 0)
-        return;
-    if (value > 0 && value < 5)
+void change_priority(uint64_t pid, int delta)
+{
+    if (delta > 0)
     {
-        delete_value_ocurrence(&round_robin, pid);
+        while(delta-- > 0 && blocks[pid].priority < MAX_PRIORITY) 
+        {
+            blocks[pid].priority++;
+            add(&round_robin, pid);
+        }
     }
-    else
+    else if(delta < 0)
     {
-        add(&round_robin, pid);
+        while(delta++ < 0 && blocks[pid].priority > 1) {
+            blocks[pid].priority--;
+            delete_value_ocurrence(&round_robin, pid);
+        }
     }
 }
 
 int block(int pid)
 {
-    if (pid > 64 || pid < 1)
+    if (pid > 64 || pid < 1 || blocks[pid].process_state == UNAVAILABLE)
         return -1;
-    // manda proceso de RUNNING a BLOCKED
-    blocks[running_pid].process_state = BLOCKED;
+    
+    blocks[pid].process_state = BLOCKED;
+    if(get_pid() == pid) {
+        yield();
+    }
     return pid;
 }
 
@@ -264,14 +279,9 @@ int unlock(int pid)
 {
     if (pid > 64 || pid < 1)
         return -1;
-    // manda proceso de BLOCKED a READY con prioridad = 1
+
     blocks[pid].process_state = READY;
     return pid;
-}
-
-void resume()
-{
-    // ni idea lo que hace
 }
 
 uint64_t wait_pid(uint64_t pid, int *status, int options)
@@ -280,17 +290,7 @@ uint64_t wait_pid(uint64_t pid, int *status, int options)
     {
         return blocks[pid < 0 ? pid * -1 : pid].process_state == UNAVAILABLE ? (pid < 0 ? pid * -1 : pid) : -1;
     }
-    else if (pid == 0)
-    {
-        for (int i = 0; i < MAX_PROCESS_BLOCKS; i++)
-        {
-            if (blocks[i].parent_pid == get_pid() && blocks[i].process_state == UNAVAILABLE)
-            {
-                return i;
-            }
-        }
-    }
-    else if (pid == -1)
+    else if (pid == 0 || pid == -1)
     {
         for (int i = 0; i < MAX_PROCESS_BLOCKS; i++)
         {

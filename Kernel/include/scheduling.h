@@ -3,10 +3,10 @@
 
 #include <stdint.h>
 
-#define MAX_PROCESS_BLOCKS 64 /* <--- esto puede ir en .h */
+#define MAX_PROCESS_BLOCKS 64 
 #define STACK_SIZE (1 << 12)  /* 4KB */
 #define INVALID_PID (-1)
-
+#define MAX_PRIORITY 5
 typedef uint64_t Stack[STACK_SIZE];
 
 typedef struct ProcessSnapshot
@@ -48,6 +48,8 @@ void change_priority(uint64_t pid, int value);
 int block(int pid);
 
 int unlock(int pid);
+
+void exit(uint64_t return_value);
 
 void resume();
 

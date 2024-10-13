@@ -17,6 +17,38 @@
 // Funciones:
 int64_t endless_loop(int argc, char *argv[]);
 int64_t endless_loop_print(int argc, char *argv[]);
+int64_t arg_print(int argc, char *argv[]) {
+  int j = 0;
+  while( j != 10) 
+  {
+  printf("arg_print ");
+  k_print_int_dec(argc);
+  printf("[ ");
+j++;
+  for(int i = 0; i < argc; i++) {
+    printf(" '");
+    printf(argv[i]);
+    printf("', ");
+  }
+  printf("]\n");
+  yield();
+  }
+  while(j != 400) {
+    if(j==30) kill_process(3);
+    get_all_processes();
+    if(j==300) {
+      unlock(4);
+    }
+    if(j ==100) {
+
+      block(4);
+      block(2);
+    }
+    j++;
+    yield();
+  }
+  // exit(0); 
+}
 
 typedef int64_t (*FunctionPointer)(int argc, char *argv[]);
 
@@ -29,6 +61,7 @@ struct DictionaryEntry
 struct DictionaryEntry dictionary[SIZE_DICTIONARY] = {
     {"endless_loop", endless_loop},
     {"endless_loop_print", endless_loop_print},
+    {"arg_print", arg_print}
     // Add up to 64 entries
 };
 
@@ -44,20 +77,11 @@ FunctionPointer findFunctionByName(const char *name)
   return NULL; // Return NULL if the name is not found
 }
 
-// uint64_t default_rip = 0;
-
-// TODO: crear un initializer para no tener que estar haciendo comparaciones todo el tiempo
-// uint64_t get_rip() {
-//   if (!default_rip) {
-//     process_initializer(0, 0, 0);
-//   }
-//   return default_rip;
-// }
 
 uint64_t process_initializer(char *name, int argc, char *argv[])
 {
   printf(name);
   FunctionPointer func = findFunctionByName(name);
-  return func(argc, argv);
-  // exit(return_value);
+  uint64_t exit_code = func(argc, argv);
+  exit(exit_code);
 }
