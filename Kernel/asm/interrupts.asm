@@ -152,7 +152,7 @@ SECTION .text
 %macro change_process 0
 	pushState
 
-	mov rdi, 0 ; pasaje de parametro
+	mov rdi, 0
 	call irqDispatcher
 
 	mov rdi, rsp
@@ -195,7 +195,8 @@ _get_starting_point:
 
 GLOBAL storeRegs
 
-%macro copy_updating_regex 0		; copia updating_regex en regex. Ver diferencia en section bss
+%macro copy_updating_regex 0		
+; copia updating_regex en regex. Ver diferencia en section bss
     push rsi                ; Save the RSI register (callee-saved)
     push rdi                ; Save the RDI register (callee-saved)
 

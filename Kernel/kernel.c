@@ -59,6 +59,8 @@ int main()
 
     printf("iniciando test de procesos\n");
     test_processes();
+
+
     printf("test finalizado\n");
     // while(1);
     // sys_registers();     // descomentar para ver registros del kernel

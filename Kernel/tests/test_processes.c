@@ -8,8 +8,25 @@ typedef struct P_rq
     State state;
 } p_rq;
 
+void javitest() {
+    printf("\njavitest start____________________\n");
+        char * argvaux[] = {"500"};
+    create_process("endless_loop_print", 1, argvaux);
+    printf("Primer proceso creado\n");
+    create_process("endless_loop_print", 1, argvaux);
+    printf("Segundo proceso creado\n");
+    create_process("endless_loop_print", 1, argvaux);
+    printf("Tercer proceso creado\n");
+
+
+    printf("\njavitest stop________________\n");
+    while(1);
+}
+
 int64_t test_processes()
 {
+    javitest();
+    return;
     uint8_t rq;
     uint8_t alive = 0;
     uint8_t action;

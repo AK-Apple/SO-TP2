@@ -61,35 +61,3 @@ uint64_t process_initializer(char *name, int argc, char *argv[])
   return func(argc, argv);
   // exit(return_value);
 }
-
-/*
-// Dummies
-void bussy_wait(uint64_t n) {
-  uint64_t i;
-  for (i = 0; i < n; i++)
-    ;
-}
-
-int64_t endless_loop(int argc, char* argv[]) {
-  while (1)
-    ;
-}
-
-int64_t endless_loop_print(int argc, char* argv[]) {
-  k_print_int_dec(argc); putChar('\n');
-  if (argc != 1) return 1;
-
-  printf(argv[0]);
-  uint64_t wait = k_atoi(argv[0]);
-  k_print_int_dec(wait);
-
-
-  int64_t pid = get_pid();
-
-  while (1) {
-    // printf("%d ", pid);
-    k_print_int_dec(pid);
-    printf(" ");
-    bussy_wait(wait);
-  }
-}*/

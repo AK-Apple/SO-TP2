@@ -1,4 +1,5 @@
 GLOBAL cpuVendor
+GLOBAL force_timer_tick
 
 section .text
 	
@@ -78,6 +79,9 @@ outb:
     ret           ; Return from the function
 
 
+force_timer_tick:
+    int 0x20
+    ret
 ;==========================================0
 
 section .data

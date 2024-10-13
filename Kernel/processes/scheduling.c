@@ -5,7 +5,7 @@
 #include "process.h"
 #include "interrupts.h"
 
-Stack stacks[MAX_PROCESS_BLOCKS] = {0};
+Stack stacks[MAX_PROCESS_BLOCKS] = {0}; 
 
 uint64_t running_pid = 0;
 CircularList round_robin = {0};
@@ -14,13 +14,11 @@ typedef struct ProcessBlock
 {
     uint64_t stack_pointer;
     State process_state;
-    uint64_t pid; // <---- stacks[pid] es stack_base ; blocks[i] determina i=pid
     uint64_t parent_pid;
     uint64_t priority;
     char *p_name;
     int argc;
     char **argv;
-    // char **argv;
 } ProcessBlock;
 
 uint64_t available_pids[MAX_PROCESS_BLOCKS] = {0};
@@ -33,7 +31,7 @@ uint64_t request_pid()
     {
         if (biggest_pid >= MAX_PROCESS_BLOCKS)
         {
-            printf("RAN OUT OF PID!!\n");    // Por alguna razón no anda
+            printf("[scheduler] RAN OUT OF PID!!\n");
             return INVALID_PID;
         }
         biggest_pid++;
@@ -48,7 +46,6 @@ void free_pid(int pid)
 }
 
 ProcessBlock blocks[MAX_PROCESS_BLOCKS] = {0};
-// TODO: hacer que tire error cuando pid > 64
 
 void exit(uint64_t return_value)
 {
@@ -78,16 +75,11 @@ int kill_process(uint64_t pid)
     blocks[pid].argv = NULL;
     blocks[pid].p_name = NULL;
     blocks[pid].parent_pid = 0;
-    blocks[pid].pid = INVALID_PID;
     blocks[pid].priority = 0;
     blocks[pid].process_state = UNAVAILABLE;
     blocks[pid].stack_pointer = 0;
     free_pid(pid);
     return pid;
-}
-
-void store_context()
-{
 }
 
 int get_process_status(uint64_t pid)
@@ -99,19 +91,12 @@ int get_process_status(uint64_t pid)
 
 uint64_t schedule(uint64_t running_stack_pointer)
 {
-    // printf("llego al schedule\n");
-
-    // k_print_int_dec(running_stack_pointer);
-
     blocks[running_pid].stack_pointer = running_stack_pointer;
     blocks[running_pid].process_state = READY;
 
     uint64_t next_pid = next(&round_robin);
 
     running_pid = next_pid;
-
-    // k_print_int_dec(getpid());
-    // k_print_int_dec(blocks[next_pid].stack_pointer);
 
     blocks[next_pid].process_state = RUNNING;
     return blocks[next_pid].stack_pointer;
@@ -123,7 +108,7 @@ uint64_t schedule(uint64_t running_stack_pointer)
 
 // ------- Principio de un proceso --------
 
-#define ALIGN 40
+#define ALIGN 16
 
 uint64_t default_rip = 0;
 
@@ -170,12 +155,11 @@ int create_process(char *name, int argc, char **argv)
     {
         return -1;
     }
-    uint64_t rsp = stacks[new_pid] + STACK_SIZE - ALIGN; // TODO: no sé si va este - 64
+    uint64_t rsp = stacks[new_pid] + STACK_SIZE - ALIGN; 
 
     // arriba del RSP, hay que poner los valores de RAX, RBX, etc.
     initializeRegisters(rsp);
 
-    blocks[new_pid].pid = new_pid;
     blocks[new_pid].stack_pointer = rsp;
     blocks[new_pid].process_state = READY;
     blocks[new_pid].parent_pid = running_pid;
@@ -186,15 +170,16 @@ int create_process(char *name, int argc, char **argv)
 
     add(&round_robin, new_pid);
     return new_pid;
-    // forzar timer-tick
+    // force_timer_tick();
 }
 
 void create_init_process()
 {
-    blocks[0].pid = request_pid(); // Should be 0
+    int pid = request_pid(); 
+    // Should be 0
     blocks[0].stack_pointer = 0;   // Se va a actualizar. El valor no importa
     blocks[0].process_state = RUNNING;
-    blocks[0].parent_pid = -1; // TODO: designarle un valor. Por ahora, no importa mucho
+    blocks[0].parent_pid = get_pid(); 
     blocks[0].priority = 1;
     blocks[0].p_name = 0;
     running_pid = 0;
@@ -206,28 +191,6 @@ void create_init_process()
     // OBS: el proceso INIT va a usar otro stack
 }
 
-void create_process_beta(uint64_t rip)
-{
-    uint64_t new_pid = request_pid();
-    uint64_t rsp = stacks[new_pid] + STACK_SIZE - ALIGN; // TODO: no sé si va este - 64
-
-    // arriba del RSP, hay que poner los valores de RAX, RBX, etc.
-    initializeRegisters(rsp);
-
-    blocks[new_pid].pid = new_pid;
-    blocks[new_pid].stack_pointer = rsp;
-    blocks[new_pid].process_state = READY;
-    blocks[new_pid].parent_pid = running_pid;
-    blocks[new_pid].priority = 1;
-
-    add(&round_robin, new_pid);
-
-    // forzar timer-tick
-}
-
-// ------- End --------
-
-// ------- Utilities --------
 
 int get_processes_count()
 {
@@ -249,24 +212,14 @@ int64_t get_pid()
     return running_pid;
 }
 
-void info_processes()
-{
-    // ready --> pcb
-}
-
 void get_all_processes()
 {
-    if (free_pid == 0)
-    {
-        printf("No hay procesos\n");
-        return;
-    }
     printf("pid process_name priority rsp \n");
     for (int i = 0; i < MAX_PROCESS_BLOCKS; i++)
     {
         if (blocks[i].process_state != UNAVAILABLE)
         {
-            k_print_int_dec(blocks[i].pid);
+            k_print_int_dec(i);
             putChar(' ');
             printf(blocks[i].p_name);
             k_print_int_dec(blocks[i].priority);
@@ -274,23 +227,14 @@ void get_all_processes()
 
             k_print_int_dec(blocks[i].stack_pointer);
             putChar('\n');
-            // toReturn[i] = (ProcessSnapshot){
-            //     .p_name = blocks[i].p_name,
-            //     .pid = blocks[i].pid,
-            //     .priority = blocks[i].priority,
-            //     .stack = stacks[i],
-            //     .base_pointer = blocks[i].stack_pointer,
-            //     .foreground = 0
-            //     /* ACA HAY QUE PONER CREO LOS FD DE LOS HIJOS? */
-            // };
         }
     }
-    // return toReturn;
 }
 
 void yield()
 {
     next(&round_robin);
+    force_timer_tick();
 }
 
 void change_priority(uint64_t pid, int value)
@@ -342,7 +286,7 @@ uint64_t wait_pid(uint64_t pid, int *status, int options)
         {
             if (blocks[i].parent_pid == get_pid() && blocks[i].process_state == UNAVAILABLE)
             {
-                return blocks[i].pid;
+                return i;
             }
         }
     }
@@ -352,10 +296,8 @@ uint64_t wait_pid(uint64_t pid, int *status, int options)
         {
             if (blocks[i].parent_pid == get_pid() && blocks[i].process_state == UNAVAILABLE)
             {
-                return blocks[i].pid;
+                return i;
             }
         }
     }
 }
-
-// --------- end syscalls --------

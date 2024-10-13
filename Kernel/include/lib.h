@@ -14,6 +14,7 @@ void sys_registers();
 
 // assembler (libasm.asm)
 char * cpuVendor(char *result);
+void force_timer_tick();
 
 void outb (unsigned char __value, unsigned short int __port);
 unsigned char inb (unsigned short int __port);
