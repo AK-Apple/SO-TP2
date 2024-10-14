@@ -6,8 +6,8 @@
 #define TICKS_TO_SECONDS(x) ((x) * 5 / 91)
 
 void timer_handler();
-int ticks_elapsed();
-int seconds_elapsed();
+uint64_t ticks_elapsed();
+uint64_t seconds_elapsed();
 
 #define SECONDS 00
 #define MINUTES 02
@@ -19,5 +19,8 @@ int seconds_elapsed();
 
 extern uint8_t getRTC(uint64_t descriptor); // de libasm.asm
 uint8_t sys_getTime(int descriptor);
+
+void ticks_sleep(uint64_t ticks_to_sleep);
+void seconds_sleep(uint64_t seconds_to_sleep);
 
 #endif

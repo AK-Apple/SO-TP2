@@ -54,8 +54,9 @@ ProcessBlock blocks[MAX_PROCESS_BLOCKS] = {0};
 
 void exit(uint64_t return_value)
 {
+    force_timer_tick(); // para que haya suficiente tiempo
     kill_process(get_pid());
-    force_timer_tick();
+    yield();
 };
 
 void reasign_children(uint64_t pid)
@@ -84,6 +85,9 @@ int kill_process(uint64_t pid)
     blocks[pid].process_state = UNAVAILABLE;
     blocks[pid].stack_pointer = 0;
     free_pid(pid);
+    printf("[killing process] ");
+    k_print_int_dec(pid);
+    putChar('\n');
     return pid;
 }
 
@@ -143,7 +147,10 @@ uint64_t schedule(uint64_t running_stack_pointer)
     }
     remaining_quantum = 2;
     blocks[running_pid].stack_pointer = running_stack_pointer;
-    blocks[running_pid].process_state = READY;
+
+    if(blocks[running_pid].process_state != UNAVAILABLE) {
+        blocks[running_pid].process_state = READY;
+    }
 
     uint64_t next_pid = 0;
     do {
@@ -199,6 +206,7 @@ void initializeRegisters(uint64_t new_pid, uint64_t rsp)
 
 int create_process(char *name, int argc, char **argv)
 {
+    yield();
     uint64_t new_pid = request_pid();
     if (new_pid == INVALID_PID)
     {
@@ -291,6 +299,7 @@ void get_all_processes()
 
 void yield()
 {
+    // remaining_quantum = 0;
     force_timer_tick();
 }
 
@@ -334,20 +343,57 @@ int unlock(int pid)
     return pid;
 }
 
+// uint64_t wait_pid(uint64_t pid, int *status, int options)
+// {
+//     if ((pid > 0 || pid < -1) && blocks[pid].parent_pid == get_pid())
+//     {
+//         return blocks[pid < 0 ? pid * -1 : pid].process_state == UNAVAILABLE ? (pid < 0 ? pid * -1 : pid) : -1;
+//     }
+//     else if (pid == 0 || pid == -1)
+//     {
+//         for (int i = 0; i < MAX_PROCESS_BLOCKS; i++)
+//         {
+//             if (blocks[i].parent_pid == get_pid() && blocks[i].process_state == UNAVAILABLE)
+//             {
+//                 return i;
+//             }
+//         }
+//     }
+// }
+
+// TODO: ver qué onda con status y options
+
+// State get_process_state(uint64_t pid)
+// {
+//     return blocks[pid].process_state;
+// }
+
 uint64_t wait_pid(uint64_t pid, int *status, int options)
 {
-    if ((pid > 0 || pid < -1) && blocks[pid].parent_pid == get_pid())
-    {
-        return blocks[pid < 0 ? pid * -1 : pid].process_state == UNAVAILABLE ? (pid < 0 ? pid * -1 : pid) : -1;
+    while(blocks[pid].process_state != UNAVAILABLE) {
+        yield();
     }
-    else if (pid == 0 || pid == -1)
-    {
-        for (int i = 0; i < MAX_PROCESS_BLOCKS; i++)
-        {
-            if (blocks[i].parent_pid == get_pid() && blocks[i].process_state == UNAVAILABLE)
-            {
-                return i;
-            }
+    // waitpid debe esperar a sus hijos??????
+    return pid;
+}
+
+void children_wait() {
+    uint64_t parent_pid = get_pid();
+    for(int i=0; i<MAX_PROCESS_BLOCKS; i++) {
+        if (blocks[i].parent_pid = parent_pid) {
+            wait_pid(i, 0, 0);
         }
     }
 }
+
+// waitpid debería: guardar el estado original y esperar hasta que cambie
+
+// Mejor caso:
+// ------
+// -------------
+// ----------------------
+
+// Peor caso:
+// ----------------------
+// -------------
+// ------

@@ -1,6 +1,8 @@
-#include <stdio.h>
+#include "IO.h"
+#include "lib.h"
 #include "scheduling.h"
 #include "test_util.h"
+#include "time.h"
 
 typedef struct P_rq
 {
@@ -31,17 +33,31 @@ void javitest() {
     printf("\njavitest stop________________\n");
 }
 
-void prioritytest() {
+void prioritytest() 
+{
     char * argvaux[] = {"500"};
     uint64_t pid_1 = create_process("endless_loop_print", 1, argvaux);
     uint64_t pid_2 = create_process("endless_loop_print", 1, argvaux);
     change_priority(pid_1, 4);
+    // change_priority(pid_1, -4);
+    while(1);
+}
+
+void waitpidtest() 
+{
+    char * argvaux[] = {"500"};
+    uint64_t pid_1 = create_process("sleepy_process", 1, argvaux);
+    uint64_t pid_2 = create_process("sleepy_process", 1, argvaux);
+    uint64_t pid_3 = create_process("sleepy_process", 1, argvaux);
+    // uint64_t pid4 = create_process("endless_loop", 1, argvaux);
+    children_wait();
+    printf("\nesto se imprime despues de que el todos despierten\n");
     while(1);
 }
 
 int64_t test_processes()
 {
-    prioritytest();
+    waitpidtest();
     return;
     uint8_t rq;
     uint8_t alive = 0;

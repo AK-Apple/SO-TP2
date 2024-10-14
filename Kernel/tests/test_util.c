@@ -67,30 +67,30 @@ void bussy_wait(uint64_t n)
         ;
 }
 
-void endless_loop()
-{
-    while (1)
-        printf("[endless_loop]");
-}
+// int64_t endless_loop(int argc, char *argv[])
+// {
+//     while (1)
+//         printf("[endless_loop]");
+// }
 
-int64_t endless_loop_print(int argc, char* argv[]) {
-  if (argc != 1) {
-    printf("[endless_loop_print] ARGCOUNT INCORRECT\n");
-    return 1;
-  }
-  printf("AAAAAAAAAAAA"); 
-printf(argv[0]);
-argv[0] = "5000000";
-  uint64_t wait = k_atoi(argv[0]);
-  k_print_int_dec(wait);
+// int64_t endless_loop_print(int argc, char* argv[]) {
+//   if (argc != 1) {
+//     printf("[endless_loop_print] ARGCOUNT INCORRECT\n");
+//     return 1;
+//   }
+//   printf("AAAAAAAAAAAA"); 
+// printf(argv[0]);
+// argv[0] = "5000000";
+//   uint64_t wait = k_atoi(argv[0]);
+//   k_print_int_dec(wait);
 
 
-  int64_t pid = get_pid();
+//   int64_t pid = get_pid();
 
-  while (1) {
-    printf("[endless_loop_print] pid=");
-    k_print_int_dec(pid);
-    putChar('\n');
-    bussy_wait(wait);
-  }
-}
+//   while (1) {
+//     printf("[endless_loop_print] pid=");
+//     k_print_int_dec(pid);
+//     putChar('\n');
+//     bussy_wait(wait);
+//   }
+// }

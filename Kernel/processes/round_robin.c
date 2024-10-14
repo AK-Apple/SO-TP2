@@ -72,46 +72,51 @@ void add(CircularList *list, int value)
 
 void delete_value_ocurrence(CircularList *list, int value)
 {
-    int new_size = 0;
-    int new_current_index = list->current_index;
+    if (list->size == 0)
+    {
+        return; // No elements to delete
+    }
 
-    for (int i = 0; i < list->size; i++)
+    int i, found_index = -1;
+
+    // Find the first occurrence of the value
+    for (i = 0; i < list->size; i++)
     {
         if (list->array[i] == value)
         {
-            // Skip the element that matches the value
-            if (i == list->current_index)
-            {
-                // Update current index if the current item is being deleted
-                new_current_index = (new_size < list->size) ? new_size : 0;
-            }
-            continue;
+            found_index = i; // Record the index of the found value
+            break; // Exit the loop after finding the first occurrence
         }
+    }
 
-        // Shift the elements
-        list->array[new_size] = list->array[i];
+    if (found_index != -1)
+    {
+        // Swap with the last element
+        list->array[found_index] = list->array[list->size - 1];
 
-        if (i == list->current_index)
+        // Decrease the size of the list
+        list->size--;
+
+        // Update the current index if needed
+        if (found_index < list->current_index)
         {
-            // Track the updated position for the current index
-            new_current_index = new_size;
+            list->current_index--; // Move back the current index
         }
-
-        new_size++;
-    }
-
-    // Update list properties
-    list->size = new_size;
-
-    if (new_size == 0)
-    {
-        list->current_index = 0; // Reset current index if the list is empty
-    }
-    else
-    {
-        list->current_index = new_current_index;
+        else if (found_index == list->current_index)
+        {
+            // If we deleted the current index, reset it
+            if (list->size == 0)
+            {
+                list->current_index = 0; // Reset if the list is now empty
+            }
+            else
+            {
+                list->current_index = found_index % list->size; // Wrap around
+            }
+        }
     }
 }
+
 
 void display_list(CircularList *list) 
 {

@@ -51,9 +51,9 @@ int unlock(int pid);
 
 void exit(uint64_t return_value);
 
-void resume();
-
 uint64_t wait_pid(uint64_t pid, int *status, int options);
+
+void children_wait();
 
 void save_regs();
 

@@ -5,20 +5,36 @@
 #include "scheduling.h"
 #include "IO.h"
 
-static unsigned long ticks = 0;
+uint64_t ticks = 0;
 
 
 void timer_handler() {
 	ticks++;
 }
 
-int ticks_elapsed() {
+uint64_t ticks_elapsed() {
 	return ticks;
 }
 
 
-int seconds_elapsed() {
+uint64_t seconds_elapsed() {
 	return ticks / 18;
+}
+
+void ticks_sleep(uint64_t ticks_to_sleep)
+{
+
+    uint64_t started_at = ticks;
+    while (ticks_elapsed() < started_at + ticks_to_sleep);
+
+    return;
+}
+
+void seconds_sleep(uint64_t seconds_to_sleep)
+{
+    uint64_t started_at = seconds_elapsed();
+    while (seconds_elapsed() < started_at + seconds_to_sleep);
+    return;
 }
 
 
