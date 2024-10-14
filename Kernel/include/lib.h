@@ -26,6 +26,8 @@ unsigned char inb (unsigned short int __port);
 
 int k_strcmp(const char *str1, const char *str2);
 
+void k_print_integer(uint64_t number, uint64_t padding, uint64_t base);
+
 void k_print_int_dec(int64_t number);
 
 int64_t k_atoi(const char* str);

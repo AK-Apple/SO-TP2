@@ -31,9 +31,17 @@ void javitest() {
     printf("\njavitest stop________________\n");
 }
 
+void prioritytest() {
+    char * argvaux[] = {"500"};
+    uint64_t pid_1 = create_process("endless_loop_print", 1, argvaux);
+    uint64_t pid_2 = create_process("endless_loop_print", 1, argvaux);
+    change_priority(pid_1, 4);
+    while(1);
+}
+
 int64_t test_processes()
 {
-    javitest();
+    prioritytest();
     return;
     uint8_t rq;
     uint8_t alive = 0;

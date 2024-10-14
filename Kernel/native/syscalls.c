@@ -70,7 +70,7 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
         case SYS_WIDTH_HEIGHT:
             return sys_getSize(param_1);
         case SYS_GETREGS:
-            sys_registers();
+            print_saved_regs();
             return 1;
         case SYS_GET_MEM:
             return fl_malloc();

@@ -17,6 +17,7 @@
 // Funciones:
 int64_t endless_loop(int argc, char *argv[]);
 int64_t endless_loop_print(int argc, char *argv[]);
+
 int64_t arg_print(int argc, char *argv[]) {
   int j = 0;
   while( j != 10) 
@@ -47,7 +48,7 @@ j++;
     j++;
     yield();
   }
-  // exit(0); 
+  return 0;
 }
 
 typedef int64_t (*FunctionPointer)(int argc, char *argv[]);
@@ -82,6 +83,5 @@ uint64_t process_initializer(char *name, int argc, char *argv[])
 {
   printf(name);
   FunctionPointer func = findFunctionByName(name);
-  uint64_t exit_code = func(argc, argv);
-  exit(exit_code);
+  return func(argc, argv);
 }

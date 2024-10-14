@@ -142,6 +142,24 @@ void k_print_int_dec(int64_t number) {
     }
 }
 
+void k_print_integer(uint64_t number, uint64_t padding, uint64_t base) {
+    uint64_t length = 0;
+    uint64_t numberReverse = 0; 
+    while(number > 0) {
+        length++;
+        numberReverse = numberReverse * base + number % base;
+        number /= base;
+
+    }
+    for(uint64_t i = length; i < padding; i++) 
+        putChar('0');
+    while (length-- || numberReverse > 0) {
+        int remainder = numberReverse % base;
+        putChar((remainder > 9) ? (remainder - 10) + 'A' : remainder + '0');
+        numberReverse /= base;
+    }
+}
+
 
 int64_t k_atoi(const char *str) {
     int64_t result = 0;

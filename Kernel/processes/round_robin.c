@@ -113,4 +113,17 @@ void delete_value_ocurrence(CircularList *list, int value)
     }
 }
 
+void display_list(CircularList *list) 
+{
+    putChar('[ ');
+    for(int i = 0; i < list->size; i++) 
+    {
+        if(list->current_index == i) putChar('(');
+        k_print_int_dec(list->array[i]);
+        if(list->current_index == i) putChar(')');
+        printf(", ");
+    }
+    printf(']\n');
+}
+
 // TODO: falta una función que solamente borre una instancia de un valor

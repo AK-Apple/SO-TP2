@@ -4,6 +4,7 @@
 #include "IO.h"
 #include "lib.h"
 #include "naiveConsole.h"
+#include "scheduling.h"
 
 #define ZERO_EXCEPTION_ID 0
 #define INVALID_OPCODE_ID 1
@@ -26,6 +27,7 @@ void exceptionDispatcher(int exception, const uint64_t regex[18]) {
         invalid_opcode();
     }
     showRegisters(regex);
+    exit(1);
 }
 
 static void zero_division() {

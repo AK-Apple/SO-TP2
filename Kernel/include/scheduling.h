@@ -55,6 +55,10 @@ void resume();
 
 uint64_t wait_pid(uint64_t pid, int *status, int options);
 
+void save_regs();
+
+void print_saved_regs();
+
 // -------- SO ----------
 
 typedef struct StackedRegisters

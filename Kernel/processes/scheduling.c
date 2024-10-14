@@ -11,6 +11,9 @@ uint64_t running_pid = 0;
 CircularList round_robin = {0};
 int remaining_quantum = 0;
 
+StackedRegisters saved_regs = {0};
+char regs_captured = 0;
+
 typedef struct ProcessBlock
 {
     uint64_t stack_pointer;
@@ -20,6 +23,7 @@ typedef struct ProcessBlock
     char *p_name;
     int argc;
     char **argv;
+    StackedRegisters regs;
 } ProcessBlock;
 
 uint64_t available_pids[MAX_PROCESS_BLOCKS] = {0};
@@ -88,9 +92,51 @@ int get_process_status(uint64_t pid)
     return blocks[pid].process_state;
 }
 
+void save_regs() {
+    saved_regs = blocks[running_pid].regs;
+    regs_captured = 1;
+}
+
+void print_regs(StackedRegisters regs){
+    printf("\nRAX : 0x"); k_print_integer(regs.rax, 16, 16);
+    printf("\nRBX : 0x"); k_print_integer(regs.rbx, 16, 16);
+    printf("\nRCX : 0x"); k_print_integer(regs.rcx, 16, 16);
+    printf("\nRDX : 0x"); k_print_integer(regs.rdx, 16, 16);
+    printf("\nRDI : 0x"); k_print_integer(regs.rdi, 16, 16);
+    printf("\nRSI : 0x"); k_print_integer(regs.rsi, 16, 16);
+    printf("\nRBP : 0x"); k_print_integer(regs.rbp, 16, 16);
+    printf("\nRSP : 0x"); k_print_integer(regs.rsp, 16, 16);
+    printf("\nR08 : 0x"); k_print_integer(regs.r8, 16, 16);
+    printf("\nR09 : 0x"); k_print_integer(regs.r9, 16, 16);
+    printf("\nR10 : 0x"); k_print_integer(regs.r10, 16, 16);
+    printf("\nR11 : 0x"); k_print_integer(regs.r11, 16, 16);
+    printf("\nR12 : 0x"); k_print_integer(regs.r12, 16, 16);
+    printf("\nR13 : 0x"); k_print_integer(regs.r13, 16, 16);
+    printf("\nR14 : 0x"); k_print_integer(regs.r14, 16, 16);
+    printf("\nR15 : 0x"); k_print_integer(regs.r15, 16, 16);
+    printf("\nRIP : 0x"); k_print_integer(regs.rip, 16, 16);
+    printf("\nRFLAGS : 0x"); k_print_integer(regs.rflags, 16, 16);
+    printf("\nCS : 0x"); k_print_integer(regs.cs, 16, 16);
+    printf("\nSS : 0x"); k_print_integer(regs.ss, 16, 16);
+    printf("\n\n");
+}
+
+// TODO: falta un print_hex
+
+void print_saved_regs(){
+    if (!regs_captured) {
+        printf("No regs saved. Press left alt to save regs");
+        print_regs(blocks[running_pid].regs);
+    }
+    else {
+        print_regs(saved_regs);
+    }
+}
 
 uint64_t schedule(uint64_t running_stack_pointer)
 {
+    // TODO: esto de los quantums no lo veo necesario
+
     if(remaining_quantum > 0) {
         remaining_quantum--;
         return running_stack_pointer;
@@ -104,6 +150,8 @@ uint64_t schedule(uint64_t running_stack_pointer)
         next_pid = next(&round_robin);
     } while(blocks[next_pid].process_state == BLOCKED);
 
+    blocks[running_pid].regs = *(StackedRegisters *) running_stack_pointer;
+    // k_print_int_dec(blocks[running_pid].regs.rbp);
     running_pid = next_pid;
 
     blocks[next_pid].process_state = RUNNING;
@@ -127,16 +175,17 @@ void initializer()
     // TODO: RBP = 0, arreglarlo
     // Ojo: esto implica que NO SE PUEDEN crear variables en este stackframe  
 
-    if (blocks[running_pid].p_name == 0)
+    if (running_pid == 0)
         return; // para el proceso init
     
-    process_initializer(
-        blocks[running_pid].p_name,
-        blocks[running_pid].argc,
-        blocks[running_pid].argv);
+    exit(
+        process_initializer(
+            blocks[running_pid].p_name,
+            blocks[running_pid].argc,
+            blocks[running_pid].argv));
 }
 
-void initializeRegisters(uint64_t rsp)
+void initializeRegisters(uint64_t new_pid, uint64_t rsp)
 {
     StackedRegisters stackedRegisters = (StackedRegisters){0};
     stackedRegisters.rflags = 0x202;
@@ -144,7 +193,7 @@ void initializeRegisters(uint64_t rsp)
     stackedRegisters.rip = default_rip;
     stackedRegisters.rsp = rsp;
 
-    // TODO: revisar esto, porque tengo un mal presentimiento de esto
+    blocks[new_pid].regs = stackedRegisters;
     memcpy((void *)rsp, &stackedRegisters, sizeof(struct StackedRegisters));
 }
 
@@ -165,7 +214,7 @@ int create_process(char *name, int argc, char **argv)
     blocks[new_pid].argv = rsp;
     rsp -= sizeof(StackedRegisters);
 
-    initializeRegisters(rsp);
+    initializeRegisters(new_pid, rsp);
 
     blocks[new_pid].stack_pointer = rsp;
     blocks[new_pid].process_state = READY;
@@ -186,7 +235,7 @@ void create_init_process()
     blocks[0].process_state = RUNNING;
     blocks[0].parent_pid = get_pid(); 
     blocks[0].priority = 1;
-    blocks[0].p_name = 0;
+    blocks[0].p_name = "INIT";
     running_pid = 0;
     initializer();
 
@@ -219,20 +268,21 @@ int64_t get_pid()
 void get_all_processes()
 {
     static char *PROCESS_STATE_STRING[] = {"U", "RUNNING", "READY", "BLOCKED"};
-    printf("pid process_name priority rsp state\n");
+    printf("pid : process_name : priority : rsp : rbp : state\n");
     for (int i = 0; i < MAX_PROCESS_BLOCKS; i++)
     {
         if (blocks[i].process_state != UNAVAILABLE)
         {
             k_print_int_dec(i);
-            putChar(' ');
+            printf(" : ");
             printf(blocks[i].p_name);
-            putChar(' ');
+            printf(" : ");
             k_print_int_dec(blocks[i].priority);
-            putChar(' ');
-
-            k_print_int_dec(blocks[i].stack_pointer);
-            putChar(' ');
+            printf(" : ");
+            k_print_integer(blocks[i].stack_pointer, 16, 16);
+            printf(" : ");
+            k_print_integer(blocks[i].regs.rbp, 16, 16);
+            printf(" : ");
             printf(PROCESS_STATE_STRING[blocks[i].process_state]);
             putChar('\n');
         }

@@ -2,6 +2,7 @@
 #include "video.h"
 #include "IO.h"
 #include "lib.h"
+#include "scheduling.h"
 
 #define REGS_SIZE 18
 
@@ -186,7 +187,8 @@ void keyboard_handler() {
             break;
         case '\x38':    // left-alt pressed (guarda registros)
             keyFlag[1] = 3;
-            getRegs();
+            // getRegs();
+            save_regs();
             break;
         default:
             if (key != '\0') {
