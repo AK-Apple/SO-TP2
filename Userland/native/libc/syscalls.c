@@ -56,3 +56,57 @@ int sys_getWindowSize(int elem) {
 void sys_getRegs() {
     syscall(SYS_GETREGS, 0, 0, 0);
 }
+
+void *sys_fl_malloc() {
+    return syscall(SYS_GET_MEM, 0, 0, 0);
+}
+#include "../include/stdio.h"
+int64_t arg_print(int argc, char *argv[]) {
+    printf("%dargc %d \n", 33, argc);
+    for(int i = 0; i < argc; i++) {
+        printf(argv[i]);
+        printf(", ");
+    }
+    printf(" \n");
+    while(1);
+}
+int sys_create_process(char *name, int argc, char **argv) {
+    printf("create process");
+    argc = 2;
+    char *argva[] = {"arg1", "arg2"};
+    argv = argva;
+    return syscall(SYS_CREATE_PROCESS, arg_print, argc, argv);
+}
+int sys_kill_process(uint64_t pid) {
+    return syscall(SYS_KILL_PROCESS, pid, 0, 0);
+}
+int sys_get_process_status(int pid) {
+    return syscall(SYS_PROCESS_STATUS, pid, 0, 0);
+}
+int sys_get_pid() {
+    return syscall(SYS_GET_PID, 0, 0, 0);
+}
+void sys_print_all_processes() {
+    syscall(SYS_GET_ALL_PROCESSES, 0, 0, 0);
+}
+void sys_change_priority(uint64_t pid, int delta) {
+    syscall(SYS_CHANGE_PRIORITY, pid, delta, 0);
+}
+int sys_block(int pid) {
+    return syscall(SYS_BLOCK, pid, 0, 0);
+}
+int sys_unblock(int pid) {
+    return syscall(SYS_UNLOCK, pid, 0, 0);
+}
+void sys_yield() {
+    syscall(SYS_YIELD, 0, 0, 0);
+}
+uint64_t sys_wait_pid(uint64_t pid, int *status, int options) {
+    syscall(SYS_WAITPID, pid, status, options);
+}
+void sys_wait_children() {
+    syscall(SYS_WAIT_CHILDREN, 0, 0, 0);
+}
+void sys_exit(uint64_t return_value) {
+    syscall(SYS_EXIT, return_value, 0, 0);
+}

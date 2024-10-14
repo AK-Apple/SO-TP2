@@ -20,7 +20,7 @@ typedef struct ProcessBlock
     State process_state;
     uint64_t parent_pid;
     uint64_t priority;
-    char *p_name;
+    Program program;
     int argc;
     char **argv;
     StackedRegisters regs;
@@ -78,7 +78,7 @@ int kill_process(uint64_t pid)
 
     blocks[pid].argc = 0;
     blocks[pid].argv = NULL;
-    blocks[pid].p_name = NULL;
+    blocks[pid].program = NULL;
     blocks[pid].parent_pid = 0;
     blocks[pid].priority = 0;
     blocks[pid].process_state = UNAVAILABLE;
@@ -178,11 +178,14 @@ void initializer()
     if (running_pid == 0)
         return; // para el proceso init
     
+    // exit(
+    //     process_initializer(
+    //         blocks[running_pid].p_name,
+    //         blocks[running_pid].argc,
+    //         blocks[running_pid].argv));
     exit(
-        process_initializer(
-            blocks[running_pid].p_name,
-            blocks[running_pid].argc,
-            blocks[running_pid].argv));
+        blocks[running_pid].program(blocks[running_pid].argc, blocks[running_pid].argv)
+    );
 }
 
 void initializeRegisters(uint64_t new_pid, uint64_t rsp)
@@ -197,7 +200,7 @@ void initializeRegisters(uint64_t new_pid, uint64_t rsp)
     memcpy((void *)rsp, &stackedRegisters, sizeof(struct StackedRegisters));
 }
 
-int create_process(char *name, int argc, char **argv)
+int create_process(Program program, int argc, char **argv)
 {
     uint64_t new_pid = request_pid();
     if (new_pid == INVALID_PID)
@@ -220,7 +223,7 @@ int create_process(char *name, int argc, char **argv)
     blocks[new_pid].process_state = READY;
     blocks[new_pid].parent_pid = running_pid;
     blocks[new_pid].priority = 1;
-    blocks[new_pid].p_name = name;
+    blocks[new_pid].program = program;
     blocks[new_pid].argc = argc;
 
     add(&round_robin, new_pid);
@@ -235,7 +238,7 @@ void create_init_process()
     blocks[0].process_state = RUNNING;
     blocks[0].parent_pid = get_pid(); 
     blocks[0].priority = 1;
-    blocks[0].p_name = "INIT";
+    // blocks[0].p_name = "INIT";
     running_pid = 0;
     initializer();
 
@@ -275,7 +278,13 @@ void get_all_processes()
         {
             k_print_int_dec(i);
             printf(" : ");
-            printf(blocks[i].p_name);
+            if(i == 0) {
+                printf("INIT");
+            }
+            else if(blocks[i].argc > 0)
+                printf(blocks[i].argv[0]);
+            else 
+                printf("UNKNOWN PROCESS");
             printf(" : ");
             k_print_int_dec(blocks[i].priority);
             printf(" : ");

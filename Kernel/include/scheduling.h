@@ -9,6 +9,8 @@
 #define MAX_PRIORITY 5
 typedef uint64_t Stack[STACK_SIZE];
 
+typedef uint64_t (*Program)(uint64_t, const char*[]);
+
 typedef struct ProcessSnapshot
 {
     char *p_name;
@@ -27,13 +29,11 @@ typedef enum
     BLOCKED
 } State;
 
-int create_process(char *name, int argc, char **argv);
+int create_process(Program program, int argc, char **argv);
 
 void create_init_process();
 
 int kill_process(uint64_t pid);
-
-void store_context();
 
 int64_t get_pid();
 

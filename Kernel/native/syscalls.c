@@ -33,6 +33,8 @@
 #define SYS_UNLOCK 22
 #define SYS_YIELD 23
 #define SYS_WAITPID 24
+#define SYS_WAIT_CHILDREN 25
+#define SYS_EXIT 26
 
 uint64_t registers[18] = {0};
 
@@ -75,11 +77,9 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
         case SYS_GET_MEM:
             return fl_malloc();
         case SYS_CREATE_PROCESS:
-            create_process((char *) param_1, param_2, (char **) param_3);
-            return 1;
+            return create_process(param_1, param_2, (char **) param_3);
         case SYS_KILL_PROCESS:
-            kill_process(param_1);
-            return 1;
+            return kill_process(param_1);
         case SYS_PROCESS_STATUS:
             return get_process_status(param_1);
         case SYS_GET_PID:
@@ -91,16 +91,19 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
             change_priority(param_1, param_2);
             return 1;
         case SYS_BLOCK:
-            block(param_1);
-            return 1;
+            return block(param_1);
         case SYS_UNLOCK:
-            unlock(param_1);
-            return 1;
+            return unlock(param_1);
         case SYS_YIELD:
             yield();
             return 1;
         case SYS_WAITPID:
-            wait_pid(param_1, (int *) param_2, param_3);
+            return wait_pid(param_1, (int *) param_2, param_3);
+        case SYS_WAIT_CHILDREN:
+            children_wait();
+            return 1;
+        case SYS_EXIT:
+            exit(param_1);
             return 1;
     }
     return 0;

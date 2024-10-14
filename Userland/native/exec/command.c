@@ -22,6 +22,9 @@ static command commands[] = {
         {"invalidopcode   :  ", "Muestra excepcion de codigo invalido.", invalidOpcode},
         {"inforeg         :  ", "Muestra los registros guardados.", sys_getRegs},
         {"clear           :  ", "Limpia toda la pantalla.", clear},
+        {"ps              :  ", "Lista la informacion de los procesos", print_process_state},
+        {"kill            :  ", "mata un proceso dado un pid", kill_process},
+        {"testp           :  ", "ejecuta test de proceso", test_processes_cmd},
 };
 
 void print_help() {
@@ -64,7 +67,19 @@ void changeSize_5() {
     sys_new_size(5);
 }
 
+void print_process_state() {
+    sys_print_all_processes();
+}
 
+void kill_process(int pid) {
+    sys_kill_process(pid);
+}
+int64_t test_processes_cmd(uint64_t argc, char *argv[]) {
+    sys_create_process(test_processes, argc, argv);
+}
+void test_prio_cmd() {
+    sys_create_process(test_prio, 0, 0);
+}
 
 void time() {
 

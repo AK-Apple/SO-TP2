@@ -52,20 +52,16 @@ void *initializeKernelBinary()
 
 int main()
 {
-    printf("Voy a crear algo\n");
     create_init_process();
-    printf("init creado\n");
     load_idt();
 
-    printf("iniciando test de procesos\n");
-    test_processes();
+    // printf("iniciando test de procesos\n");
+    // test_processes();
 
-    printf("test finalizado\n");
+    // printf("test finalizado\n");
 
-    get_all_processes();
+    // get_all_processes();
 
-    // while(1);
-    // sys_registers();     // descomentar para ver registros del kernel
 
     ((EntryPoint)sampleCodeModuleAddress)();
 

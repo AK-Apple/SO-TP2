@@ -16,6 +16,20 @@
 #define SYS_WIDTH_HEIGHT 11
 #define SYS_GETREGS 13
 
+#define SYS_GET_MEM 14
+#define SYS_CREATE_PROCESS 15
+#define SYS_KILL_PROCESS 16
+#define SYS_PROCESS_STATUS 17
+#define SYS_GET_PID 18
+#define SYS_GET_ALL_PROCESSES 19
+#define SYS_CHANGE_PRIORITY 20
+#define SYS_BLOCK 21
+#define SYS_UNLOCK 22
+#define SYS_YIELD 23
+#define SYS_WAITPID 24
+#define SYS_WAIT_CHILDREN 25
+#define SYS_EXIT 26
+
 #include <stdint.h>
 
 extern uint64_t syscall(uint64_t id, uint64_t par2, void * par3, uint64_t par4);
@@ -44,5 +58,20 @@ void sys_new_size(int newSize);
 int sys_getWindowSize(int elem);
 
 void sys_getRegs();
+
+void *sys_fl_malloc();
+
+int sys_create_process(char *name, int argc, char **argv);
+int sys_kill_process(uint64_t pid);
+int sys_get_process_status(int pid);
+int sys_get_pid();
+void sys_print_all_processes();
+void sys_change_priority(uint64_t pid, int delta);
+int sys_block(int pid);
+int sys_unblock(int pid);
+void sys_yield();
+uint64_t sys_wait_pid(uint64_t pid, int *status, int options);
+void sys_wait_children();
+void sys_exit(uint64_t return_value);
 
 #endif //TPE_ARQUI_SYSCALLS_H
