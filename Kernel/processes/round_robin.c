@@ -14,10 +14,10 @@ int next(CircularList *list)
 {
     if (list->size == 0)
     {
-        return -1; // Return -1 if the list is empty
+        return -1;
     }
     int current_value = list->array[list->current_index];
-    list->current_index = (list->current_index + 1) % list->size; // Move to the next element
+    list->current_index = (list->current_index + 1) % list->size;
     return current_value;
 }
 
@@ -34,7 +34,7 @@ void delete_value(CircularList *list, int value)
             list->array[new_size] = list->array[i];
             if (i == list->current_index)
             {
-                new_current_index = new_size; // Update current index if needed
+                new_current_index = new_size; 
             }
             new_size++;
         }
@@ -44,7 +44,7 @@ void delete_value(CircularList *list, int value)
     list->size = new_size;
     if (new_size == 0)
     {
-        list->current_index = 0; // Reset current index if the list is empty
+        list->current_index = 0; 
     }
     else if (new_current_index != -1)
     {
@@ -52,7 +52,7 @@ void delete_value(CircularList *list, int value)
     }
     else if (list->current_index >= list->size)
     {
-        list->current_index = 0; // Wrap around current index if needed
+        list->current_index = 0; 
     }
 }
 
@@ -74,7 +74,7 @@ void delete_value_ocurrence(CircularList *list, int value)
 {
     if (list->size == 0)
     {
-        return; // No elements to delete
+        return; 
     }
 
     int i, found_index = -1;
@@ -84,8 +84,8 @@ void delete_value_ocurrence(CircularList *list, int value)
     {
         if (list->array[i] == value)
         {
-            found_index = i; // Record the index of the found value
-            break; // Exit the loop after finding the first occurrence
+            found_index = i;
+            break; 
         }
     }
 
@@ -94,24 +94,21 @@ void delete_value_ocurrence(CircularList *list, int value)
         // Swap with the last element
         list->array[found_index] = list->array[list->size - 1];
 
-        // Decrease the size of the list
         list->size--;
 
-        // Update the current index if needed
         if (found_index < list->current_index)
         {
-            list->current_index--; // Move back the current index
+            list->current_index--;
         }
         else if (found_index == list->current_index)
         {
-            // If we deleted the current index, reset it
             if (list->size == 0)
             {
-                list->current_index = 0; // Reset if the list is now empty
+                list->current_index = 0; 
             }
             else
             {
-                list->current_index = found_index % list->size; // Wrap around
+                list->current_index = found_index % list->size; 
             }
         }
     }
@@ -120,7 +117,7 @@ void delete_value_ocurrence(CircularList *list, int value)
 
 void display_list(CircularList *list) 
 {
-    putChar('[ ');
+    putChar('[');
     for(int i = 0; i < list->size; i++) 
     {
         if(list->current_index == i) putChar('(');
@@ -128,7 +125,5 @@ void display_list(CircularList *list)
         if(list->current_index == i) putChar(')');
         printf(", ");
     }
-    printf(']\n');
+    printf("]\n");
 }
-
-// TODO: falta una función que solamente borre una instancia de un valor

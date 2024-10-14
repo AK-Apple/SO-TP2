@@ -11,7 +11,6 @@
 
 // Alternativa: hacer un Switch
 
-// TODO: realizar exit, strcmp y printf con %d
 
 #define SIZE_DICTIONARY 64
 

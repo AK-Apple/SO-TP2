@@ -51,13 +51,14 @@ void waitpidtest()
     uint64_t pid_3 = create_process("sleepy_process", 1, argvaux);
     // uint64_t pid4 = create_process("endless_loop", 1, argvaux);
     children_wait();
+    wait_pid(3, 0, 0);
     printf("\nesto se imprime despues de que el todos despierten\n");
     while(1);
 }
 
 int64_t test_processes()
 {
-    waitpidtest();
+    javitest();
     return;
     uint8_t rq;
     uint8_t alive = 0;
