@@ -4,10 +4,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "../include/syscalls.h"
+
 typedef struct {
     char * title;
     char * desc;
-    void (*command)();
+    Program command;
 } command;
 
 void print_time();
@@ -24,12 +26,15 @@ void changeSize_4();
 void changeSize_5();
 
 void print_process_state();
-void kill_process(int pid);
-int64_t test_processes_cmd(uint64_t argc, char *argv[]);
-void test_prio_cmd();
+void kill_process(uint64_t argc, char *argv[]);
 
-void test_prio();
-int64_t test_processes(uint64_t argc, char *argv[]);
+
+int64_t test_processes_cmd(uint64_t argc, char *argv[]);
+int64_t test_prio_cmd(uint64_t argc, char *argv[]);
+
+// Getters de "Programs" (un Program es una función para inicializar procesos)
+Program get_test_processes();
+Program get_test_prio();
 
 //para excepciones (buscan en Assembler)
 extern void runInvalidOpcodeException(void);

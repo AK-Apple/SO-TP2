@@ -29,6 +29,4 @@ void add(CircularList *list, int value);
 // Displays the current state of the list (used for debugging)
 void display_list(CircularList *list);
 
-// TODO: falta la función
-
 #endif // CIRCULAR_LIST_H

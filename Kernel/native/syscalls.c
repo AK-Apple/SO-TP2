@@ -75,9 +75,9 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
             print_saved_regs();
             return 1;
         case SYS_GET_MEM:
-            return fl_malloc();
+            return (uint64_t) fl_malloc();
         case SYS_CREATE_PROCESS:
-            return create_process(param_1, param_2, (char **) param_3);
+            return create_process((Program) param_1, param_2, (char **) param_3);
         case SYS_KILL_PROCESS:
             return kill_process(param_1);
         case SYS_PROCESS_STATUS:

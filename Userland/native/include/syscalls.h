@@ -32,6 +32,8 @@
 
 #include <stdint.h>
 
+typedef uint64_t (*Program)(uint64_t, const char*[]);
+
 extern uint64_t syscall(uint64_t id, uint64_t par2, void * par3, uint64_t par4);
 
 void sys_hlt();
@@ -61,7 +63,7 @@ void sys_getRegs();
 
 void *sys_fl_malloc();
 
-int sys_create_process(char *name, int argc, char **argv);
+int sys_create_process(Program program, int argc, char **argv);
 int sys_kill_process(uint64_t pid);
 int sys_get_process_status(int pid);
 int sys_get_pid();

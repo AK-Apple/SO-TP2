@@ -73,7 +73,7 @@ int kill_process(uint64_t pid)
 {
     if (pid > MAX_PROCESS_BLOCKS || pid < 1)
         return -1;
-    delete_value(&round_robin, pid);
+    
     reasign_children(pid);
 
     blocks[pid].argc = 0;
@@ -84,6 +84,7 @@ int kill_process(uint64_t pid)
     blocks[pid].process_state = UNAVAILABLE;
     blocks[pid].stack_pointer = 0;
     free_pid(pid);
+    delete_value(&round_robin, pid);
 
     return pid;
 }
@@ -166,14 +167,14 @@ uint64_t default_rip = 0;
 
 void initializer()
 {
-    default_rip = _get_starting_point();
     // a partir de acá empieza un proceso
-    printf("Empezo el proceso nro ");
-    k_print_int_dec(running_pid);
-    putChar('\n');
+    // printf("Empezo el proceso nro ");
+    // k_print_int_dec(running_pid);
+    // putChar('\n');
 
     // TODO: RBP = 0, arreglarlo
     // Ojo: esto implica que NO SE PUEDEN crear variables en este stackframe  
+
 
     if (running_pid == 0)
         return; // para el proceso init
@@ -184,7 +185,7 @@ void initializer()
     //         blocks[running_pid].argc,
     //         blocks[running_pid].argv));
     exit(
-        blocks[running_pid].program(blocks[running_pid].argc, blocks[running_pid].argv)
+        blocks[running_pid].program(blocks[running_pid].argc, (const char *) blocks[running_pid].argv)
     );
 }
 
@@ -193,7 +194,7 @@ void initializeRegisters(uint64_t new_pid, uint64_t rsp)
     StackedRegisters stackedRegisters = (StackedRegisters){0};
     stackedRegisters.rflags = 0x202;
     stackedRegisters.cs = 0x8;
-    stackedRegisters.rip = default_rip;
+    stackedRegisters.rip = initializer;
     stackedRegisters.rsp = rsp;
 
     blocks[new_pid].regs = stackedRegisters;
@@ -208,13 +209,25 @@ int create_process(Program program, int argc, char **argv)
         return -1;
     }
     memset(stacks[new_pid], 0, sizeof(Stack));
-    uint64_t rsp = stacks[new_pid] + STACK_SIZE; 
+    uint64_t rsp = (uint64_t) stacks[new_pid] + STACK_SIZE; 
+    uint64_t rsp_argv = rsp;
+    rsp -= argc * sizeof(char **);
     for(int i = 0; i < argc; i++) {
-        rsp -= sizeof(char *);
-        char **stack_argument = (char **)rsp;
-        *stack_argument = argv[argc - i - 1];
+        rsp_argv -= sizeof(char *);
+        int j = 0;
+        char *argument = argv[argc - i - 1];
+        while(argument[j++]);
+        while(j >= 0) {
+            rsp--;
+            char *current_char = (char *)rsp;
+            *current_char = argument[j--];
+        }
+
+        char **stack_argument = (char **)rsp_argv;
+        *stack_argument = (char *) rsp;
     }
-    blocks[new_pid].argv = rsp;
+    rsp &= -16;
+    blocks[new_pid].argv = rsp_argv;
     rsp -= sizeof(StackedRegisters);
 
     initializeRegisters(new_pid, rsp);
@@ -240,7 +253,6 @@ void create_init_process()
     blocks[0].priority = 1;
     // blocks[0].p_name = "INIT";
     running_pid = 0;
-    initializer();
 
     add(&round_robin, 0);
 
@@ -304,20 +316,43 @@ void yield()
     force_timer_tick();
 }
 
-void change_priority(uint64_t pid, int delta)
-{
+// void change_priority(uint64_t pid, int delta)
+// {
+//     if (delta > 0)
+//     {
+//         while(delta-- > 0 && blocks[pid].priority < MAX_PRIORITY) 
+//         {
+//             blocks[pid].priority++;
+//             add(&round_robin, pid);
+//         }
+//     }
+//     else if(delta < 0)
+//     {
+//         while(delta++ < 0 && blocks[pid].priority > 1) {
+//             blocks[pid].priority--;
+//             delete_value_ocurrence(&round_robin, pid);
+//         }
+//     }
+// }
+
+// Falta testear bien
+void change_priority(uint64_t pid, int value){
+    value = (value < MAX_PRIORITY) ? value : MAX_PRIORITY;
+    value = (value > 0) ? value : 1;
+
+    int delta = value - blocks[pid].priority;
+
     if (delta > 0)
     {
-        while(delta-- > 0 && blocks[pid].priority < MAX_PRIORITY) 
+        while(delta-- > 0) 
         {
-            blocks[pid].priority++;
             add(&round_robin, pid);
         }
     }
     else if(delta < 0)
     {
-        while(delta++ < 0 && blocks[pid].priority > 1) {
-            blocks[pid].priority--;
+        while(delta++ < 0) 
+        {
             delete_value_ocurrence(&round_robin, pid);
         }
     }
@@ -358,8 +393,9 @@ uint64_t wait_pid(uint64_t pid, int *status, int options)
 void children_wait() {
     uint64_t parent_pid = get_pid();
     for(int i=0; i<MAX_PROCESS_BLOCKS; i++) {
-        if (blocks[i].parent_pid = parent_pid) {
+        if (blocks[i].parent_pid == parent_pid) {
             wait_pid(i, 0, 0);
         }
     }
 }
+// Función no testeada

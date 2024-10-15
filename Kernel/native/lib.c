@@ -186,7 +186,3 @@ int64_t k_atoi(const char *str) {
 
     return result * sign;
 }
-
-int arrange(char* str, char* argv[]) {
-
-}

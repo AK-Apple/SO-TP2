@@ -1,5 +1,5 @@
 #include "../include/syscalls.h"
-
+#include "../include/command.h"
 
 void sys_hlt() {
     syscall(SYS_HLT, 0, 0, 0);
@@ -61,21 +61,9 @@ void *sys_fl_malloc() {
     return syscall(SYS_GET_MEM, 0, 0, 0);
 }
 #include "../include/stdio.h"
-int64_t arg_print(int argc, char *argv[]) {
-    printf("%dargc %d \n", 33, argc);
-    for(int i = 0; i < argc; i++) {
-        printf(argv[i]);
-        printf(", ");
-    }
-    printf(" \n");
-    while(1);
-}
-int sys_create_process(char *name, int argc, char **argv) {
-    printf("create process");
-    argc = 2;
-    char *argva[] = {"arg1", "arg2"};
-    argv = argva;
-    return syscall(SYS_CREATE_PROCESS, arg_print, argc, argv);
+
+int sys_create_process(Program program, int argc, char **argv) {
+    return syscall(SYS_CREATE_PROCESS, program, argc, argv);
 }
 int sys_kill_process(uint64_t pid) {
     return syscall(SYS_KILL_PROCESS, pid, 0, 0);
@@ -90,7 +78,7 @@ void sys_print_all_processes() {
     syscall(SYS_GET_ALL_PROCESSES, 0, 0, 0);
 }
 void sys_change_priority(uint64_t pid, int delta) {
-    syscall(SYS_CHANGE_PRIORITY, pid, delta, 0);
+    syscall(SYS_CHANGE_PRIORITY, pid, (uint64_t) delta, 0);
 }
 int sys_block(int pid) {
     return syscall(SYS_BLOCK, pid, 0, 0);
@@ -102,7 +90,7 @@ void sys_yield() {
     syscall(SYS_YIELD, 0, 0, 0);
 }
 uint64_t sys_wait_pid(uint64_t pid, int *status, int options) {
-    syscall(SYS_WAITPID, pid, status, options);
+    return syscall(SYS_WAITPID, pid, status, options);
 }
 void sys_wait_children() {
     syscall(SYS_WAIT_CHILDREN, 0, 0, 0);

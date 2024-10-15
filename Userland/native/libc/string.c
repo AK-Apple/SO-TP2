@@ -40,3 +40,14 @@ void* memcpy(void* dest, const void* src, int n) {
     }
     return dest;
 }
+
+int charcount(const char* str, char c) {
+	int count = 0;
+	for(int i = 0; str[i]; i++){
+		if(str[i] == c){
+			count++;
+		}
+	}
+
+	return count;
+}

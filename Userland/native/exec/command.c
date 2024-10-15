@@ -3,6 +3,7 @@
 #include "../include/stdio.h"
 #include "../include/stdlib.h"
 #include "../include/eliminator.h"
+#include "../include/test_util.h"
 
 #define REG_SIZE 17
 #define SECONDS 0
@@ -14,7 +15,7 @@
 #define YEAR 9
 
 static command commands[] = {
-        {"help            :  ", "Muestra la lista de comandos.", print_help},
+        {"help            :  ", "Muestra la lista de comandos.", (Program) print_help},
         {"time            :  ", "Muestra la hora.", time},
         {"eliminator      :  ", "Ejecuta el juego eliminator.", eliminator},
         {"size_<1-5>      :  ", "cambia tamanio de letra (entre 1 a 5).", changeSize_1},
@@ -25,6 +26,7 @@ static command commands[] = {
         {"ps              :  ", "Lista la informacion de los procesos", print_process_state},
         {"kill            :  ", "mata un proceso dado un pid", kill_process},
         {"testp           :  ", "ejecuta test de proceso", test_processes_cmd},
+        {"testprio        :  ", "ejecuta test de prioridades", test_prio_cmd}
 };
 
 void print_help() {
@@ -71,14 +73,25 @@ void print_process_state() {
     sys_print_all_processes();
 }
 
-void kill_process(int pid) {
+void kill_process(uint64_t argc, char *argv[]) {
+    printf("[killing process] pid=");
+    if(argc != 2) {
+        printf("invalid arguments"); 
+        return;
+    }
+    int pid = satoi(argv[1]);
+    printInt(pid);
+    if(pid < 1) {
+        printf("invalid pid");
+        return;
+    }
     sys_kill_process(pid);
 }
 int64_t test_processes_cmd(uint64_t argc, char *argv[]) {
-    sys_create_process(test_processes, argc, argv);
+    sys_create_process(get_test_processes(), argc, argv);
 }
-void test_prio_cmd() {
-    sys_create_process(test_prio, 0, 0);
+int64_t test_prio_cmd(uint64_t argc, char *argv[]) {
+    sys_create_process(get_test_prio(), argc, argv);
 }
 
 void time() {
