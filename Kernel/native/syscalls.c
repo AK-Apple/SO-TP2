@@ -13,9 +13,14 @@ void MISSING_SYSCALL() {
     printf("[KERNEL] mising syscal");
 }
 
+void syscall_halt() {
+    set_current_quantum(0);
+    _hlt();
+}
+
 uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_t param_3) {
     static const Syscall syscalls[] = {
-        _hlt, // #define SYS_HLT 0
+        syscall_halt, // #define SYS_HLT 0
         play_sound, // #define SYS_SOUND 1
         MISSING_SYSCALL,// #define SYS_SLEEP 2
         sys_read, // #define SYS_READ 3

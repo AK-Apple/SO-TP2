@@ -3,6 +3,8 @@
 
 #define COLOR_RED       0x00FF0000
 #define COLOR_YELLOW    0x00CDFF00
+#define COLOR_BLUE      0x000000FF
+#define COLOR_GREEN     0x0000FF00
 
 #include <stdint.h>
 

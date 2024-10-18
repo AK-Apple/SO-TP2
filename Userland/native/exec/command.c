@@ -15,6 +15,8 @@
 #define MONTH 8
 #define YEAR 9
 
+extern int active_pid;
+
 void play_music_cmd(uint64_t argc, char *argv[]) {
     uint64_t song_id = 1;
     if(argc >= 2) {
@@ -79,11 +81,15 @@ void kill_process(uint64_t argc, char *argv[]) {
     sys_kill_process(pid);
 }
 int64_t test_processes_cmd(uint64_t argc, char *argv[]) {
-    sys_create_process(get_test_processes(), argc, argv);
+    int pid = sys_create_process(get_test_processes(), argc, argv);
+    active_pid = pid; 
 }
 int64_t test_prio_cmd(uint64_t argc, char *argv[]) {
-    sys_create_process(get_test_prio(), argc, argv);
+    int pid = sys_create_process(get_test_prio(), argc, argv);
+    active_pid = pid;
 }
+
+
 
 void print_time() {
 

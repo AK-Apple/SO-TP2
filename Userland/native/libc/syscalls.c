@@ -7,7 +7,9 @@ void sys_hlt() {
 }
 
 int sys_read(int fd, char * buf, int count){
-    return syscall(SYS_READ, fd, (void *) buf, count);
+    int ret = syscall(SYS_READ, fd, (void *) buf, count);
+    if(!ret) sys_hlt();
+    return ret;
 }
 
 void sys_write(int fd, char * buf, int count){

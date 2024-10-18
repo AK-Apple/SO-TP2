@@ -169,6 +169,10 @@ void initializer()
     );
 }
 
+void set_current_quantum(uint64_t q) {
+    remaining_quantum = q;
+}
+
 void initializeRegisters(uint64_t new_pid, uint64_t rsp)
 {
     StackedRegisters stackedRegisters = (StackedRegisters){0};
@@ -264,26 +268,18 @@ int64_t get_pid()
 
 void get_all_processes()
 {
-    static char *PROCESS_STATE_STRING[] = {"U", "RUNNING", "READY", "BLOCKED"};
-    printf("pid : process_name : priority : rsp : rbp : state\n");
+    static char *PROCESS_STATE_STRING[] = {"UNKNOWN", "RUNNING", "  READY", "BLOCKED"};
+    printf("pid : prio : rsp : rbp : state : process_name\n");
     for (int i = 0; i < MAX_PROCESS_BLOCKS; i++)
     {
         if (blocks[i].process_state != UNAVAILABLE)
         {
-            k_print_int_dec(i);
-            printf(" : ");
-            if(blocks[i].argc > 0)
-                printf(blocks[i].argv[0]);
-            else 
-                printf("UNKNOWN PROCESS");
-            printf(" : ");
-            k_print_int_dec(blocks[i].priority);
-            printf(" : ");
+            printf("%d : %d : ", i, blocks[i].priority);
             k_print_integer(blocks[i].stack_pointer, 16, 16);
             printf(" : ");
             k_print_integer(blocks[i].regs.rbp, 16, 16);
-            printf(" : ");
-            printf(PROCESS_STATE_STRING[blocks[i].process_state]);
+            printf(" : %s : ", PROCESS_STATE_STRING[blocks[i].process_state]);
+            printf(blocks[i].argc > 0 ? blocks[i].argv[0] : "UNKNOWN PROCESS");
             putChar('\n');
         }
     }

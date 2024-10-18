@@ -32,7 +32,7 @@ static uint64_t vprintf(char *fmt, va_list vars) {
 
     while (fmt[i]) {
         if (fmt[i] == '%') {
-            uint64_t padding = 0;
+            uint64_t padding = 1;
             char buf[SIZE_BUFFER] = {0};
             switch (fmt[++i]) {
                 case 'd':

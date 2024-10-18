@@ -59,6 +59,8 @@ void save_regs();
 
 void print_saved_regs();
 
+void set_current_quantum(uint64_t q);
+
 // -------- SO ----------
 
 typedef struct StackedRegisters
