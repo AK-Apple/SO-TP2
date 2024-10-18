@@ -5,8 +5,6 @@
 
 #define MAX_BUF 1024
 
-void putchar(char c);
-void putcharColoured(char c, uint64_t foreground, uint64_t background);
 uint64_t getchar();
 
 uint64_t gets(char * buf, uint64_t length);

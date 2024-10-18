@@ -98,3 +98,6 @@ void sys_wait_children() {
 void sys_exit(uint64_t return_value) {
     syscall(SYS_EXIT, return_value, 0, 0);
 }
+void sys_set_text_color(uint64_t fg) {
+    syscall(SYS_SET_TEXT_COLOR, fg, 0, 0);
+}

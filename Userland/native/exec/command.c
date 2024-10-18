@@ -4,6 +4,7 @@
 #include "../include/stdlib.h"
 #include "../include/eliminator.h"
 #include "../include/test_util.h"
+#include "../include/sounds.h"
 
 #define REG_SIZE 17
 #define SECONDS 0
@@ -14,59 +15,50 @@
 #define MONTH 8
 #define YEAR 9
 
-static command commands[] = {
-        {"help            :  ", "Muestra la lista de comandos.", (Program) print_help},
-        {"time            :  ", "Muestra la hora.", time},
-        {"eliminator      :  ", "Ejecuta el juego eliminator.", eliminator},
-        {"size_<1-5>      :  ", "cambia tamanio de letra (entre 1 a 5).", changeSize_1},
-        {"dividebyzero    :  ", "Muestra excepcion de division de 0.", divideByZero},
-        {"invalidopcode   :  ", "Muestra excepcion de codigo invalido.", invalidOpcode},
-        {"inforeg         :  ", "Muestra los registros guardados.", sys_getRegs},
-        {"clear           :  ", "Limpia toda la pantalla.", clear},
-        {"ps              :  ", "Lista la informacion de los procesos", print_process_state},
-        {"kill            :  ", "mata un proceso dado un pid", kill_process},
-        {"testp           :  ", "ejecuta test de proceso", test_processes_cmd},
-        {"testprio        :  ", "ejecuta test de prioridades", test_prio_cmd}
-};
-
-void print_help() {
-    printf("Presiona left alt para guardar registros en cualquier momento\n");
-    printf("Comandos disponibles:\n");
-    for (int i = 0 ; i < sizeof(commands)/sizeof(command) ; i++) {
-        printf(commands[i].title);
-        printf(" : ");
-        printf(commands[i].desc);
-        printf("\n");
+void play_music_cmd(uint64_t argc, char *argv[]) {
+    uint64_t song_id = 1;
+    if(argc >= 2) {
+        song_id = satoi(argv[1]);
+        if(song_id < 1 || song_id > 3) {
+            song_id = 1;
+        }
     }
+    play_song(song_id);
+    while (next_part()); // esto bloquea la consola, quiza en un futura hacer que corra en background
 }
-
 
 void clear() {
     sys_clear();
 }
 
-void divideByZero() {
-    runZeroDivisionException();
+void divide(uint64_t argc, char *argv[]) {
+    if(argc == 3) {
+        int64_t a, b;
+        a = satoi(argv[1]);    
+        b = satoi(argv[2]);
+        int64_t res = a / b;
+        printf("%d / %d = %d\n", a, b, res);    
+    }
+    else {
+        printf_error("div <a> <b>\n");
+    }
 }
 
 void invalidOpcode() {
-    runInvalidOpcodeException();
+    printf("executing invalid opcode...\n");
+    static uint8_t invalidOpcodes[] = {0x06, 0x07}; // PUSH ES and POP ES opcodes in 32-bit. disabled in 64-bit => invalid opcode
+    ((void (*)()) invalidOpcodes)();
 }
 
-void changeSize_1() {
-    sys_new_size(1);
-}
-void changeSize_2() {
-    sys_new_size(2);
-}
-void changeSize_3() {
-    sys_new_size(3);
-}
-void changeSize_4() {
-    sys_new_size(4);
-}
-void changeSize_5() {
-    sys_new_size(5);
+void changeSize(uint64_t argc, char *argv[]) {
+    uint32_t new_size = 1;
+    if (argc >= 2) {
+        new_size = satoi(argv[1]);
+        if(new_size < 1 || new_size > 5) {
+            new_size = 1;
+        }
+    }
+    sys_new_size(new_size);
 }
 
 void print_process_state() {
@@ -74,15 +66,14 @@ void print_process_state() {
 }
 
 void kill_process(uint64_t argc, char *argv[]) {
-    printf("[killing process] pid=");
+    int pid = satoi(argv[1]);
+    printf("[killing process] pid=%d\n", pid);
     if(argc != 2) {
-        printf("invalid arguments"); 
+        printf_error("invalid arguments\n"); 
         return;
     }
-    int pid = satoi(argv[1]);
-    printInt(pid);
     if(pid < 1) {
-        printf("invalid pid");
+        printf_error("invalid pid\n");
         return;
     }
     sys_kill_process(pid);
@@ -94,7 +85,7 @@ int64_t test_prio_cmd(uint64_t argc, char *argv[]) {
     sys_create_process(get_test_prio(), argc, argv);
 }
 
-void time() {
+void print_time() {
 
     int hours = sys_time(HOURS);
     // hours -= 3;          // el tema con pasar a horario de argentina es que habría que cambiar el día (y hasta el año si es 31/12) también, y es todito un lío

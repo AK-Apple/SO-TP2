@@ -11,5 +11,6 @@ void sys_write(int fd, const char* buf, int count);
 int sys_read(int fd, char* buf, int count);
 void sys_new_size(int newSize);
 void sys_clearScreen();
+void set_foreground_color(uint64_t fg);
 
 #endif //TPE_ARQUI_IO_H

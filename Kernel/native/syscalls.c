@@ -36,6 +36,8 @@
 #define SYS_WAIT_CHILDREN 25
 #define SYS_EXIT 26
 
+#define SYS_SET_TEXT_COLOR 27
+
 uint64_t registers[18] = {0};
 
 uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_t param_3){
@@ -105,6 +107,9 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
         case SYS_EXIT:
             exit(param_1);
             return 1;
+        case SYS_SET_TEXT_COLOR:
+            set_foreground_color(param_1);
+            return 1;   
     }
     return 0;
 }

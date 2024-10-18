@@ -30,6 +30,8 @@
 #define SYS_WAIT_CHILDREN 25
 #define SYS_EXIT 26
 
+#define SYS_SET_TEXT_COLOR 27
+
 #include <stdint.h>
 
 typedef uint64_t (*Program)(uint64_t, const char*[]);
@@ -40,6 +42,7 @@ void sys_hlt();
 
 int sys_read(int fd, char * buf, int count);
 void sys_write(int fd, char* buf, int count);
+void sys_set_text_color(uint64_t fg);
 
 uint64_t sys_time(int d);
 
@@ -51,7 +54,6 @@ void sys_nosound();
 void sys_clear();
 
 void print_help();
-void test_int_80h();
 void sys_putPixel(uint32_t hexColor, uint64_t x, uint64_t y);
 int sys_ticks_elapsed();
 int sys_secondsElapsed();

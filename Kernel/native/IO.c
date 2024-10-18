@@ -17,6 +17,7 @@ uint8_t fontSize = 1;
 static char stdinArr[SIZE_BUFFER];  
 static int sizeIn = 0;
 static int startsIn = 0;
+static uint64_t global_foreground_color = 0x00FFFFFF;
 
 int xOutOfBounds(uint64_t * x) {
     return *x + FONT_WIDTH * fontSize >= getWidth() || (int)*x < 0;     // casteo a int para que me tome que existen los negativos
@@ -93,9 +94,15 @@ void printf(char * str) {
 
 // Funciones que manejan stdin, stdout y stderr
 void putOut(char c){
-    putCharColoured(c, 0x00ffffff, BG_COLOR);
+    putCharColoured(c, global_foreground_color, BG_COLOR);
 }
 
+void set_foreground_color(uint64_t fg) {
+    if(fg > 0x00FFFFFF) {
+        fg = 0x00FFFFFF;
+    }
+    global_foreground_color = fg;
+}
 
 void putErr(char c){
     putCharColoured(c, 0x00ff0000, BG_COLOR);

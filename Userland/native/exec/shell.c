@@ -10,21 +10,39 @@
 
 #define MAX_BUF 1024
 
-// se podría cambiar la implementación para que se acepten parámetros (y no haya que hacer size 1, size 2...)
-// pero en este caso no hace falta porque hay pocos parámetros
-char * commands[] = {"clear", "dividebyzero", "help", "inforeg", "invalidopcode", "time", "eliminator",
-                     "size_1", "size_2", "size_3", "size_4", "size_5", "ps", "kill", "testp", "testprio"};
-Program commands_functions[] = {clear,  divideByZero, print_help, sys_getRegs, invalidOpcode, time, eliminator,
-                                  changeSize_1, changeSize_2, changeSize_3, changeSize_4, changeSize_5, print_process_state,
-                                  kill_process, test_processes_cmd, test_prio_cmd};
+Command commands[] = {
+        {"help", "Muestra la lista de comandos.", (Program) print_help},
+        {"song", "pone musica con beeps. song <song_id> con song_id entre 1,2,3", play_music_cmd},
+        {"time", "Muestra la hora.", print_time},
+        {"eliminator", "Ejecuta el juego eliminator.", eliminator},
+        {"size", "cambia tamanio de letra (entre 1 a 5).\t size <font_size>", changeSize},
+        {"div", "divide num/den ; div <num> <den>", divide},
+        {"invalidopcode", "Muestra excepcion de codigo invalido.", invalidOpcode},
+        {"inforeg", "Muestra los registros guardados.", sys_getRegs},
+        {"clear", "Limpia toda la pantalla.", clear},
+        {"ps", "Lista la informacion de los procesos", print_process_state},
+        {"kill", "mata un proceso dado un pid\t kill <pid>", kill_process},
+        {"testp", "ejecuta test de proceso", test_processes_cmd},
+        {"testprio", "ejecuta test de prioridades", test_prio_cmd}
+};
+
+void print_help() {
+    printf("Presiona left alt para guardar registros en cualquier momento\n");
+    printf("Comandos disponibles:\n");
+    for (int i = 0 ; i < sizeof(commands)/sizeof(commands[0]) ; i++) {
+        printf(commands[i].title);
+        repeat_char(' ', 20 - strlen(commands[i].title));
+        printf(" : ");
+        printf(commands[i].desc);
+        printf("\n");
+    }
+}
 
 void shell() {
-    play_song(2);
-    while (next_part());
     printHeader();
 
     do {
-        printf_color("user", 0xcdff00, 0x000000);
+        printf_color("user", COLOR_YELLOW, 0x000000);
         printf(":~$ ");
         int break_line = 0;
         int i = 0;
@@ -41,7 +59,7 @@ void shell() {
                 } else if (buf[0] == 0x08 && i > 0) {  // borrado (tiene que haber algo en el buffer)
                     command[i - 1] = 0;
                     i--;
-                } else if (buf[0] != 0x08) {        //
+                } else if (buf[0] != 0x08) {
                     command[i] = *buf;
                     i++;
                 }
@@ -51,8 +69,7 @@ void shell() {
 }
 void printHeader() {
     printf_color("Bienvenido a la Shell!\n", 0xcdff00, 0x000000);
-    printf("Ejecuta 'help' para ver una lista de comandos.\n");
-    return;
+    print_help();
 }
 
 void execute(char inputBuffer[]) {
@@ -70,11 +87,11 @@ void execute(char inputBuffer[]) {
     }
     for (int i = 0; i < command_count ; i++)
     {
-        if (strcmp(argv[0], commands[i]) == 0)
+        if (strcmp(argv[0], commands[i].title) == 0)
         {
-            commands_functions[i](argc, argv);
+            commands[i].command(argc, argv);
             return;
         }
     }
-    printf("Invalid command, try again.\n");
+    printf_error("Invalid command, try again.\n");
 }

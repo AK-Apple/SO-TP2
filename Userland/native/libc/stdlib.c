@@ -4,15 +4,6 @@
 
 uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base);
 
-void putcharColoured(char c, uint64_t foreground, uint64_t background) {
-    char buf[1] = {c};
-    sys_write(1, buf, 1);
-}
-
-void putchar(char c) {
-    putcharColoured(c, 0xFFFFFF, 0x000000);
-}
-
 uint64_t getchar() {
     char buf[1];
     sys_read(0, buf, 1);
