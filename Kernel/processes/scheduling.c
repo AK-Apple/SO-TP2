@@ -159,31 +159,11 @@ uint64_t schedule(uint64_t running_stack_pointer)
     return blocks[next_pid].stack_pointer;
 }
 
-
-// ------- Principio de un proceso --------
-
-
-uint64_t default_rip = 0;
-
 void initializer()
 {
     // a partir de acá empieza un proceso
-    // printf("Empezo el proceso nro ");
-    // k_print_int_dec(running_pid);
-    // putChar('\n');
-
     // TODO: RBP = 0, arreglarlo
     // Ojo: esto implica que NO SE PUEDEN crear variables en este stackframe  
-
-
-    if (running_pid == 0)
-        return; // para el proceso init
-    
-    // exit(
-    //     process_initializer(
-    //         blocks[running_pid].p_name,
-    //         blocks[running_pid].argc,
-    //         blocks[running_pid].argv));
     exit(
         blocks[running_pid].program(blocks[running_pid].argc, (const char *) blocks[running_pid].argv)
     );
@@ -245,13 +225,15 @@ int create_process(Program program, int argc, char **argv)
 
 void create_init_process()
 {
+    static char *init_args[] = {"INIT"};
     int pid = request_pid(); 
     // Should be 0
     blocks[0].stack_pointer = 0;   // Se va a actualizar. El valor no importa
     blocks[0].process_state = RUNNING;
     blocks[0].parent_pid = get_pid(); 
     blocks[0].priority = 1;
-    // blocks[0].p_name = "INIT";
+    blocks[0].argc = 1;
+    blocks[0].argv = init_args;
     running_pid = 0;
 
     add(&round_robin, 0);
@@ -290,10 +272,7 @@ void get_all_processes()
         {
             k_print_int_dec(i);
             printf(" : ");
-            if(i == 0) {
-                printf("INIT");
-            }
-            else if(blocks[i].argc > 0)
+            if(blocks[i].argc > 0)
                 printf(blocks[i].argv[0]);
             else 
                 printf("UNKNOWN PROCESS");

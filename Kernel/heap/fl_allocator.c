@@ -1,4 +1,5 @@
 #include "fl_allocator.h"
+#include "IO.h"
 #include <stddef.h>
 
 typedef struct FreeListMemoryManager {
@@ -8,6 +9,10 @@ typedef struct FreeListMemoryManager {
 } FreeListMemoryManager;
 
 static FreeListMemoryManager fl_memory_manager = {0};
+
+void fl_print_mem() {
+    printf("[FL_MEM] falta implementar print mem");
+}
 
 int fl_total_memory() {
     return BLOCK_COUNT * BLOCK_SIZE;

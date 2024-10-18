@@ -1,7 +1,9 @@
 #include "IO.h"
 #include "video.h"
 #include <stdint.h>
+#include <stdarg.h>
 #include "font.h"
+#include "lib.h"
 #include "interrupts.h"
 
 
@@ -18,6 +20,49 @@ static char stdinArr[SIZE_BUFFER];
 static int sizeIn = 0;
 static int startsIn = 0;
 static uint64_t global_foreground_color = 0x00FFFFFF;
+
+static void print_str(char *str) {
+    for (int i = 0; str[i] != '\0'; i++) {
+        putOut(str[i]);
+    }
+}
+
+static uint64_t vprintf(char *fmt, va_list vars) {
+    uint64_t i = 0;
+
+    while (fmt[i]) {
+        if (fmt[i] == '%') {
+            uint64_t padding = 0;
+            char buf[SIZE_BUFFER] = {0};
+            switch (fmt[++i]) {
+                case 'd':
+                    k_print_integer(va_arg(vars, int), padding, 10);
+                    break;
+                case 'x':
+                    k_print_integer(va_arg(vars, int), padding, 16);
+                    break;
+                case 'b':
+                    k_print_integer(va_arg(vars, int), padding, 2);
+                    break;
+                case 'c':
+                    putOut(va_arg(vars, int));
+                    break;
+                case 's':
+                    print_str(va_arg(vars, char*));
+                    break;
+                case '%':
+                    putOut('%');
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            putOut(fmt[i]);
+        }
+        i++;
+    }
+    return i;
+}
 
 int xOutOfBounds(uint64_t * x) {
     return *x + FONT_WIDTH * fontSize >= getWidth() || (int)*x < 0;     // casteo a int para que me tome que existen los negativos
@@ -81,15 +126,27 @@ void putCharColoured(char c, uint64_t foreGround, uint64_t backGround) {
     }
 }
 
-// putChar y printf facilitan el manejo de IO cuando el Kernel quiere escribir cosas
 void putChar(char c) {
     putCharColoured(c, 0xFFFFFF, BG_COLOR);
 }
 
-void printf(char * str) {
-    for (int i = 0; str[i] != '\0'; i++) {
-        putChar(str[i]);
-    }
+void printf(char * fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    vprintf(fmt, args);
+    va_end(args);
+}
+
+void printf_error(char * fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+
+    uint64_t previous_foreground = global_foreground_color;
+    set_foreground_color(0x00FF0000);
+    vprintf(fmt, args);
+    set_foreground_color(previous_foreground);
+
+    va_end(args);
 }
 
 // Funciones que manejan stdin, stdout y stderr

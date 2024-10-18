@@ -152,10 +152,10 @@ void k_print_integer(uint64_t number, uint64_t padding, uint64_t base) {
 
     }
     for(uint64_t i = length; i < padding; i++) 
-        putChar('0');
+        putOut('0');
     while (length-- || numberReverse > 0) {
         int remainder = numberReverse % base;
-        putChar((remainder > 9) ? (remainder - 10) + 'A' : remainder + '0');
+        putOut((remainder > 9) ? (remainder - 10) + 'A' : remainder + '0');
         numberReverse /= base;
     }
 }

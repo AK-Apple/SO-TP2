@@ -1,5 +1,6 @@
 #include "../include/syscalls.h"
 #include "../include/command.h"
+#include "../include/stdio.h"
 
 void sys_hlt() {
     syscall(SYS_HLT, 0, 0, 0);
@@ -58,9 +59,15 @@ void sys_getRegs() {
 }
 
 void *sys_fl_malloc() {
-    return syscall(SYS_GET_MEM, 0, 0, 0);
+    return syscall(SYS_MALLOC, 0, 0, 0);
 }
-#include "../include/stdio.h"
+
+void sys_free(void *pointer) {
+    syscall(SYS_FREE, pointer, 0, 0);
+}
+void sys_print_mem() {
+    syscall(SYS_PRINT_MEM, 0, 0, 0);
+}
 
 int sys_create_process(Program program, int argc, char **argv) {
     return syscall(SYS_CREATE_PROCESS, program, argc, argv);

@@ -15,8 +15,8 @@
 #define SYS_GET_ELAPSED_TICKS 10
 #define SYS_WIDTH_HEIGHT 11
 #define SYS_GETREGS 13
+#define SYS_SET_TEXT_COLOR 14
 
-#define SYS_GET_MEM 14
 #define SYS_CREATE_PROCESS 15
 #define SYS_KILL_PROCESS 16
 #define SYS_PROCESS_STATUS 17
@@ -30,7 +30,9 @@
 #define SYS_WAIT_CHILDREN 25
 #define SYS_EXIT 26
 
-#define SYS_SET_TEXT_COLOR 27
+#define SYS_MALLOC 27
+#define SYS_FREE 28
+#define SYS_PRINT_MEM 29
 
 #include <stdint.h>
 
@@ -77,5 +79,7 @@ void sys_yield();
 uint64_t sys_wait_pid(uint64_t pid, int *status, int options);
 void sys_wait_children();
 void sys_exit(uint64_t return_value);
+void sys_free(void *pointer);
+void sys_print_mem();
 
 #endif //TPE_ARQUI_SYSCALLS_H

@@ -55,14 +55,6 @@ int main()
     create_init_process();
     load_idt();
 
-    // printf("iniciando test de procesos\n");
-    // test_processes();
-
-    // printf("test finalizado\n");
-
-    // get_all_processes();
-
-
     ((EntryPoint)sampleCodeModuleAddress)();
 
     while (1)

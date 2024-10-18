@@ -94,7 +94,7 @@ static uint64_t vprintf_color(char *fmt, uint64_t foreground, uint64_t backgroun
 
     while (fmt[i]) {
         if (fmt[i] == '%') {
-            char buf[MAX_BUF];
+            char buf[MAX_BUF] = {0};
             switch (fmt[++i]) {
                 case 'd':
                     uintToBase(va_arg(vars, int), buf, 10);

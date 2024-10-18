@@ -23,7 +23,8 @@ Command commands[] = {
         {"ps", "Lista la informacion de los procesos", print_process_state},
         {"kill", "mata un proceso dado un pid\t kill <pid>", kill_process},
         {"testp", "ejecuta test de proceso", test_processes_cmd},
-        {"testprio", "ejecuta test de prioridades", test_prio_cmd}
+        {"testprio", "ejecuta test de prioridades", test_prio_cmd},
+        {"mem", "imprime la informacion de memoria dinamica", sys_print_mem},
 };
 
 void print_help() {
