@@ -161,9 +161,7 @@ uint64_t schedule(uint64_t running_stack_pointer)
 
 void initializer()
 {
-    // a partir de acá empieza un proceso
-    // TODO: RBP = 0, arreglarlo
-    // Ojo: esto implica que NO SE PUEDEN crear variables en este stackframe  
+    // Ya se pueden inicializar variables acá. TODO: borrar este comentario
     exit(
         blocks[running_pid].program(blocks[running_pid].argc, (const char *) blocks[running_pid].argv)
     );
@@ -180,6 +178,8 @@ void initializeRegisters(uint64_t new_pid, uint64_t rsp)
     stackedRegisters.cs = 0x8;
     stackedRegisters.rip = initializer;
     stackedRegisters.rsp = rsp;
+
+    stackedRegisters.rbp = rsp + sizeof(stackedRegisters);
 
     blocks[new_pid].regs = stackedRegisters;
     memcpy((void *)rsp, &stackedRegisters, sizeof(struct StackedRegisters));
