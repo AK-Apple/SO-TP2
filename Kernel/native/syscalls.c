@@ -10,7 +10,7 @@
 typedef uint64_t (*Syscall)(uint64_t, uint64_t, uint64_t);
 
 void MISSING_SYSCALL() {
-    printf("[KERNEL] mising syscal");
+    printf_error("[KERNEL] missing syscall\n");
 }
 
 void syscall_halt() {
@@ -52,12 +52,15 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
 
         fl_malloc, // #define SYS_MALLOC 27
         fl_free, // #define SYS_FREE 28
-        fl_print_mem, // #define SYS_PRINT_MEM 29
+        fl_print_mem, // #define SYS_PRINT_MEM 29,
+
+        MISSING_SYSCALL, // #define SYS_SEM_OPEN 30
+        MISSING_SYSCALL, // #define SYS_SEM_WAIT 31
+        MISSING_SYSCALL, // #define SYS_SEM_POST 32
+        MISSING_SYSCALL, // #define SYS_SEM_CLOSE 33
     };
     if(id >= sizeof(syscalls) / sizeof(syscalls[0])) {
-        printf("[KERNEL] invalid syscall id:");
-        k_print_int_dec(id);
-        putChar('\n');
+        printf_error("[KERNEL] invalid syscall id:%d\n", id);
     }
     return syscalls[id](param_1, param_2, param_3);
 }

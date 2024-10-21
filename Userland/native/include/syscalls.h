@@ -34,6 +34,11 @@
 #define SYS_FREE 28
 #define SYS_PRINT_MEM 29
 
+#define SYS_SEM_OPEN 30
+#define SYS_SEM_WAIT 31
+#define SYS_SEM_POST 32
+#define SYS_SEM_CLOSE 33
+
 #include <stdint.h>
 
 typedef uint64_t (*Program)(uint64_t, const char*[]);
@@ -65,8 +70,6 @@ int sys_getWindowSize(int elem);
 
 void sys_getRegs();
 
-void *sys_fl_malloc();
-
 int sys_create_process(Program program, int argc, char **argv);
 int sys_kill_process(uint64_t pid);
 int sys_get_process_status(int pid);
@@ -79,7 +82,14 @@ void sys_yield();
 uint64_t sys_wait_pid(uint64_t pid, int *status, int options);
 void sys_wait_children();
 void sys_exit(uint64_t return_value);
+
+void *sys_fl_malloc();
 void sys_free(void *pointer);
 void sys_print_mem();
+
+int sys_sem_open(char *path, int init);
+void sys_sem_wait(char *path);
+void sys_sem_post(char *path);
+void sys_sem_close(char *path);
 
 #endif //TPE_ARQUI_SYSCALLS_H

@@ -27,9 +27,11 @@ void kill_process(uint64_t argc, char *argv[]);
 
 int64_t test_processes_cmd(uint64_t argc, char *argv[]);
 int64_t test_prio_cmd(uint64_t argc, char *argv[]);
+int64_t test_sync_cmd(uint64_t argc, char *argv[]);
 
 // Getters de "Programs" (un Program es una función para inicializar procesos)
 Program get_test_processes();
 Program get_test_prio();
+Program get_test_sync();
 
 #endif //TPE_COMMAND_H

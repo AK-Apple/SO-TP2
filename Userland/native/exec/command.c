@@ -89,6 +89,11 @@ int64_t test_prio_cmd(uint64_t argc, char *argv[]) {
     active_pid = pid;
 }
 
+int64_t test_sync_cmd(uint64_t argc, char *argv[]) {
+    int pid = sys_create_process(get_test_sync(), argc, argv);
+    active_pid = pid;
+}
+
 
 
 void print_time() {

@@ -9,7 +9,7 @@ typedef struct {
 } AsciiMap;
 
 extern char getKey();   // de libasm.asm
-char mapKey(char character, int flags[2]);
+int mapKey(char character, int flags[2]);
 void keyboard_handler();
 
 #endif

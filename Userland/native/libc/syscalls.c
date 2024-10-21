@@ -110,3 +110,16 @@ void sys_exit(uint64_t return_value) {
 void sys_set_text_color(uint64_t fg) {
     syscall(SYS_SET_TEXT_COLOR, fg, 0, 0);
 }
+
+int sys_sem_open(char *path, int init) {
+    return syscall(SYS_SEM_OPEN, path, init, 0);
+}
+void sys_sem_wait(char *path) {
+    syscall(SYS_SEM_WAIT, path, 0, 0);
+}
+void sys_sem_post(char *path) {
+    syscall(SYS_SEM_POST, path, 0, 0);
+}
+void sys_sem_close(char *path) {
+    syscall(SYS_SEM_CLOSE, path, 0, 0);
+}

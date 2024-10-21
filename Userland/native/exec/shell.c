@@ -11,21 +11,22 @@
 #define MAX_BUF 1024
 
 static Command commands[] = {
-        {"help", "Muestra la lista de comandos.", (Program) print_help},
-        {"song", "pone musica con beeps. song <song_id> con song_id entre 1,2,3", play_music_cmd},
-        {"time", "Muestra la hora.", print_time},
-        {"eliminator", "Ejecuta el juego eliminator.", eliminator},
-        {"size", "cambia tamanio de letra (entre 1 a 5).\t size <font_size>", changeSize},
-        {"div", "divide num/den ; div <num> <den>", divide},
-        {"invalidopcode", "Muestra excepcion de codigo invalido.", invalidOpcode},
-        {"inforeg", "Muestra los registros guardados. (Presiona `left_alt` para guardar registros en cualquier momento)", sys_getRegs},
-        {"clear", "Limpia toda la pantalla.", clear},
-        {"ps", "Lista la informacion de los procesos", print_process_state},
-        {"kill", "mata un proceso dado un pid\t kill <pid>", kill_process},
-        {"testp", "ejecuta test de proceso", test_processes_cmd},
-        {"testprio", "ejecuta test de prioridades", test_prio_cmd},
-        {"mem", "imprime la informacion de memoria dinamica", sys_print_mem},
-        {"fg", "manda un proceso a foreground\t fd <pid>", send_to_foreground},
+    {"help", "Muestra la lista de comandos.", (Program) print_help},
+    {"song", "pone musica con beeps. song <song_id> con song_id entre 1,2,3", play_music_cmd},
+    {"time", "Muestra la hora.", print_time},
+    {"eliminator", "Ejecuta el juego eliminator.", eliminator},
+    {"size", "cambia tamanio de letra (entre 1 a 5).\t size <font_size>", changeSize},
+    {"div", "divide num/den ; div <num> <den>", divide},
+    {"invalidopcode", "Muestra excepcion de codigo invalido.", invalidOpcode},
+    {"inforeg", "Muestra los registros guardados. (Presiona `left_alt` para guardar registros en cualquier momento)", sys_getRegs},
+    {"clear", "Limpia toda la pantalla.", clear},
+    {"ps", "Lista la informacion de los procesos", print_process_state},
+    {"kill", "mata un proceso dado un pid\t kill <pid>", kill_process},
+    {"testproc", "ejecuta test de proceso", test_processes_cmd},
+    {"testprio", "ejecuta test de prioridades", test_prio_cmd},
+    {"testsync", "ejecuta test de sincronizacion\r testsync <n:countdown> <use_sem:0|1>", test_sync_cmd},
+    {"mem", "imprime la informacion de memoria dinamica", sys_print_mem},
+    {"fg", "manda un proceso a foreground\t fg <pid>", send_to_foreground},
 };
 int active_pid = 0;
 int shell_pid = 0;
@@ -35,9 +36,7 @@ void print_help() {
     for (int i = 0 ; i < sizeof(commands)/sizeof(commands[0]) ; i++) {
         printf(commands[i].title);
         repeat_char(' ', 20 - strlen(commands[i].title));
-        printf(" : ");
-        printf(commands[i].desc);
-        printf("\n");
+        printf(" : %s\n", commands[i].desc);
     }
 }
 

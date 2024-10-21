@@ -8,7 +8,8 @@
 
 int keyFlag[4] = {0,0}; // index 0: bloq-mayus ; index 1: {1=shift ; 2=CTRL ; 3=alt}
 
-const AsciiMap map[256] = {
+const AsciiMap map[] = {
+        {'\xFF', 0x20, 0x0, 2}, // CTRL + D (EOF)
         {'\x0',  0x0, 0x0, 0},  // -
         {'\x1',  0x0, 0x0, 0},
         {'\x2',  0x0, 0x0, 0},
@@ -141,11 +142,10 @@ const AsciiMap map[256] = {
         {'\xac', 0x29, 0x0, 3},
         {'\xd1', 0x27, 0x0, 1},
         {'\xf1', 0x27, 0x0, 0},
-        {'\xFF', 0x54, 0x0, 0}  // guarda los registros
 };
 
-char mapKey(char character, int flags[2]) {
-    for (int i = 0 ; i < 131 ; i++) {
+int mapKey(char character, int flags[2]) {
+    for (int i = 0 ; i < sizeof(map)/sizeof(map[0]) ; i++) {
         if (map[i].make_code == character) {
             if (map[i].character >= 'A' && map[i].character <= 'Z') {  // es una letra
                 if (!flags[0]) {    // se fija si mayus esta desactivado (si es 0)
@@ -163,7 +163,8 @@ char mapKey(char character, int flags[2]) {
 
 void keyboard_handler() {
     char i = getKey();      // llamada a Assembler
-    char key = mapKey(i, keyFlag);
+    int key = mapKey(i, keyFlag);
+    if(key == -1) printf("EOF!"); // TODO: EOF is (int), but functions send (char)
     switch (i) {
         case '\x3A':    // bloq-mayus
             keyFlag[0] = !keyFlag[0];
