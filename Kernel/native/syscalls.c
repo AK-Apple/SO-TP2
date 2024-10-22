@@ -5,7 +5,7 @@
 #include "interrupts.h"
 #include "sound.h"
 #include "scheduling.h"
-#include "fl_allocator.h"
+#include "memory_allocator.h"
 
 typedef uint64_t (*Syscall)(uint64_t, uint64_t, uint64_t);
 
@@ -50,14 +50,15 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
         children_wait, // #define SYS_WAIT_CHILDREN 25
         exit, // #define SYS_EXIT 26
 
-        fl_malloc, // #define SYS_MALLOC 27
-        fl_free, // #define SYS_FREE 28
-        fl_print_mem, // #define SYS_PRINT_MEM 29,
+        memory_alloc, // #define SYS_MALLOC 27
+        memory_free, // #define SYS_FREE 28
+        memory_info, // #define SYS_PRINT_MEM 29,
+        largest_free_block, // #define SYS_LARGEST_FREE_BLOCK 30
 
-        MISSING_SYSCALL, // #define SYS_SEM_OPEN 30
-        MISSING_SYSCALL, // #define SYS_SEM_WAIT 31
-        MISSING_SYSCALL, // #define SYS_SEM_POST 32
-        MISSING_SYSCALL, // #define SYS_SEM_CLOSE 33
+        MISSING_SYSCALL, // #define SYS_SEM_OPEN 31
+        MISSING_SYSCALL, // #define SYS_SEM_WAIT 32
+        MISSING_SYSCALL, // #define SYS_SEM_POST 33
+        MISSING_SYSCALL, // #define SYS_SEM_CLOSE 34
     };
     if(id >= sizeof(syscalls) / sizeof(syscalls[0])) {
         printf_error("[KERNEL] invalid syscall id:%d\n", id);

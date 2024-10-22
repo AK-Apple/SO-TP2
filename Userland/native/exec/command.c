@@ -80,6 +80,10 @@ void kill_process(uint64_t argc, char *argv[]) {
     }
     sys_kill_process(pid);
 }
+int64_t test_mman_cmd(uint64_t argc, char *argv[]) {
+    int pid = sys_create_process(get_test_mman(), argc, argv);
+    active_pid = pid; 
+}
 int64_t test_processes_cmd(uint64_t argc, char *argv[]) {
     int pid = sys_create_process(get_test_processes(), argc, argv);
     active_pid = pid; 

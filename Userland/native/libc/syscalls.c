@@ -60,15 +60,17 @@ void sys_getRegs() {
     syscall(SYS_GETREGS, 0, 0, 0);
 }
 
-void *sys_fl_malloc() {
-    return syscall(SYS_MALLOC, 0, 0, 0);
+void *sys_memory_alloc(size_t bytes) {
+    return syscall(SYS_MALLOC, bytes, 0, 0);
 }
-
-void sys_free(void *pointer) {
+void sys_memory_free(void *pointer) {
     syscall(SYS_FREE, pointer, 0, 0);
 }
-void sys_print_mem() {
+void sys_memory_info() {
     syscall(SYS_PRINT_MEM, 0, 0, 0);
+}
+size_t sys_memory_largest_block() {
+    return syscall(SYS_LARGEST_FREE_BLOCK, 0, 0, 0);
 }
 
 int sys_create_process(Program program, int argc, char **argv) {

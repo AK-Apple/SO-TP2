@@ -24,8 +24,9 @@ static Command commands[] = {
     {"kill", "mata un proceso dado un pid\t kill <pid>", kill_process},
     {"testproc", "ejecuta test de proceso", test_processes_cmd},
     {"testprio", "ejecuta test de prioridades", test_prio_cmd},
-    {"testsync", "ejecuta test de sincronizacion\r testsync <n:countdown> <use_sem:0|1>", test_sync_cmd},
-    {"mem", "imprime la informacion de memoria dinamica", sys_print_mem},
+    {"testsync", "ejecuta test de sincronizacion\t testsync <n:countdown> <use_sem:0|1>", test_sync_cmd},
+    {"testmman", "ejecuta test de memoria \t testmman <max_memory> <smart_allocation:0|1>", test_mman_cmd},
+    {"mem", "imprime la informacion de memoria dinamica", sys_memory_info},
     {"fg", "manda un proceso a foreground\t fg <pid>", send_to_foreground},
 };
 int active_pid = 0;

@@ -33,13 +33,15 @@
 #define SYS_MALLOC 27
 #define SYS_FREE 28
 #define SYS_PRINT_MEM 29
+#define SYS_LARGEST_FREE_BLOCK 30
 
-#define SYS_SEM_OPEN 30
-#define SYS_SEM_WAIT 31
-#define SYS_SEM_POST 32
-#define SYS_SEM_CLOSE 33
+#define SYS_SEM_OPEN 31
+#define SYS_SEM_WAIT 32
+#define SYS_SEM_POST 33
+#define SYS_SEM_CLOSE 34
 
 #include <stdint.h>
+#include <stddef.h>
 
 typedef uint64_t (*Program)(uint64_t, const char*[]);
 
@@ -83,9 +85,10 @@ uint64_t sys_wait_pid(uint64_t pid, int *status, int options);
 void sys_wait_children();
 void sys_exit(uint64_t return_value);
 
-void *sys_fl_malloc();
-void sys_free(void *pointer);
-void sys_print_mem();
+void *sys_memory_alloc(size_t bytes);
+void sys_memory_free(void *pointer);
+void sys_memory_info();
+size_t sys_memory_largest_block();
 
 int sys_sem_open(char *path, int init);
 void sys_sem_wait(char *path);

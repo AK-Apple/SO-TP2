@@ -2,11 +2,9 @@
 #include <lib.h>
 #include <moduleLoader.h>
 #include <idtLoader.h>
-#include "fl_allocator.h"
+#include "memory_allocator.h"
 #include "IO.h"
-#include "test_mm.h"
 #include "scheduling.h"
-#include "test_util.h"
 
 extern void test_int_80h();
 
@@ -45,7 +43,7 @@ void *initializeKernelBinary()
     uint64_t userlandModuleSize = loadModules(&endOfKernelBinary, moduleAddresses);
 
     clearBSS(&bss, &endOfKernel - &bss);
-    initialize_allocator(sampleDataModuleAddress + userlandModuleSize);
+    initialize_memory_allocator(sampleDataModuleAddress + userlandModuleSize, 65536);
 
     return getStackBase();
 }
