@@ -68,7 +68,7 @@ int64_t endless_loop_print(int argc, char* argv[]) {
   // --------- Get Arguments from argv[] ----------
 
   if (argc != 1) {
-    printf("[endless_loop_print] ARGCOUNT INCORRECT\n");
+    printf_error("[endless_loop_print] ARGCOUNT INCORRECT\n");
     return 1;
   }
   uint64_t wait = atoi(argv[0]);
@@ -78,9 +78,7 @@ int64_t endless_loop_print(int argc, char* argv[]) {
   int64_t pid = sys_get_pid();
 
   while (1) {
-    printf("[endless_loop_print] pid=");
-    printInt(pid);
-    printf("\n");
+    printf("%d\n", pid);
     bussy_wait(wait);
   }
   return 0;
@@ -88,10 +86,10 @@ int64_t endless_loop_print(int argc, char* argv[]) {
 
 Program get_endless_loop()
 {
-  return endless_loop;
+  return (Program)endless_loop;
 }
 
 Program get_endless_loop_print()
 {
-  return endless_loop_print;
+  return (Program)endless_loop_print;
 }

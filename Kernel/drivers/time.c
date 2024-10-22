@@ -1,6 +1,5 @@
 #include "time.h"
 #include "lib.h"
-#include "naiveConsole.h"
 #include "interrupts.h"
 #include "scheduling.h"
 #include "IO.h"

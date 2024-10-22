@@ -43,9 +43,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
-typedef uint64_t (*Program)(uint64_t, const char*[]);
+typedef uint64_t (*Program)(uint64_t, char*[]);
 
-extern uint64_t syscall(uint64_t id, uint64_t par2, void * par3, uint64_t par4);
+extern uint64_t syscall(uint64_t id, uint64_t par2, uint64_t par3, uint64_t par4);
 
 void sys_hlt();
 
@@ -77,7 +77,7 @@ int sys_kill_process(uint64_t pid);
 int sys_get_process_status(int pid);
 int sys_get_pid();
 void sys_print_all_processes();
-void sys_change_priority(uint64_t pid, int delta);
+void sys_change_priority(uint64_t pid, uint64_t delta);
 int sys_block(int pid);
 int sys_unblock(int pid);
 void sys_yield();

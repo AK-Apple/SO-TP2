@@ -43,7 +43,7 @@ void *initializeKernelBinary()
     uint64_t userlandModuleSize = loadModules(&endOfKernelBinary, moduleAddresses);
 
     clearBSS(&bss, &endOfKernel - &bss);
-    initialize_memory_allocator(sampleDataModuleAddress + userlandModuleSize, 65536);
+    initialize_memory_allocator(sampleDataModuleAddress + userlandModuleSize, 1L << 20);
 
     return getStackBase();
 }

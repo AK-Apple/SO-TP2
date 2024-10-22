@@ -33,7 +33,6 @@ static uint64_t vprintf(char *fmt, va_list vars) {
     while (fmt[i]) {
         if (fmt[i] == '%') {
             uint64_t padding = 1;
-            char buf[SIZE_BUFFER] = {0};
             switch (fmt[++i]) {
                 case 'd':
                     k_print_integer(va_arg(vars, int), padding, 10);
@@ -89,7 +88,7 @@ void putCharAt(uint8_t c, uint64_t * x, uint64_t * y, uint64_t foreColor, uint64
     }
 
     uint8_t charMap[FONT_HEIGHT][FONT_WIDTH];
-    getCharMap(c, charMap);
+    get_char_map(c, charMap);
 
     for (int i = 0; i < FONT_HEIGHT ; i++) {
         for (int j = 0; j < FONT_WIDTH ; j++) {

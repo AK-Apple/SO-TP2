@@ -1,5 +1,6 @@
 #ifndef MEMORY_ALLOCATOR_H
 #define MEMORY_ALLOCATOR_H
+#define USE_BUDDY_ALLOCATOR // -D=USE_BUDDY_ALLOCATOR
 
 #include <stdint.h>
 #include <stddef.h>

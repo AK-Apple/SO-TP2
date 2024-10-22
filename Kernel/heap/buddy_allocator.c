@@ -3,16 +3,13 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define USE_BUDDY_ALLOCATOR
 #ifdef USE_BUDDY_ALLOCATOR
 
-
 #define BUCKET_COUNT 31
-#define HEADER_SIZE_LOG2 4 
-#define SMALLEST_BLOCK_SIZE 16 // deberia ser 32
+#define HEADER_SIZE_LOG2 5 
 
 typedef struct Buddy_Header {
-    struct Buddy_Header *prev;  // para el linked list the este buddy
+    struct Buddy_Header *prev;  // para el linked list de este buddy
     struct Buddy_Header *next;  
     uint64_t bucket_index;      // indice en bucket, tambien es el exponente de tamano del bloque
     uint64_t intended_size;     // tamano que se pidio originalmente
@@ -36,7 +33,7 @@ calcula el indice del bucket mas pequeno cuyo tamano es >= bytes
 */
 static size_t size_to_bucket_index(size_t bytes) {
   size_t bucket = 0;
-  size_t size = SMALLEST_BLOCK_SIZE;
+  size_t size = sizeof(Buddy_Header);
 
   while (size < bytes) {
     size *= 2;

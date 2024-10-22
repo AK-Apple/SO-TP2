@@ -57,5 +57,5 @@ for(int i = 0; i < 10; i++) {
 }
 
 Program get_test_prio(){
-  return test_prio;
+  return (Program)test_prio;
 }

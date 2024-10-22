@@ -18,4 +18,6 @@ void putPixel(uint32_t hexColor, uint64_t x, uint64_t y);
 void putSquare(uint32_t hexColor, uint64_t x, uint64_t y, uint64_t size);
 char getKey();
 
+void * memset(void * destiation, int32_t c, uint64_t length);
+
 #endif //TPE_STDLIB_H

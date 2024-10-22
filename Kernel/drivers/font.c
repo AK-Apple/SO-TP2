@@ -1,6 +1,6 @@
 #include "font.h"
 
-char mappedChars[4096][8] = {
+char MAPPED_CHARS[4096][8] = {
 	// 0x00 "^@" NUL
 	{0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0},
@@ -4355,10 +4355,10 @@ char mappedChars[4096][8] = {
 	{0, 0, 0, 0, 0, 0, 0, 0}
 };
 
-void getCharMap(char c, uint8_t charMap[FONT_HEIGHT][FONT_WIDTH]) {
+void get_char_map(char c, uint8_t char_map[FONT_HEIGHT][FONT_WIDTH]) {
     for (int i = c * FONT_HEIGHT, j = 0 ; j < FONT_HEIGHT ; i++, j++) {
         for (int k = 0 ; k < FONT_WIDTH ; k++) {
-            charMap[j][k] = mappedChars[i][k];
+            char_map[j][k] = MAPPED_CHARS[i][k];
         }
     }
 }

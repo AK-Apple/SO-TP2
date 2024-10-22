@@ -1,6 +1,7 @@
 #include "../include/stdio.h"
 #include <stdarg.h>
 #include "../include/stdlib.h"
+#include "../include/syscalls.h"
 
 #define MAX_BUF 1024
 
@@ -8,6 +9,11 @@ static uint64_t default_foreground_color = 0x00FFFFFF;
 
 static uint64_t vprintf_color(char *fmt, uint64_t foreground, uint64_t background, va_list vars);
 static void print_str(const char * str);
+
+void putchar(char c) {
+    char buf[1] = {c};
+    sys_write(1, buf, 1);
+}
 
 void putcharColoured(char c, uint64_t foreground, uint64_t background) {
     if(foreground != default_foreground_color) {
@@ -19,11 +25,6 @@ void putcharColoured(char c, uint64_t foreground, uint64_t background) {
     if(foreground != default_foreground_color) {
         sys_set_text_color(default_foreground_color);
     }
-}
-
-void putchar(char c) {
-    char buf[1] = {c};
-    sys_write(1, buf, 1);
 }
 
 void repeat_char(char c, int count) {

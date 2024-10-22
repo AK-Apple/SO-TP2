@@ -6,6 +6,6 @@
 
 #include <stdint.h>
 
-void getCharMap(char c, uint8_t charMap[FONT_HEIGHT][FONT_WIDTH]);
+void get_char_map(char c, uint8_t char_map[FONT_HEIGHT][FONT_WIDTH]);
 
 #endif //TPE_ARQUI_FONT_H

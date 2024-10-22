@@ -48,7 +48,7 @@ void divide(uint64_t argc, char *argv[]) {
 
 void invalidOpcode() {
     printf("executing invalid opcode...\n");
-    static uint8_t invalidOpcodes[] = {0x06, 0x07}; // PUSH ES and POP ES opcodes in 32-bit. disabled in 64-bit => invalid opcode
+    static uint8_t invalidOpcodes[] = {0x06, 0x07};
     ((void (*)()) invalidOpcodes)();
 }
 
@@ -83,19 +83,23 @@ void kill_process(uint64_t argc, char *argv[]) {
 int64_t test_mman_cmd(uint64_t argc, char *argv[]) {
     int pid = sys_create_process(get_test_mman(), argc, argv);
     active_pid = pid; 
+    return 0;
 }
 int64_t test_processes_cmd(uint64_t argc, char *argv[]) {
     int pid = sys_create_process(get_test_processes(), argc, argv);
     active_pid = pid; 
+    return 0;
 }
 int64_t test_prio_cmd(uint64_t argc, char *argv[]) {
     int pid = sys_create_process(get_test_prio(), argc, argv);
     active_pid = pid;
+    return 0;
 }
 
 int64_t test_sync_cmd(uint64_t argc, char *argv[]) {
     int pid = sys_create_process(get_test_sync(), argc, argv);
     active_pid = pid;
+    return 0;
 }
 
 
@@ -103,10 +107,6 @@ int64_t test_sync_cmd(uint64_t argc, char *argv[]) {
 void print_time() {
 
     int hours = sys_time(HOURS);
-    // hours -= 3;          // el tema con pasar a horario de argentina es que habría que cambiar el día (y hasta el año si es 31/12) también, y es todito un lío
-    // if(hours <= 0){
-    //     hours += 24;
-    // }
     printInt(hours);
     printf(":");
     int minutes = sys_time(MINUTES);

@@ -2,6 +2,7 @@
 #include "IO.h"
 #include <stddef.h>
 
+#ifndef USE_BUDDY_ALLOCATOR
 // typedef struct FreeListMemoryManager {
 //     int current_free_index;
 //     void *base_adress;
@@ -37,4 +38,5 @@
 // void fl_free(void *pointer) {
 //     fl_memory_manager.free_pointers[--fl_memory_manager.current_free_index] = pointer;
 // }
+#endif
 

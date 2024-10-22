@@ -3,7 +3,6 @@
 #include "exceptions.h"
 #include "IO.h"
 #include "lib.h"
-#include "naiveConsole.h"
 #include "scheduling.h"
 
 #define ZERO_EXCEPTION_ID 0

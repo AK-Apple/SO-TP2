@@ -35,7 +35,7 @@ uint64_t request_pid()
     {
         if (biggest_pid >= MAX_PROCESS_BLOCKS)
         {
-            printf("[scheduler] RAN OUT OF PID!!\n");
+            printf_error("[scheduler] RAN OUT OF PID!!\n");
             return INVALID_PID;
         }
         biggest_pid++;
@@ -139,7 +139,7 @@ uint64_t schedule(uint64_t running_stack_pointer)
         remaining_quantum--;
         return running_stack_pointer;
     }
-    remaining_quantum = 2;
+    remaining_quantum = 1;
     blocks[running_pid].stack_pointer = running_stack_pointer;
 
     if(blocks[running_pid].process_state != UNAVAILABLE) {
@@ -160,7 +160,6 @@ uint64_t schedule(uint64_t running_stack_pointer)
 
 void initializer()
 {
-    // Ya se pueden inicializar variables acá. TODO: borrar este comentario
     exit(
         blocks[running_pid].program(blocks[running_pid].argc, (const char *) blocks[running_pid].argv)
     );
@@ -289,25 +288,6 @@ void yield()
     remaining_quantum = 0;
     force_timer_tick();
 }
-
-// void change_priority(uint64_t pid, int delta)
-// {
-//     if (delta > 0)
-//     {
-//         while(delta-- > 0 && blocks[pid].priority < MAX_PRIORITY) 
-//         {
-//             blocks[pid].priority++;
-//             add(&round_robin, pid);
-//         }
-//     }
-//     else if(delta < 0)
-//     {
-//         while(delta++ < 0 && blocks[pid].priority > 1) {
-//             blocks[pid].priority--;
-//             delete_value_ocurrence(&round_robin, pid);
-//         }
-//     }
-// }
 
 // Falta testear bien
 void change_priority(uint64_t pid, int value){

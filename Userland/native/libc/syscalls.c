@@ -7,13 +7,13 @@ void sys_hlt() {
 }
 
 int sys_read(int fd, char * buf, int count){
-    int ret = syscall(SYS_READ, fd, (void *) buf, count);
+    int ret = syscall(SYS_READ, fd, (uint64_t)buf, count);
     if(!ret) sys_hlt();
     return ret;
 }
 
 void sys_write(int fd, char * buf, int count){
-    syscall(SYS_WRITE, fd, (void *) buf, count);
+    syscall(SYS_WRITE, fd, (uint64_t)buf, count);
 }
 
 uint64_t sys_time(int d) {
@@ -41,7 +41,7 @@ void sys_new_size(int newSize){
 }
 
 void sys_putPixel(uint32_t hexColor, uint64_t x, uint64_t y){
-    syscall(SYS_PUT_PIXEL, hexColor, (void *) x, y);
+    syscall(SYS_PUT_PIXEL, hexColor, x, y);
 }
 
 int sys_secondsElapsed(){
@@ -61,10 +61,10 @@ void sys_getRegs() {
 }
 
 void *sys_memory_alloc(size_t bytes) {
-    return syscall(SYS_MALLOC, bytes, 0, 0);
+    return (void *)syscall(SYS_MALLOC, bytes, 0, 0);
 }
 void sys_memory_free(void *pointer) {
-    syscall(SYS_FREE, pointer, 0, 0);
+    syscall(SYS_FREE, (uint64_t)pointer, 0, 0);
 }
 void sys_memory_info() {
     syscall(SYS_PRINT_MEM, 0, 0, 0);
@@ -74,7 +74,7 @@ size_t sys_memory_largest_block() {
 }
 
 int sys_create_process(Program program, int argc, char **argv) {
-    return syscall(SYS_CREATE_PROCESS, program, argc, argv);
+    return syscall(SYS_CREATE_PROCESS, (uint64_t)program, argc, (uint64_t)argv);
 }
 int sys_kill_process(uint64_t pid) {
     return syscall(SYS_KILL_PROCESS, pid, 0, 0);
@@ -88,8 +88,8 @@ int sys_get_pid() {
 void sys_print_all_processes() {
     syscall(SYS_GET_ALL_PROCESSES, 0, 0, 0);
 }
-void sys_change_priority(uint64_t pid, int delta) {
-    syscall(SYS_CHANGE_PRIORITY, pid, (uint64_t) delta, 0);
+void sys_change_priority(uint64_t pid, uint64_t delta) {
+    syscall(SYS_CHANGE_PRIORITY, pid, delta, 0);
 }
 int sys_block(int pid) {
     return syscall(SYS_BLOCK, pid, 0, 0);
@@ -101,7 +101,7 @@ void sys_yield() {
     syscall(SYS_YIELD, 0, 0, 0);
 }
 uint64_t sys_wait_pid(uint64_t pid, int *status, int options) {
-    return syscall(SYS_WAITPID, pid, status, options);
+    return syscall(SYS_WAITPID, pid, (uint64_t)status, options);
 }
 void sys_wait_children() {
     syscall(SYS_WAIT_CHILDREN, 0, 0, 0);
@@ -114,14 +114,14 @@ void sys_set_text_color(uint64_t fg) {
 }
 
 int sys_sem_open(char *path, int init) {
-    return syscall(SYS_SEM_OPEN, path, init, 0);
+    return syscall(SYS_SEM_OPEN, (uint64_t)path, init, 0);
 }
 void sys_sem_wait(char *path) {
-    syscall(SYS_SEM_WAIT, path, 0, 0);
+    syscall(SYS_SEM_WAIT, (uint64_t)path, 0, 0);
 }
 void sys_sem_post(char *path) {
-    syscall(SYS_SEM_POST, path, 0, 0);
+    syscall(SYS_SEM_POST, (uint64_t)path, 0, 0);
 }
 void sys_sem_close(char *path) {
-    syscall(SYS_SEM_CLOSE, path, 0, 0);
+    syscall(SYS_SEM_CLOSE, (uint64_t)path, 0, 0);
 }

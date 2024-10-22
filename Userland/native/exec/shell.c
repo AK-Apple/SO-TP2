@@ -11,23 +11,23 @@
 #define MAX_BUF 1024
 
 static Command commands[] = {
-    {"help", "Muestra la lista de comandos.", (Program) print_help},
-    {"song", "pone musica con beeps. song <song_id> con song_id entre 1,2,3", play_music_cmd},
-    {"time", "Muestra la hora.", print_time},
-    {"eliminator", "Ejecuta el juego eliminator.", eliminator},
-    {"size", "cambia tamanio de letra (entre 1 a 5).\t size <font_size>", changeSize},
-    {"div", "divide num/den ; div <num> <den>", divide},
-    {"invalidopcode", "Muestra excepcion de codigo invalido.", invalidOpcode},
-    {"inforeg", "Muestra los registros guardados. (Presiona `left_alt` para guardar registros en cualquier momento)", sys_getRegs},
-    {"clear", "Limpia toda la pantalla.", clear},
-    {"ps", "Lista la informacion de los procesos", print_process_state},
-    {"kill", "mata un proceso dado un pid\t kill <pid>", kill_process},
-    {"testproc", "ejecuta test de proceso", test_processes_cmd},
-    {"testprio", "ejecuta test de prioridades", test_prio_cmd},
-    {"testsync", "ejecuta test de sincronizacion\t testsync <n:countdown> <use_sem:0|1>", test_sync_cmd},
-    {"testmman", "ejecuta test de memoria \t testmman <max_memory> <smart_allocation:0|1>", test_mman_cmd},
-    {"mem", "imprime la informacion de memoria dinamica", sys_memory_info},
-    {"fg", "manda un proceso a foreground\t fg <pid>", send_to_foreground},
+    {"help", "Muestra la lista de comandos.", (Program)print_help},
+    {"song", "pone musica con beeps. song <song_id> con song_id entre 1,2,3", (Program)play_music_cmd},
+    {"time", "Muestra la hora.", (Program)print_time},
+    {"eliminator", "Ejecuta el juego eliminator.", (Program)eliminator},
+    {"size", "cambia tamanio de letra (entre 1 a 5).\t size <font_size>", (Program)changeSize},
+    {"div", "divide num/den ; div <num> <den>", (Program)divide},
+    {"invalidopcode", "Muestra excepcion de codigo invalido.", (Program)invalidOpcode},
+    {"inforeg", "Muestra los registros guardados. (Presiona `left_alt` para guardar registros en cualquier momento)", (Program)sys_getRegs},
+    {"clear", "Limpia toda la pantalla.", (Program)clear},
+    {"ps", "Lista la informacion de los procesos", (Program)print_process_state},
+    {"kill", "mata un proceso dado un pid\t kill <pid>", (Program)kill_process},
+    {"testproc", "ejecuta test de proceso", (Program)test_processes_cmd},
+    {"testprio", "ejecuta test de prioridades", (Program)test_prio_cmd},
+    {"testsync", "ejecuta test de sincronizacion\t testsync <n:countdown> <use_sem:0|1>", (Program)test_sync_cmd},
+    {"testmman", "ejecuta test de memoria \t testmman <max_memory> <smart_allocation:0|1>", (Program)test_mman_cmd},
+    {"mem", "imprime la informacion de memoria dinamica", (Program)sys_memory_info},
+    {"fg", "manda un proceso a foreground\t fg <pid>", (Program)send_to_foreground},
 };
 int active_pid = 0;
 int shell_pid = 0;
@@ -41,7 +41,7 @@ void print_help() {
     }
 }
 
-send_to_foreground(int pid) {
+void send_to_foreground(int pid) {
     if(pid == 0) {
         printf_error("cant send init to foreground\n");
     }
