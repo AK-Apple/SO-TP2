@@ -13,5 +13,6 @@ void sys_new_size(int newSize);
 void sys_clearScreen();
 void set_foreground_color(uint64_t fg);
 void printf_error(char * fmt, ...);
+void printf_color(char * fmt, uint64_t foreground, ...);
 
 #endif //TPE_ARQUI_IO_H

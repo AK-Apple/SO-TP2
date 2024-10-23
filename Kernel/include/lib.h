@@ -33,5 +33,6 @@ void k_print_integer(uint64_t number, uint64_t padding, uint64_t base);
 void k_print_int_dec(int64_t number);
 
 int64_t k_atoi(const char* str);
+int64_t k_atoi_index(const char *str, uint64_t *index);
 
 #endif

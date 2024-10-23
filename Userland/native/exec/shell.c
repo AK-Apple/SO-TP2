@@ -12,33 +12,91 @@
 
 static Command commands[] = {
     {"help", "Muestra la lista de comandos.", (Program)print_help},
-    {"song", "pone musica con beeps. song <song_id> con song_id entre 1,2,3", (Program)play_music_cmd},
+    {"song", "pone musica con beeps. Con song_id:1|2|3", (Program)play_music_cmd, "<song_id>"},
     {"time", "Muestra la hora.", (Program)print_time},
     {"eliminator", "Ejecuta el juego eliminator.", (Program)eliminator},
-    {"size", "cambia tamanio de letra (entre 1 a 5).\t size <font_size>", (Program)changeSize},
-    {"div", "divide num/den ; div <num> <den>", (Program)divide},
+    {"size", "cambia tamanio de letra (entre 1 a 5).", (Program)changeSize, "<font_size>"},
+    {"div", "divide num/den", (Program)divide, "<num> <den>"},
     {"invalidopcode", "Muestra excepcion de codigo invalido.", (Program)invalidOpcode},
-    {"inforeg", "Muestra los registros guardados. (Presiona `left_alt` para guardar registros en cualquier momento)", (Program)sys_getRegs},
-    {"clear", "Limpia toda la pantalla.", (Program)clear},
-    {"ps", "Lista la informacion de los procesos", (Program)print_process_state},
-    {"kill", "mata un proceso dado un pid\t kill <pid>", (Program)kill_process},
-    {"testproc", "ejecuta test de proceso", (Program)test_processes_cmd},
-    {"testprio", "ejecuta test de prioridades", (Program)test_prio_cmd},
-    {"testsync", "ejecuta test de sincronizacion\t testsync <n:countdown> <use_sem:0|1>", (Program)test_sync_cmd},
-    {"testmman", "ejecuta test de memoria \t testmman <max_memory> <smart_allocation:0|1>", (Program)test_mman_cmd},
+    {"inforeg", "Muestra los registros guardados. (Presiona `left_alt` para guardar registros)", (Program)sys_getRegs},
+    {"clear", "Limpia toda la pantalla.", (Program)sys_clear},
+    {"ps", "Lista la informacion de los procesos", (Program)sys_print_all_processes},
+    {"kill", "mata un proceso dado un pid", (Program)kill_process, "<pid>"},
     {"mem", "imprime la informacion de memoria dinamica", (Program)sys_memory_info},
-    {"fg", "manda un proceso a foreground\t fg <pid>", (Program)send_to_foreground},
+    {"fg", "manda un proceso a foreground", (Program)send_to_foreground, "<pid>"},
+    {"block", "bloquea un proceso dado un pid", (Program)block_cmd, "<pid>"},
+    {"unblock", "desbloquea un proceso dado un pid", (Program)unblock_cmd, "<pid>"},
+};
+static Process_Command processes[] = {
+    {"testproc", "ejecuta test de proceso", get_test_processes, "<max_proc>"},
+    {"testprio", "ejecuta test de prioridades", get_test_prio},
+    {"testsync", "ejecuta test de sincronizacion. count=countdown, sem:0|1", get_test_sync, "<count> <sem>"},
+    {"testmman", "ejecuta test de memoria. smart:0|1", get_test_mman, "<max> <smart>"},
 };
 int active_pid = 0;
 int shell_pid = 0;
 
+uint64_t block_cmd(uint64_t argc, char *argv[]) {
+    if(argc >= 2) {
+        int64_t pid = atoi(argv[1]);
+        if(pid > 0 && sys_get_process_status(pid) != 0) {
+            sys_block(pid);
+        }  
+        else {
+            printf_error("block invalid argument %s\n", argv[1]);
+        }
+    }
+    else {
+        printf_error("block recibe 1 argumento; <pid>\n");
+    }
+    return 0;
+}
+
+uint64_t unblock_cmd(uint64_t argc, char *argv[]) {
+    if(argc >= 2) {
+        int64_t pid = atoi(argv[1]);
+        if(pid > 0 && sys_get_process_status(pid) != 0) {
+            sys_unblock(pid);
+        }  
+        else {
+            printf_error("unblock invalid pid %s\n", argv[1]);
+        }
+    }
+    else {
+        printf_error("unblock recibe 1 argumento; <pid>\n");
+    }
+    return 0;
+}
+
 void print_help() {
-    printf("Comandos disponibles:\n");
+    printf("Comandos built-in disponibles:\n");
     for (int i = 0 ; i < sizeof(commands)/sizeof(commands[0]) ; i++) {
-        printf(commands[i].title);
-        repeat_char(' ', 20 - strlen(commands[i].title));
+        printf_color(commands[i].title, COLOR_GREEN, 0);
+        uint64_t total_len = strlen(commands[i].title);
+        if(commands[i].args) {
+            total_len += strlen(commands[i].args) + 1;
+            printf_color(" %s", COLOR_YELLOW, 0, commands[i].args);
+        }
+        repeat_char(' ', 24 - total_len);
         printf(" : %s\n", commands[i].desc);
     }
+    printf("Comandos que crean procesos:\n");
+    for (int i = 0 ; i < sizeof(processes)/sizeof(processes[0]) ; i++) {
+        printf_color(processes[i].title, COLOR_GREEN, 0);
+        uint64_t total_len = strlen(processes[i].title);
+        if(processes[i].args) {
+            total_len += strlen(processes[i].args) + 1;
+            printf_color(" %s", COLOR_YELLOW, 0, processes[i].args);
+        }
+        repeat_char(' ', 24 - total_len);
+        printf(" : %s\n", processes[i].desc);
+    }
+    printf("Hotkeys:\n");
+    printf("ctrl c   : para matar al proceso activo y volver a la shell\n");
+    printf("ctrl z   : para bloquar al proceso activo y volver a la shell\n");
+    printf("ctrl x   : para seguir corriendo el proceso activo y volver a la shell\n");
+    printf("ctrl d   : para mandar EOF\n");
+    printf("left_alt : para guardar registros\n");
 }
 
 void send_to_foreground(int pid) {
@@ -56,7 +114,8 @@ void send_to_foreground(int pid) {
 }
 
 void shell() {
-    printHeader();
+    printf_color("Bienvenido a la Shell!! ", COLOR_GREEN, 0x000000);
+    print_help();
     shell_pid = sys_get_pid(); 
     active_pid = shell_pid;
 
@@ -111,10 +170,6 @@ void shell() {
         }
     } while (1);
 }
-void printHeader() {
-    printf_color("Bienvenido a la Shell!! ", COLOR_GREEN, 0x000000);
-    print_help();
-}
 
 void execute(char inputBuffer[]) {
     int command_count = sizeof(commands) / sizeof(commands[0]);
@@ -134,6 +189,16 @@ void execute(char inputBuffer[]) {
         if (strcmp(argv[0], commands[i].title) == 0)
         {
             commands[i].command(argc, argv);
+            return;
+        }
+    }
+    for (int i = 0; i < sizeof(processes)/sizeof(processes[0]) ; i++)
+    {
+        if (strcmp(argv[0], processes[i].title) == 0)
+        {
+            int pid = sys_create_process(processes[i].process_getter(), argc, argv);
+            printf("[shell] Running %s with pid %d...\n", argv[0], pid);
+            active_pid = pid;
             return;
         }
     }

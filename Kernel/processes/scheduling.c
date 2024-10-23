@@ -161,7 +161,7 @@ uint64_t schedule(uint64_t running_stack_pointer)
 void initializer()
 {
     exit(
-        blocks[running_pid].program(blocks[running_pid].argc, (const char *) blocks[running_pid].argv)
+        blocks[running_pid].program(blocks[running_pid].argc, (const char **) blocks[running_pid].argv)
     );
 }
 
@@ -174,7 +174,7 @@ void initializeRegisters(uint64_t new_pid, uint64_t rsp)
     StackedRegisters stackedRegisters = (StackedRegisters){0};
     stackedRegisters.rflags = 0x202;
     stackedRegisters.cs = 0x8;
-    stackedRegisters.rip = initializer;
+    stackedRegisters.rip = (uint64_t)initializer;
     stackedRegisters.rsp = rsp;
 
     stackedRegisters.rbp = rsp + sizeof(stackedRegisters);
@@ -209,7 +209,7 @@ int create_process(Program program, int argc, char **argv)
         *stack_argument = (char *) rsp;
     }
     rsp &= -16;
-    blocks[new_pid].argv = rsp_argv;
+    blocks[new_pid].argv = (char **)rsp_argv;
     rsp -= sizeof(StackedRegisters);
 
     initializeRegisters(new_pid, rsp);
@@ -228,18 +228,25 @@ int create_process(Program program, int argc, char **argv)
 void create_init_process()
 {
     static char *init_args[] = {"INIT"};
+    running_pid = 0;
     int pid = request_pid(); 
-    // Should be 0
+    if(pid != 0 && 0) {
+        round_robin.current_index = 0;
+        round_robin.size = 0;
+        for(int i = 0; i < MAX_PROCESS_BLOCKS; i++)
+            if(blocks[i].process_state != UNAVAILABLE)
+                free_pid(i);
+        memset(blocks, 0, sizeof(ProcessBlock) * MAX_PROCESS_BLOCKS);
+        pid = request_pid();
+    }
     blocks[0].stack_pointer = 0;   // Se va a actualizar. El valor no importa
     blocks[0].process_state = RUNNING;
     blocks[0].parent_pid = get_pid(); 
     blocks[0].priority = 1;
     blocks[0].argc = 1;
     blocks[0].argv = init_args;
-    running_pid = 0;
 
     add(&round_robin, 0);
-
     // OBS: el proceso INIT va a usar otro stack
 }
 
@@ -266,19 +273,18 @@ int64_t get_pid()
 
 void get_all_processes()
 {
-    static char *PROCESS_STATE_STRING[] = {"UNKNOWN", "RUNNING", "  READY", "BLOCKED"};
-    printf("pid : prio : rsp : rbp : state : process_name\n");
+    static char *PROCESS_STATE_STRING[] = {"UNKNOWN", "RUNNING", "READY  ", "BLOCKED"};
+    static uint64_t PROCESS_STATE_COLOR[] = {0x00999999, 0x0000FF00, 0x00CCDD00, 0x00FF0000};
+    printf("pid : ppid : prio : stack_pointer_64 : base_pointer_64  : state   : process_name\n");
     for (int i = 0; i < MAX_PROCESS_BLOCKS; i++)
     {
         if (blocks[i].process_state != UNAVAILABLE)
         {
-            printf("%d : %d : ", i, blocks[i].priority);
-            k_print_integer(blocks[i].stack_pointer, 16, 16);
-            printf(" : ");
-            k_print_integer(blocks[i].regs.rbp, 16, 16);
-            printf(" : %s : ", PROCESS_STATE_STRING[blocks[i].process_state]);
-            printf(blocks[i].argc > 0 ? blocks[i].argv[0] : "UNKNOWN PROCESS");
-            putChar('\n');
+            printf("%3d : %4d : %4d : ", i, blocks[i].parent_pid, blocks[i].priority);
+            printf("%16x : %16x : ", blocks[i].stack_pointer, blocks[i].regs.rbp);
+            uint64_t process_state = blocks[i].process_state;
+            printf_color(PROCESS_STATE_STRING[process_state], PROCESS_STATE_COLOR[process_state]);
+            printf(" : %s\n", blocks[i].argc > 0 ? blocks[i].argv[0] : "UNKNOWN PROCESS");
         }
     }
 }

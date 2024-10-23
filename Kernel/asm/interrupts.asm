@@ -26,6 +26,7 @@ EXTERN getStackBase
 EXTERN int80Dispacher
 EXTERN irqDispatcher
 EXTERN exceptionDispatcher
+EXTERN main
 
 EXTERN int80_write
 
@@ -179,7 +180,7 @@ SECTION .text
 	call getStackBase
 	mov [rsp + 15*8 + 24], rax	; rsp
 
-	mov rax, 0x400000
+	mov rax, main
 	mov [rsp + 15*8], rax		; rip
 
 	popState

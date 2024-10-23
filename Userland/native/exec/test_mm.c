@@ -6,7 +6,7 @@
 #include "../include/test_util.h"
 #include "../include/syscalls.h"
 
-#define MAX_BLOCKS 2048
+#define MAX_BLOCKS 4096
 #define HEADER_SIZE 32
 
 typedef struct MM_rq {

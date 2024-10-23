@@ -32,8 +32,10 @@ static uint64_t vprintf(char *fmt, va_list vars) {
 
     while (fmt[i]) {
         if (fmt[i] == '%') {
-            uint64_t padding = 1;
-            switch (fmt[++i]) {
+            i++;
+            uint64_t padding = k_atoi_index(fmt, &i);
+            padding = (padding == 0) ? 1 : padding;
+            switch (fmt[i]) {
                 case 'd':
                     k_print_integer(va_arg(vars, int), padding, 10);
                     break;
@@ -133,6 +135,18 @@ void printf(char * fmt, ...) {
     va_list args;
     va_start(args, fmt);
     vprintf(fmt, args);
+    va_end(args);
+}
+
+void printf_color(char * fmt, uint64_t foreground, ...) {
+    va_list args;
+    va_start(args, foreground);
+
+    uint64_t previous_foreground = global_foreground_color;
+    set_foreground_color(foreground);
+    vprintf(fmt, args);
+    set_foreground_color(previous_foreground);
+
     va_end(args);
 }
 

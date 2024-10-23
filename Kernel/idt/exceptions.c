@@ -27,7 +27,6 @@ void exceptionDispatcher(int exception, const uint64_t regex[18]) {
     }
     showRegisters(regex);
     // TODO: actualizar el código de excepciones para que los registros se guarden como en scheduler (una función recibe rsp) 
-    exit(1);
 }
 
 static void zero_division() {

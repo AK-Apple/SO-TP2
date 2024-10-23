@@ -217,3 +217,15 @@ int64_t k_atoi(const char *str) {
 
     return result * sign;
 }
+
+int64_t k_atoi_index(const char *str, uint64_t *index) {
+    int64_t result = 0;
+
+    // Convert characters to integer
+    while (str[*index] >= '0' && str[*index] <= '9') {
+        result = result * 10 + (str[*index] - '0');
+        *index += 1;
+    }
+
+    return result;
+}

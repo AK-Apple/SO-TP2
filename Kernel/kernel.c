@@ -5,6 +5,7 @@
 #include "memory_allocator.h"
 #include "IO.h"
 #include "scheduling.h"
+#include "interrupts.h"
 
 extern void test_int_80h();
 

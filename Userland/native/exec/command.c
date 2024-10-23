@@ -15,8 +15,6 @@
 #define MONTH 8
 #define YEAR 9
 
-extern int active_pid;
-
 void play_music_cmd(uint64_t argc, char *argv[]) {
     uint64_t song_id = 1;
     if(argc >= 2) {
@@ -27,10 +25,6 @@ void play_music_cmd(uint64_t argc, char *argv[]) {
     }
     play_song(song_id);
     while (next_part()); // esto bloquea la consola, quiza en un futura hacer que corra en background
-}
-
-void clear() {
-    sys_clear();
 }
 
 void divide(uint64_t argc, char *argv[]) {
@@ -63,10 +57,6 @@ void changeSize(uint64_t argc, char *argv[]) {
     sys_new_size(new_size);
 }
 
-void print_process_state() {
-    sys_print_all_processes();
-}
-
 void kill_process(uint64_t argc, char *argv[]) {
     int pid = satoi(argv[1]);
     printf("[killing process] pid=%d\n", pid);
@@ -80,32 +70,8 @@ void kill_process(uint64_t argc, char *argv[]) {
     }
     sys_kill_process(pid);
 }
-int64_t test_mman_cmd(uint64_t argc, char *argv[]) {
-    int pid = sys_create_process(get_test_mman(), argc, argv);
-    active_pid = pid; 
-    return 0;
-}
-int64_t test_processes_cmd(uint64_t argc, char *argv[]) {
-    int pid = sys_create_process(get_test_processes(), argc, argv);
-    active_pid = pid; 
-    return 0;
-}
-int64_t test_prio_cmd(uint64_t argc, char *argv[]) {
-    int pid = sys_create_process(get_test_prio(), argc, argv);
-    active_pid = pid;
-    return 0;
-}
-
-int64_t test_sync_cmd(uint64_t argc, char *argv[]) {
-    int pid = sys_create_process(get_test_sync(), argc, argv);
-    active_pid = pid;
-    return 0;
-}
-
-
 
 void print_time() {
-
     int hours = sys_time(HOURS);
     printInt(hours);
     printf(":");
