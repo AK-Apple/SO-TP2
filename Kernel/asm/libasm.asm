@@ -82,7 +82,29 @@ outb:
 force_timer_tick:
     int 0x20
     ret
-;==========================================0
+
+; -- void acquire(uint8_t * lock);
+GLOBAL acquire
+
+acquire:
+    mov al, 0
+.retry:
+    xchg BYTE [rdi], al
+    test al, al
+    jz .retry
+    ret
+
+
+; -- void release(uint8_t * lock);
+GLOBAL release
+
+release:
+    mov BYTE [rdi], 1
+    ret
+
+
+
+;=============================================
 
 section .data
     date db "00:00:00", 0

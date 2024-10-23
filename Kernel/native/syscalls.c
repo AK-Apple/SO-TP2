@@ -6,6 +6,8 @@
 #include "sound.h"
 #include "scheduling.h"
 #include "memory_allocator.h"
+#include "semaphores.h"
+
 
 typedef uint64_t (*Syscall)(uint64_t, uint64_t, uint64_t);
 
@@ -55,10 +57,10 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
         (Syscall)memory_info, // #define SYS_PRINT_MEM 29,
         (Syscall)largest_free_block, // #define SYS_LARGEST_FREE_BLOCK 30
 
-        (Syscall)MISSING_SYSCALL, // #define SYS_SEM_OPEN 31
-        (Syscall)MISSING_SYSCALL, // #define SYS_SEM_WAIT 32
-        (Syscall)MISSING_SYSCALL, // #define SYS_SEM_POST 33
-        (Syscall)MISSING_SYSCALL, // #define SYS_SEM_CLOSE 34
+        (Syscall)sem_open, // #define SYS_SEM_OPEN 31
+        (Syscall)sem_wait, // #define SYS_SEM_WAIT 32
+        (Syscall)sem_post, // #define SYS_SEM_POST 33
+        (Syscall)sem_close, // #define SYS_SEM_CLOSE 34
     };
     if(id >= sizeof(syscalls) / sizeof(syscalls[0])) {
         printf_error("[KERNEL] invalid syscall id:%d\n", id);

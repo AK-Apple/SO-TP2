@@ -318,6 +318,7 @@ int block(int pid)
         return -1;
     
     blocks[pid].process_state = BLOCKED;
+    _sti();
     if(get_pid() == pid) {
         yield();
     }

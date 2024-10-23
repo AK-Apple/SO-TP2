@@ -5,7 +5,7 @@
 #include "../include/stdlib.h"
 #include "test_util.h"
 
-#define SEM_ID "sem"
+#define SEM_ID 5
 #define TOTAL_PAIR_PROCESSES 2
 
 int64_t global; // shared memory
@@ -42,6 +42,7 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
   for (i = 0; i < n; i++) {
     if (use_sem)
       sys_sem_wait(SEM_ID);
+      // printf("doing something\n");
     slowInc(&global, inc);
     if (use_sem)
       sys_sem_post(SEM_ID);
