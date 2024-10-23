@@ -113,15 +113,15 @@ void sys_set_text_color(uint64_t fg) {
     syscall(SYS_SET_TEXT_COLOR, fg, 0, 0);
 }
 
-int sys_sem_open(char *path, int init) {
-    return syscall(SYS_SEM_OPEN, (uint64_t)path, init, 0);
+int sys_sem_open(int64_t path, int init) {
+    return syscall(SYS_SEM_OPEN, (int64_t)path, init, 0);
 }
-void sys_sem_wait(char *path) {
-    syscall(SYS_SEM_WAIT, (uint64_t)path, 0, 0);
+void sys_sem_wait(int64_t path) {
+    syscall(SYS_SEM_WAIT, (int64_t)path, 0, 0);
 }
-void sys_sem_post(char *path) {
-    syscall(SYS_SEM_POST, (uint64_t)path, 0, 0);
+void sys_sem_post(int64_t path) {
+    syscall(SYS_SEM_POST, (int64_t)path, 0, 0);
 }
-void sys_sem_close(char *path) {
-    syscall(SYS_SEM_CLOSE, (uint64_t)path, 0, 0);
+void sys_sem_close(int64_t path) {
+    syscall(SYS_SEM_CLOSE, (int64_t)path, 0, 0);
 }

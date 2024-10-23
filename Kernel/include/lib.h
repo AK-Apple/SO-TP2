@@ -21,6 +21,9 @@ void force_timer_tick();
 void outb (unsigned char __value, unsigned short int __port);
 unsigned char inb (unsigned short int __port);
 
+void acquire(uint8_t * lock);
+void release(uint8_t * lock);
+
 
 // -------- Funciones auxiliares para el kernel ---------
 
