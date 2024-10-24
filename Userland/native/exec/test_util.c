@@ -63,22 +63,34 @@ int64_t endless_loop(int argc, char* argv[]) {
   while (1);
 }
 
-int64_t endless_loop_print(int argc, char* argv[]) {
-  
-  // --------- Get Arguments from argv[] ----------
-
-  if (argc != 1) {
-    printf_error("[endless_loop_print] ARGCOUNT INCORRECT\n");
+int64_t endless_loop_print_seconds(int argc, char* argv[]) {
+  if (argc < 2) {
+    printf_error("[endless_loop_print_seconds] ARGCOUNT INCORRECT\nloop <seconds_wait> <msg>\n");
     return 1;
   }
-  uint64_t wait = atoi(argv[0]);
+  uint64_t wait = satoi(argv[1]);
 
   // --------- Actual Function ----------
+  int64_t pid = sys_get_pid();
+  while (1) {
+    if(argc >= 3)
+      printf("[%s] ", argv[2]);
+    printf("%d\n", pid);
+    sys_sleep(wait);
+  }
+  return 0;
+}
+
+int64_t endless_loop_print(int argc, char* argv[]) {
+  if (argc < 2) {
+    printf_error("[endless_loop_print] ARGCOUNT INCORRECT\nloop <busy_wait>\n");
+    return 1;
+  }
+  uint64_t wait = satoi(argv[1]);
 
   int64_t pid = sys_get_pid();
-
   while (1) {
-    printf("%d\n", pid);
+    printf("%d  ", pid);
     bussy_wait(wait);
   }
   return 0;
@@ -92,4 +104,8 @@ Program get_endless_loop()
 Program get_endless_loop_print()
 {
   return (Program)endless_loop_print;
+}
+
+Program get_endless_loop_print_seconds() {
+  return (Program)endless_loop_print_seconds;
 }

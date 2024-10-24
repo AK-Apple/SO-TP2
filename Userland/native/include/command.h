@@ -34,5 +34,6 @@ Program get_test_processes();
 Program get_test_prio();
 Program get_test_sync();
 Program get_test_mman();
+Program get_endless_loop_print_seconds();
 
 #endif //TPE_COMMAND_H

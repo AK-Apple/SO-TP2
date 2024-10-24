@@ -55,7 +55,7 @@ void sys_set_text_color(uint64_t fg);
 
 uint64_t sys_time(int d);
 
-void sys_sleep();
+void sys_sleep(uint64_t seconds);
 
 void sys_sound(int frec);
 void sys_nosound();

@@ -15,11 +15,11 @@ int64_t prio[TOTAL_PROCESSES] = {LOWEST, MEDIUM, HIGHEST};
 void test_prio() {
 
   int64_t pids[TOTAL_PROCESSES];
-  char *argv[] = {"endless_loop_print"};
+  char *loop_argv[] = {"endless_loop_print", "10000000"};
   uint64_t i;
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
-    pids[i] = sys_create_process(get_endless_loop_print(), 1, argv);
+    pids[i] = sys_create_process(get_endless_loop_print(), sizeof(loop_argv)/sizeof(loop_argv[0]), loop_argv);
 
   printf("\nBUSY WAIT INCOMING...\n");
 

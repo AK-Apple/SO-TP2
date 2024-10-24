@@ -20,8 +20,8 @@ uint64_t sys_time(int d) {
     return syscall(SYS_TIME, d, 0, 0);
 }
 
-void sys_sleep() {
-    syscall(SYS_SLEEP, 0, 0, 0);
+void sys_sleep(uint64_t seconds) {
+    syscall(SYS_SLEEP, seconds, 0, 0);
 }
 
 void sys_sound(int frec) {

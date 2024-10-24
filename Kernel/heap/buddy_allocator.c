@@ -137,14 +137,12 @@ void memory_info() {
         Buddy_Header *header = (Buddy_Header *) current_pointer;
         uint64_t block_size = index_to_size(header->bucket_index);
         if(header->intended_size) {
-            printf("|%d:%d", block_size, header->intended_size);
+            printf_color("|%d:%d", 0x00DDDDFF, block_size, header->intended_size);
             internal_fragmentation += block_size - header->intended_size - sizeof(Buddy_Header);
             used_memory += block_size;
         }
         else {
-            set_foreground_color(0x00888888);
-            printf("|%d:free", block_size);
-            set_foreground_color(0x00FFFFFF);
+            printf_color("|%d:free", 0x00888888, block_size);
         }
         current_pointer += block_size;
     }

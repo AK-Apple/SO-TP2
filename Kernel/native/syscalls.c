@@ -24,7 +24,7 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
     static const Syscall syscalls[] = {
         (Syscall)syscall_halt, // #define SYS_HLT 0
         (Syscall)play_sound, // #define SYS_SOUND 1
-        (Syscall)MISSING_SYSCALL,// #define SYS_SLEEP 2
+        (Syscall)seconds_sleep,// #define SYS_SLEEP 2
         (Syscall)sys_read, // #define SYS_READ 3
         (Syscall)sys_write, // #define SYS_WRITE 4
         (Syscall)sys_clearScreen, // #define SYS_CLEAR_SCREEN 5

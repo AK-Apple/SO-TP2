@@ -5,6 +5,7 @@
 #define COLOR_YELLOW    0x00CDFF00
 #define COLOR_BLUE      0x000000FF
 #define COLOR_GREEN     0x0000FF00
+#define COLOR_ORANGE    0x00FF8800
 
 #include <stdint.h>
 

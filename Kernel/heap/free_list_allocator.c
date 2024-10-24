@@ -116,15 +116,13 @@ void memory_info() {
     while(current_pointer - allocator.base_address < total_memory) {
         if((Free_List_Node *)current_pointer == list_iter) {
             Free_List_Node *node = (Free_List_Node *)current_pointer;
-            set_foreground_color(0x00888888);
-            printf("|%d:free", node->size);
-            set_foreground_color(0x00FFFFFF);
+            printf_color("|%d:free", 0x00888888, node->size);
             list_iter = list_iter->next;
             current_pointer += node->size;
         }
         else {
             Allocation_Header *header = (Allocation_Header *)current_pointer;
-            printf("|%d:%d", header->size, header->intended_size);
+            printf_color("|%d:%d", 0x00DDDDFF, header->size, header->intended_size);
             internal_fragmentation += header->size - header->intended_size - sizeof(Allocation_Header);
             current_pointer += header->size;
             used_memory += header->size;

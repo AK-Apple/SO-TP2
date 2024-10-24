@@ -270,7 +270,7 @@ int64_t get_pid()
 {
     return running_pid;
 }
-
+#include "time.h"
 void get_all_processes()
 {
     static char *PROCESS_STATE_STRING[] = {"UNKNOWN", "RUNNING", "READY  ", "BLOCKED"};
@@ -306,6 +306,7 @@ void change_priority(uint64_t pid, int value){
     {
         while(delta-- > 0) 
         {
+            blocks[pid].priority++;
             add(&round_robin, pid);
         }
     }
@@ -313,6 +314,7 @@ void change_priority(uint64_t pid, int value){
     {
         while(delta++ < 0) 
         {
+            blocks[pid].priority--;
             delete_value_ocurrence(&round_robin, pid);
         }
     }
