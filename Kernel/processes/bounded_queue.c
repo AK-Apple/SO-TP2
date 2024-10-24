@@ -29,7 +29,6 @@ uint8_t is_empty(queue_t* q) {
 
 // Enqueue function
 uint8_t enqueue(queue_t* q, int value) {
-    printf("Enqueue\n");
     if (is_full(q)) {
         printf("Queue is full!\n");
         return 0; // Indicate failure
