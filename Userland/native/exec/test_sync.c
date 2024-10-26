@@ -11,7 +11,7 @@
 int64_t global; // shared memory
 
 void slowInc(int64_t *p, int64_t inc) {
-  uint64_t aux = *p;
+  int64_t aux = *p;
   sys_yield(); // This makes the race condition highly probable
   aux += inc;
   *p = aux;
@@ -31,10 +31,9 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
     return -1;
   if ((use_sem = satoi(argv[3])) < 0)
     return -1;
-
   if (use_sem)
     if (!sys_sem_open(SEM_ID, 1)) {
-      printf("test_sync: ERROR opening semaphore\n");
+      printf_error("test_sync: ERROR opening semaphore\n");
       return -1;
     }
 
@@ -42,28 +41,27 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
   for (i = 0; i < n; i++) {
     if (use_sem)
       sys_sem_wait(SEM_ID);
-      // printf("doing something\n");
     slowInc(&global, inc);
     if (use_sem)
       sys_sem_post(SEM_ID);
   }
 
-  if (use_sem)
-    sys_sem_close(SEM_ID);
-
-  sys_exit(0);
   return 0;
 }
 
 uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
   uint64_t pids[2 * TOTAL_PAIR_PROCESSES] = {0};
-
+  int64_t use_sem = 0;
   if (argc < 3) {
     printf_error("needs 2 arguments.\ntest_sync <n> <use_sem>\n");
     return -1;
   }
+  if ((use_sem = satoi(argv[2])) < 0) {
+    printf_error("use sem invalid argument %s\n", argv[2]);
+    return -1;
+  }
 
-  char *argvDec[] = {"my_process_inc", argv[1], "-1", argv[2], NULL};
+  char *argvDec[] = {"my_process_dec", argv[1], "-1", argv[2], NULL};
   char *argvInc[] = {"my_process_inc", argv[1], "1", argv[2], NULL};
 
   global = 0;
@@ -75,10 +73,11 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
   }
 
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
-    sys_wait_pid(pids[i], 0, 0);
-    sys_wait_pid(pids[i + TOTAL_PAIR_PROCESSES], 0, 0);
+    sys_wait_pid(pids[i]);
+    sys_wait_pid(pids[i + TOTAL_PAIR_PROCESSES]);
   }
-
+  if (use_sem)
+    sys_sem_close(SEM_ID);
   printf("Final value: %d\n", global);
 
   return 0;

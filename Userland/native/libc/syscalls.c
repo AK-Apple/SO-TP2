@@ -66,12 +66,12 @@ void *sys_memory_alloc(size_t bytes) {
 void sys_memory_free(void *pointer) {
     syscall(SYS_FREE, (uint64_t)pointer, 0, 0);
 }
-void sys_memory_info() {
-    syscall(SYS_PRINT_MEM, 0, 0, 0);
+void sys_memory_info(Memory_Info *info, Memory_Info_Mode mode) {
+    syscall(SYS_PRINT_MEM, (uint64_t)info, mode, 0);
 }
-size_t sys_memory_largest_block() {
-    return syscall(SYS_LARGEST_FREE_BLOCK, 0, 0, 0);
-}
+// size_t sys_memory_largest_block() {
+//     return syscall(SYS_LARGEST_FREE_BLOCK, 0, 0, 0);
+// }
 
 int sys_create_process(Program program, int argc, char **argv) {
     return syscall(SYS_CREATE_PROCESS, (uint64_t)program, argc, (uint64_t)argv);
@@ -100,8 +100,8 @@ int sys_unblock(int pid) {
 void sys_yield() {
     syscall(SYS_YIELD, 0, 0, 0);
 }
-uint64_t sys_wait_pid(uint64_t pid, int *status, int options) {
-    return syscall(SYS_WAITPID, pid, (uint64_t)status, options);
+uint64_t sys_wait_pid(uint64_t pid) {
+    return syscall(SYS_WAITPID, pid, 0, 0);
 }
 void sys_wait_children() {
     syscall(SYS_WAIT_CHILDREN, 0, 0, 0);

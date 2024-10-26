@@ -55,7 +55,7 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
         (Syscall)memory_alloc, // #define SYS_MALLOC 27
         (Syscall)memory_free, // #define SYS_FREE 28
         (Syscall)memory_info, // #define SYS_PRINT_MEM 29,
-        (Syscall)largest_free_block, // #define SYS_LARGEST_FREE_BLOCK 30
+        (Syscall)MISSING_SYSCALL, // #define SYS_LARGEST_FREE_BLOCK 30 (eliminada)
 
         (Syscall)sem_open, // #define SYS_SEM_OPEN 31
         (Syscall)sem_wait, // #define SYS_SEM_WAIT 32
@@ -64,6 +64,7 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
     };
     if(id >= sizeof(syscalls) / sizeof(syscalls[0])) {
         printf_error("[KERNEL] invalid syscall id:%d\n", id);
+        return 1;
     }
     return syscalls[id](param_1, param_2, param_3);
 }

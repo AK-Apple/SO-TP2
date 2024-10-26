@@ -1,6 +1,8 @@
 #ifndef TPE_ARQUI_SYSCALLS_H
 #define TPE_ARQUI_SYSCALLS_H
 
+#include "./../../../Shared/shared.h"
+
 #define SYS_HLT 0
 #define SYS_SOUND 1
 #define SYS_NOSOUND 12
@@ -33,7 +35,7 @@
 #define SYS_MALLOC 27
 #define SYS_FREE 28
 #define SYS_PRINT_MEM 29
-#define SYS_LARGEST_FREE_BLOCK 30
+// #define SYS_LARGEST_FREE_BLOCK 30
 
 #define SYS_SEM_OPEN 31
 #define SYS_SEM_WAIT 32
@@ -81,14 +83,14 @@ void sys_change_priority(uint64_t pid, uint64_t delta);
 int sys_block(int pid);
 int sys_unblock(int pid);
 void sys_yield();
-uint64_t sys_wait_pid(uint64_t pid, int *status, int options);
+uint64_t sys_wait_pid(uint64_t pid);
 void sys_wait_children();
 void sys_exit(uint64_t return_value);
 
 void *sys_memory_alloc(size_t bytes);
 void sys_memory_free(void *pointer);
-void sys_memory_info();
-size_t sys_memory_largest_block();
+void sys_memory_info(Memory_Info *info, Memory_Info_Mode mode);
+// size_t sys_memory_largest_block();
 
 int sys_sem_open(int64_t path, int init);
 void sys_sem_wait(int64_t path);

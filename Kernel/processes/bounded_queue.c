@@ -40,7 +40,7 @@ uint8_t enqueue(queue_t* q, int value) {
 }
 
 // Dequeue function
-uint8_t dequeue(queue_t* q, int* value) {
+uint8_t dequeue(queue_t* q, int64_t* value) {
     if (is_empty(q)) {
         return 0; // Indicate failure
     }

@@ -97,8 +97,12 @@ static uint64_t vprintf_color(char *fmt, uint64_t foreground, uint64_t backgroun
         if (fmt[i] == '%') {
             char buf[MAX_BUF] = {0};
             switch (fmt[++i]) {
-                case 'd':
+                case 'u':
                     uintToBase(va_arg(vars, int), buf, 10);
+                    print_str(buf);
+                    break;
+                case 'd':
+                    itoa(va_arg(vars, int64_t), buf, 10);
                     print_str(buf);
                     break;
                 case 'x':

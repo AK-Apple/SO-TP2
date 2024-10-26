@@ -26,7 +26,6 @@ EXTERN getStackBase
 EXTERN int80Dispacher
 EXTERN irqDispatcher
 EXTERN exceptionDispatcher
-EXTERN main
 
 EXTERN int80_write
 
@@ -170,20 +169,23 @@ SECTION .text
 
 ; ------------ Fin Sección SO -----------
 
+setup_kernel_restart:
+	call getStackBase
+	mov rsp, rax
+	call main
+
 %macro exceptionHandler 1
 	pushAndSaveState	; guarda registros en updating_regex
 
 	mov rdi, %1 ; pasaje de parametros
-	mov rsi, updating_regex
+	; mov rsi, updating_regex
+	mov rsi, rsp
 	call exceptionDispatcher
 
-	call getStackBase
-	mov [rsp + 15*8 + 24], rax	; rsp
-
-	mov rax, main
-	mov [rsp + 15*8], rax		; rip
-
 	popState
+	
+	add rsp, 8
+	push setup_kernel_restart
 	iretq
 
 %endmacro

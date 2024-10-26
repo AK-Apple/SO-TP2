@@ -7,7 +7,6 @@
 #include "../include/syscalls.h"
 
 #define MAX_BLOCKS 4096
-#define HEADER_SIZE 32
 
 typedef struct MM_rq {
   void *address;
@@ -18,12 +17,16 @@ uint64_t test_mm(uint64_t argc, char *argv[]) {
   static mm_rq mm_rqs[MAX_BLOCKS] = {0};
   uint8_t rq;
   uint32_t total;
-  int64_t max_memory = (1L << 20)-HEADER_SIZE*256;
   int use_smart_allocation = 1;
+  Memory_Info meminfo = {0};
+  sys_memory_info(&meminfo, MEM_REDUCED);
+  int64_t max_memory = meminfo.total_memory;
+  const uint64_t header_size = meminfo.header_size;
 
   if (argc >= 2) {
     if ((max_memory = satoi(argv[1])) <= 0) {
-        printf_error("numero invalido: '%s'\n", argv[1]);
+        max_memory = meminfo.total_memory;
+        printf_error("numero de memoria maxima invalido: '%s'. usando valor por defecto=%d\n", argv[1], max_memory);
         return -1;
     }
     if(argc >= 3) {
@@ -37,9 +40,11 @@ uint64_t test_mm(uint64_t argc, char *argv[]) {
     // Request as many blocks as we can
     while (rq < MAX_BLOCKS && total < max_memory) {
       if(use_smart_allocation) {
-        uint64_t largest_free_block = sys_memory_largest_block();
-        if(largest_free_block <= HEADER_SIZE) break;
-        mm_rqs[rq].size = GetUniform(largest_free_block - (HEADER_SIZE-2) - 1) + 1;
+        sys_memory_info(&meminfo, MEM_REDUCED);
+        uint64_t largest_free_block = meminfo.largest_free_block;
+        if(largest_free_block <= header_size) break;
+        uint64_t size = max_memory < largest_free_block ? max_memory : (largest_free_block - (header_size-2)); 
+        mm_rqs[rq].size = GetUniform(size - 1) + 1;
       }
       else {
         mm_rqs[rq].size = GetUniform(max_memory - total - 1) + 1;
@@ -51,12 +56,11 @@ uint64_t test_mm(uint64_t argc, char *argv[]) {
         rq++;
       }
       else {
-        printf_error("failed to allocate %d bytes (%d)\n", mm_rqs[rq].size, mm_rqs[rq].size + HEADER_SIZE);
-        sys_memory_info();
+        printf_error("failed to allocate %d bytes (%d)\n", mm_rqs[rq].size, mm_rqs[rq].size + header_size);
+        sys_memory_info(&meminfo, MEM_COMPLETE);
       }
     }
     uint32_t i;
-
     // // Set
     for (i = 0; i < rq; i++)
       if (mm_rqs[i].address)

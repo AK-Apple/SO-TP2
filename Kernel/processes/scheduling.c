@@ -230,13 +230,13 @@ void create_init_process()
     static char *init_args[] = {"INIT"};
     running_pid = 0;
     int pid = request_pid(); 
-    if(pid != 0 && 0) {
+    if(pid != 0) {
         round_robin.current_index = 0;
         round_robin.size = 0;
-        for(int i = 0; i < MAX_PROCESS_BLOCKS; i++)
-            if(blocks[i].process_state != UNAVAILABLE)
-                free_pid(i);
         memset(blocks, 0, sizeof(ProcessBlock) * MAX_PROCESS_BLOCKS);
+        memset(available_pids, 0, sizeof(available_pids));
+        biggest_pid = 0;
+        current_available_pid_index = 0;
         pid = request_pid();
     }
     blocks[0].stack_pointer = 0;   // Se va a actualizar. El valor no importa
@@ -270,12 +270,12 @@ int64_t get_pid()
 {
     return running_pid;
 }
-#include "time.h"
+
 void get_all_processes()
 {
     static char *PROCESS_STATE_STRING[] = {"UNKNOWN", "RUNNING", "READY  ", "BLOCKED"};
     static uint64_t PROCESS_STATE_COLOR[] = {0x00999999, 0x0000FF00, 0x00CCDD00, 0x00FF0000};
-    printf("pid : ppid : prio : stack_pointer_64 : base_pointer_64  : state   : process_name\n");
+    printf("pid : ppid : prio : stack_pointer_64 : base_pointer_64  : status  : process_name\n");
     for (int i = 0; i < MAX_PROCESS_BLOCKS; i++)
     {
         if (blocks[i].process_state != UNAVAILABLE)
@@ -295,7 +295,7 @@ void yield()
     force_timer_tick();
 }
 
-// Falta testear bien
+
 void change_priority(uint64_t pid, int value){
     value = (value < MAX_PRIORITY) ? value : MAX_PRIORITY;
     value = (value > 0) ? value : 1;
@@ -342,9 +342,8 @@ int unlock(int pid)
     return pid;
 }
 
-// TODO: ver qué onda con status y options
 // waitpid debería: guardar el estado original y esperar hasta que cambie
-uint64_t wait_pid(uint64_t pid, int *status, int options)
+uint64_t wait_pid(uint64_t pid)
 {
     while(blocks[pid].process_state != UNAVAILABLE) {
         yield();
@@ -357,7 +356,7 @@ void children_wait() {
     uint64_t parent_pid = get_pid();
     for(int i=0; i<MAX_PROCESS_BLOCKS; i++) {
         if (blocks[i].parent_pid == parent_pid) {
-            wait_pid(i, 0, 0);
+            wait_pid(i);
         }
     }
 }

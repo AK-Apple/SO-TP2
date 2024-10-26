@@ -44,29 +44,6 @@ uint64_t atoi(char * str) { // ascii to integer
     return res;
 }
 
-void itoa(uint64_t num, char * buf) {
-    char aux[MAX_BUF];
-    int i = 0;
-
-    if (num == 0) {
-        aux[i++] = '0';
-    }
-
-    while (num > 0) {
-        aux[i++] = num % 10 + '0';
-        num /= 10;
-    }
-    aux[i] = '\0';
-
-    int bufLen = i;
-    for (int j = 0; j < bufLen; ++j) {
-        buf[j] = aux[bufLen - j - 1];
-    }
-    buf[bufLen] = '\0';
-}
-
-
-
 uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base) {
     char *p = buffer;
     char *p1, *p2;
@@ -94,6 +71,32 @@ uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base) {
     }
 
     return digits;
+}
+
+char* itoa(int value, char* result, int base) {
+    if (base < 2 || base > 36) { 
+        *result = '\0'; return result; 
+    }
+
+    char* ptr = result, *ptr1 = result, tmp_char;
+    int tmp_value;
+
+    do {
+        tmp_value = value;
+        value /= base;
+        *ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz" [35 + (tmp_value - value * base)];
+    } while ( value );
+
+    if (tmp_value < 0) *ptr++ = '-';
+    *ptr-- = '\0';
+  
+    // Reverse the string
+    while(ptr1 < ptr) {
+        tmp_char = *ptr;
+        *ptr--= *ptr1;
+        *ptr1++ = tmp_char;
+    }
+    return result;
 }
 
 void putPixel(uint32_t hexColor, uint64_t x, uint64_t y){

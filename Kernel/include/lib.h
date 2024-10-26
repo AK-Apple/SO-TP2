@@ -2,6 +2,7 @@
 #define LIB_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 #define MAX_BUF_SIZE 1024
 
@@ -15,19 +16,17 @@ void getRegs();
 void sys_registers();
 
 // assembler (libasm.asm)
-char * cpuVendor(char *result);
-void force_timer_tick();
+extern char * cpuVendor(char *result);
+extern void force_timer_tick();
 
-void outb (unsigned char __value, unsigned short int __port);
-unsigned char inb (unsigned short int __port);
+extern void outb (unsigned char __value, unsigned short int __port);
+extern unsigned char inb (unsigned short int __port);
 
-void acquire(uint8_t * lock);
-void release(uint8_t * lock);
+extern void acquire(uint8_t * lock);
+extern void release(uint8_t * lock);
 
 
 // -------- Funciones auxiliares para el kernel ---------
-
-#define NULL ((void *) 0)
 
 int k_strcmp(const char *str1, const char *str2);
 
@@ -37,5 +36,6 @@ void k_print_int_dec(int64_t number);
 
 int64_t k_atoi(const char* str);
 int64_t k_atoi_index(const char *str, uint64_t *index);
+unsigned int log(uint64_t n, int base);
 
 #endif

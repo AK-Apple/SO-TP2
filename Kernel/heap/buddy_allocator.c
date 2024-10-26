@@ -1,5 +1,7 @@
 #include "memory_allocator.h"
+#include "./../../Shared/shared.h"
 #include "IO.h"
+#include "lib.h"
 #include <stddef.h>
 #include <stdint.h>
 
@@ -77,7 +79,20 @@ static Buddy_Header *get_its_buddy(Buddy_Header *header) {
     return (Buddy_Header *) ((uint64_t) allocator.base_address + (position ^ index_to_size(header->bucket_index)));
 }
 
+static size_t largest_free_block() {
+    uint64_t bucket_index = allocator.max_bucket_index;
+
+    while(bucket_index > 0 && !allocator.header_buckets[bucket_index])
+        bucket_index--;
+    
+    if(bucket_index == 0 && !allocator.header_buckets[bucket_index])
+        return 0;
+
+    return index_to_size(bucket_index);
+}
+
 void initialize_memory_allocator(void *base_address, uint64_t total_bytes) {
+    total_bytes = 1L << log(total_bytes, 2);
     uint64_t bucket_index = size_to_bucket_index(total_bytes);
     allocator.max_bucket_index = bucket_index;
     allocator.base_address = base_address;
@@ -127,11 +142,23 @@ void memory_free(void *pointer) {
     make_buddy_header(header, header->bucket_index, allocator.header_buckets[header->bucket_index]);
 }
 
-void memory_info() {
+void memory_info(Memory_Info *info, Memory_Info_Mode mode) {
     uint64_t total_memory = index_to_size(allocator.max_bucket_index);
     uint64_t used_memory = 0;
     uint64_t internal_fragmentation = 0;
     void *current_pointer = allocator.base_address;
+    uint64_t largest_free_block_bytes = largest_free_block();
+    uint64_t end_address = (uint64_t)allocator.base_address + total_memory - 1;
+
+    memset(info, 0, sizeof(Memory_Info));
+    info->allocator_type = "buddy_binary";
+    info->total_memory = total_memory;
+    info->largest_free_block = largest_free_block_bytes;
+    info->mode = mode;
+    info->header_size = sizeof(Buddy_Header);
+
+    if(mode == MEM_REDUCED) return;
+    printf_color("Heap from 0x%x to 0x%x with allocator type: %s\n", 0x0000AA00, allocator.base_address, end_address, info->allocator_type);
 
     while(current_pointer - allocator.base_address < total_memory) {
         Buddy_Header *header = (Buddy_Header *) current_pointer;
@@ -146,23 +173,14 @@ void memory_info() {
         }
         current_pointer += block_size;
     }
+    info->used_memory = used_memory;
+    info->internal_fragmentation = internal_fragmentation;
+    info->free_memory = total_memory- used_memory;
     printf("\nTotal memory: %d bytes\n", total_memory);
     printf("Used memory %d bytes\n", used_memory);
     printf("Free memory %d bytes\n", total_memory - used_memory);
     printf("internal fragmentation %d bytes\n", internal_fragmentation);
-    printf("Largest free block %d bytes\n", largest_free_block());
-}
-
-size_t largest_free_block() {
-    uint64_t bucket_index = allocator.max_bucket_index;
-
-    while(bucket_index > 0 && !allocator.header_buckets[bucket_index])
-        bucket_index--;
-    
-    if(bucket_index == 0 && !allocator.header_buckets[bucket_index])
-        return 0;
-
-    return index_to_size(bucket_index);
+    printf("Largest free block %d bytes\n", largest_free_block_bytes);
 }
 
 #endif

@@ -2,7 +2,8 @@
 #define TPE_ARQUI_EXCEPTIONS_H
 
 #include <stdint.h>
+#include "scheduling.h"
 
-void exceptionDispatcher(int exception, const uint64_t regex[18]);
+void exceptionDispatcher(int exception, StackedRegisters* stack);
 
 #endif //TPE_ARQUI_EXCEPTIONS_H

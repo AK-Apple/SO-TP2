@@ -23,10 +23,10 @@ static Command commands[] = {
     {"clear", "Limpia toda la pantalla.", (Program)sys_clear},
     {"ps", "Lista la informacion de los procesos", (Program)sys_print_all_processes},
     {"kill", "mata un proceso dado un pid", (Program)kill_process, "<pid>"},
-    {"mem", "Imprime el estado de la memoria. Muestra la distribucion |size:bytes|size:free, despues stats", (Program)sys_memory_info},
+    {"mem", "Imprime el estado de la memoria. Muestra la distribucion |size:bytes|size:free, despues stats", (Program)print_meminfo_cmd},
     {"fg", "manda un proceso a foreground", (Program)send_to_foreground, "<pid>"},
     {"block", "Cambia el estado de un proceso entre bloqueado y listo dado su PID.", (Program)block_cmd, "<pid>"},
-    {"nice", "Cambia la prioridad de un proceso dado su PID y la nueva prioridad. prio:1:2:3:4", (Program)change_priority_cmd, "<pid> <prio>"},
+    {"nice", "Cambia la prioridad de un proceso dado su PID y la nueva prioridad. prio:1:2:3:4:5", (Program)change_priority_cmd, "<pid> <prio>"},
 };
 static Process_Command processes[] = {
     {"testproc", "ejecuta test de proceso", get_test_processes, "<max_proc>"},
@@ -56,6 +56,11 @@ uint64_t change_priority_cmd(uint64_t argc, char *argv[]) {
     sys_change_priority(pid, priority);
 
     return 0;
+}
+
+void print_meminfo_cmd() {
+    Memory_Info info = {0};
+    sys_memory_info(&info, MEM_COMPLETE);
 }
 
 uint64_t block_cmd(uint64_t argc, char *argv[]) {
@@ -194,7 +199,7 @@ void execute(char inputBuffer[]) {
     int command_count = sizeof(commands) / sizeof(commands[0]);
     compact_whitespace(inputBuffer);
     int argc = charcount(inputBuffer, ' ') + 1;
-    char* argv[argc]; //Seguro entra en el stack, el tamaño es <= B_SIZE size, y el stack esde 4MiB.
+    char* argv[argc]; 
     int j = 0;
     argv[j++]=inputBuffer;
     for(int i = 0; inputBuffer[i]!=0; i++){
@@ -218,11 +223,11 @@ void execute(char inputBuffer[]) {
         if (strcmp(argv[0], processes[i].title) == 0)
         {
             int pid = sys_create_process(processes[i].process_getter(), argc, argv);
-            printf("[shell] Running %s with pid %d...\n", argv[0], pid);
+            printf("[shell] Running %s with pid=%d in %s...\n", argv[0], pid, send_to_background ? "background" : "foreground");
             if(!send_to_background)
                 foreground_pid = pid;
             return;
         }
     }
-    printf_error("Invalid command, try again.\n");
+    printf_error("Invalid command '%s', try 'help' command.\n", inputBuffer);
 }

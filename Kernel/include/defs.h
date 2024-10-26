@@ -21,5 +21,7 @@
 #define ACS_DATA        (ACS_PRESENT | ACS_DSEG | ACS_WRITE)
 #define ACS_STACK       (ACS_PRESENT | ACS_DSEG | ACS_WRITE)
 
+#define SYS_VARIABLES 0x5A00
+#define SYS_MEM_COUNT 0x0084
 
 #endif

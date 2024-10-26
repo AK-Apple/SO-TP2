@@ -229,3 +229,10 @@ int64_t k_atoi_index(const char *str, uint64_t *index) {
 
     return result;
 }
+
+unsigned int log(uint64_t n, int base) {
+	unsigned int count = 0;
+	while (n /= base)
+		count++;
+	return count;
+}

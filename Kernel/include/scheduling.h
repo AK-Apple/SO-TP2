@@ -51,7 +51,7 @@ int unlock(int pid);
 
 void exit(uint64_t return_value);
 
-uint64_t wait_pid(uint64_t pid, int *status, int options);
+uint64_t wait_pid(uint64_t pid);
 
 void children_wait();
 
@@ -87,6 +87,7 @@ typedef struct StackedRegisters
     uint64_t ss;
 } StackedRegisters;
 
+void print_regs(StackedRegisters regs);
 // ------- Assembler Section ---------
 
 // void _change_process(void);
