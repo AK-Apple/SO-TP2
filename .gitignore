@@ -10,6 +10,8 @@
 # others (added after)
 *.bin
 *.sys
+.qcow2
+*.img
 
 # Linker output
 *.ilk
@@ -290,7 +292,7 @@ fabric.properties
 
 .bash_history
 .gdb_history
-/Image/x64BareBonesImage.*
+/Image/x64BareBonesImage*
 
 # End of https://mrkandreev.name/snippets/gitignore-generator/#C,CMake,Python,Assembler,JetBrains
 /compile_and_run.sh
