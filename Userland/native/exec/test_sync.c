@@ -8,7 +8,7 @@
 #define SEM_ID 5
 #define TOTAL_PAIR_PROCESSES 2
 
-int64_t global; // shared memory
+int64_t global_shared_memory;
 
 void slowInc(int64_t *p, int64_t inc) {
   int64_t aux = *p;
@@ -32,18 +32,26 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
   if ((use_sem = satoi(argv[3])) < 0)
     return -1;
   if (use_sem)
-    if (!sys_sem_open(SEM_ID, 1)) {
+    if (sys_sem_open(SEM_ID, 1) == SEM_ERROR) {
       printf_error("test_sync: ERROR opening semaphore\n");
       return -1;
     }
 
   uint64_t i;
   for (i = 0; i < n; i++) {
-    if (use_sem)
-      sys_sem_wait(SEM_ID);
-    slowInc(&global, inc);
-    if (use_sem)
-      sys_sem_post(SEM_ID);
+    if (use_sem) {
+      if(sys_sem_wait(SEM_ID) == SEM_ERROR) {
+        printf_error("test_sync: ERROR sem_wait with pid=%d\n", sys_get_pid());
+        return -1;
+      }
+    }
+    slowInc(&global_shared_memory, inc);
+    if (use_sem) {
+      if(sys_sem_post(SEM_ID) == SEM_ERROR) {
+        printf_error("test_sync: ERROR sem_post with pid=%d\n", sys_get_pid());
+        return -1;
+      }
+    }
   }
 
   return 0;
@@ -64,7 +72,7 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
   char *argvDec[] = {"my_process_dec", argv[1], "-1", argv[2], NULL};
   char *argvInc[] = {"my_process_inc", argv[1], "1", argv[2], NULL};
 
-  global = 0;
+  global_shared_memory = 0;
 
   uint64_t i;
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
@@ -78,7 +86,7 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
   }
   if (use_sem)
     sys_sem_close(SEM_ID);
-  printf("Final value: %d\n", global);
+  printf("Final value: %d\n", global_shared_memory);
 
   return 0;
 }

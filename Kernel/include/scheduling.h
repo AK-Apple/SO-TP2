@@ -47,7 +47,9 @@ void change_priority(uint64_t pid, int value);
 
 int block(int pid);
 
-int unlock(int pid);
+int block_no_yield(int pid);
+
+int unblock(int pid);
 
 void exit(uint64_t return_value);
 

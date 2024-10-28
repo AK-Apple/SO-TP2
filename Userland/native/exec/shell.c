@@ -223,9 +223,12 @@ void execute(char inputBuffer[]) {
         if (strcmp(argv[0], processes[i].title) == 0)
         {
             int pid = sys_create_process(processes[i].process_getter(), argc, argv);
-            printf("[shell] Running %s with pid=%d in %s...\n", argv[0], pid, send_to_background ? "background" : "foreground");
-            if(!send_to_background)
+            const char *mode = "background";
+            if(!send_to_background) {
                 foreground_pid = pid;
+                mode = "foreground";
+            }
+            printf_color("[shell] Running %s with pid=%d in %s...\n", COLOR_YELLOW, 0, argv[0], pid, mode);
             return;
         }
     }

@@ -2,8 +2,9 @@
 #define QUEUE_H
 
 #include <stdint.h>
+#include "scheduling.h"
 
-#define MAX_SIZE 100 // Maximum size of the queue
+#define MAX_SIZE MAX_PROCESS_BLOCKS
 
 typedef struct {
     int data[MAX_SIZE]; // Array to hold queue elements

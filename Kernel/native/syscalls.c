@@ -46,7 +46,7 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
         (Syscall)get_all_processes, // #define SYS_GET_ALL_PROCESSES 19
         (Syscall)change_priority, // #define SYS_CHANGE_PRIORITY 20
         (Syscall)block, // #define SYS_BLOCK 21
-        (Syscall)unlock, // #define SYS_UNLOCK 22
+        (Syscall)unblock, // #define SYS_UNLOCK 22
         (Syscall)yield, // #define SYS_YIELD 23
         (Syscall)wait_pid, // #define SYS_WAITPID 24
         (Syscall)children_wait, // #define SYS_WAIT_CHILDREN 25

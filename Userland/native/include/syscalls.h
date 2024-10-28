@@ -93,8 +93,8 @@ void sys_memory_info(Memory_Info *info, Memory_Info_Mode mode);
 // size_t sys_memory_largest_block();
 
 int sys_sem_open(int64_t path, int init);
-void sys_sem_wait(int64_t path);
-void sys_sem_post(int64_t path);
-void sys_sem_close(int64_t path);
+int sys_sem_wait(int64_t path);
+int sys_sem_post(int64_t path);
+int sys_sem_close(int64_t path);
 
 #endif //TPE_ARQUI_SYSCALLS_H

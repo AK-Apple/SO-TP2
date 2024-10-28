@@ -322,20 +322,24 @@ void change_priority(uint64_t pid, int value){
 
 int block(int pid)
 {
-    if (pid > 64 || pid < 1 || blocks[pid].process_state == UNAVAILABLE)
+    if(block_no_yield(pid) == -1) 
         return -1;
-    
-    blocks[pid].process_state = BLOCKED;
-    _sti();
     if(get_pid() == pid) {
         yield();
     }
     return pid;
 }
 
-int unlock(int pid)
+int block_no_yield(int pid) {
+    if (pid > MAX_PROCESS_BLOCKS || pid < 1 || blocks[pid].process_state == UNAVAILABLE)
+        return -1;
+    blocks[pid].process_state = BLOCKED;
+    return 0;
+}
+
+int unblock(int pid)
 {
-    if (pid > 64 || pid < 1)
+    if (pid > MAX_PROCESS_BLOCKS || pid < 1)
         return -1;
 
     blocks[pid].process_state = READY;

@@ -1,6 +1,9 @@
 #ifndef SHARED_H
 #define SHARED_H
 
+#define SEM_SUCCESS 1
+#define SEM_ERROR 0
+
 #include <stddef.h>
 #include <stdint.h>
 

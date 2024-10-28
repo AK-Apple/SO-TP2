@@ -16,7 +16,7 @@ int64_t priorities[MAX_SEMAPHORES] = {0};
 
 uint8_t lock = 1;
 
-uint64_t valid_id(sem_t id)
+static uint64_t valid_id(sem_t id)
 {
     return id > 0 && id < MAX_SEMAPHORES;
 }
@@ -25,14 +25,14 @@ static uint64_t invalid_semaphore(sem_t id){
     return (!valid_id(id) || !semaphore_exists[id]);
 }
 
-uint8_t can_pass(sem_t id, uint64_t process)
+static uint8_t can_pass(sem_t id, uint64_t process)
 {
-    return priorities[id] == process || priorities[id] == NO_PRIORITY;
+    return (priorities[id] == process || priorities[id] == NO_PRIORITY) && semaphores[id] > 0;
 }
 
 uint64_t sem_open(sem_t id, uint64_t value)
 {
-    if (!valid_id(id) || value < 0) return 0;
+    if (!valid_id(id) || value < 0) return SEM_ERROR;
 
     acquire(&lock);
 
@@ -45,63 +45,51 @@ uint64_t sem_open(sem_t id, uint64_t value)
     }
 
     release(&lock);
-    return 1 ;
+
+    return SEM_SUCCESS;
 }
 
-void sem_close(sem_t id)
+int sem_close(sem_t id)
 {
-    if (invalid_semaphore(id)) return;
+    if (invalid_semaphore(id)) return SEM_ERROR;
     semaphore_exists[id] = 0;
+    return SEM_SUCCESS;
 }
 
-void sem_wait(sem_t id)
+int sem_wait(sem_t id)
 {
-    if (invalid_semaphore(id)) {
-        printf_error("[kernel] cant wait on a deleted semaphore %d. killing process pid=%d\n", id, get_pid());
-        exit(1);
-        return;
-    }
+    if (invalid_semaphore(id)) return SEM_ERROR;
 
-    uint8_t queued = 0;         // Sirve por si alguien decide hacer un unlock (en caso contrario, se podría poner un mismo proceso 2 veces en la queue)
-
+    int pid = get_pid();
     acquire(&lock);
-
-    while(semaphores[id] == 0  || !can_pass(id, get_pid()))
+    if (!can_pass(id, pid))
     {
-        _cli();
+        enqueue(&sem_queues[id], pid);
+    }            
+    
+    while(!can_pass(id, pid))
+    {
+        block_no_yield(pid);         
         release(&lock);
-
-        if (!queued)
-        {
-            enqueue(&sem_queues[id], get_pid());
-        }            
-        queued = 1;
-        block(get_pid());         
-        if(!semaphore_exists[id]) {
-            printf_error("[kernel] cant wait on a deleted semaphore %d. killing process pid=%d\n", id, get_pid());
-            exit(1);
-            break;
-        }               
-        // un sti al final del block reestaura el acceso a las interrupciones. Es importante que el bloqueo se realice sin interrupciones para prevenir que el proceso se bloquee por siempre
+        yield(); 
+        if(!semaphore_exists[id]) return SEM_ERROR;           
         acquire(&lock);
     }
     semaphores[id]--;
     release(&lock);
+
+    return SEM_SUCCESS;
 }
 
 
-void sem_post(sem_t id)
+int sem_post(sem_t id)
 {
-    if (invalid_semaphore(id)) {
-        printf_error("[kernel] cant post on a deleted semaphore %d. killing process pid=%d\n", id, get_pid());
-        exit(1);
-        return;
-    }
+    if (invalid_semaphore(id)) return SEM_ERROR;
 
     acquire(&lock);
 
-    int64_t to_unlock = 0;
-    if (!dequeue(&sem_queues[id], &to_unlock))
+    int64_t to_unblock = 0;
+    if (!dequeue(&sem_queues[id], &to_unblock))
     {
         priorities[id] = NO_PRIORITY;       
         // Darle prioridad al proceso que salió de la cola previene que el proceso que hace POST "se cole". 
@@ -109,11 +97,12 @@ void sem_post(sem_t id)
     }
     else
     {
-        priorities[id] = to_unlock;
+        priorities[id] = to_unblock;
     }
-    unlock(to_unlock);
-
+    unblock(to_unblock);
     semaphores[id]++;
 
     release(&lock);
+
+    return SEM_SUCCESS;
 }
