@@ -33,7 +33,7 @@ int trim_end(char* str, char c) {
 void compact_whitespace(char *str) {
     int j = 0;
     for(int i = 0; str[i]; i++) {
-        if(!is_whitespace(str[i]) || (i > 0 && !is_whitespace(str[i-1])))
+        if((i > 0 && !is_whitespace(str[i-1])) || !is_whitespace(str[i]))
             str[j++] = str[i];
     }
     str[j] = 0;

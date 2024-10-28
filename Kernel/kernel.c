@@ -1,5 +1,7 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <stdint.h>
 #include <lib.h>
 #include <moduleLoader.h>
@@ -21,9 +23,9 @@ extern uint8_t endOfKernel;
 
 static const uint64_t PageSize = 0x1000;
 
-static void *const sampleCodeModuleAddress = (void *)0x400000;
-static void *const sampleDataModuleAddress = (void *)0x500000;
-static uint32_t *const memory_count_mb_address = (uint32_t *) (SYS_VARIABLES + SYS_MEM_COUNT);
+#define SAMPLE_CODE_MODULE_ADDRESS  ((void *)0x400000)
+#define SAMPLE_DATA_MODULE_ADDRESS ((void *)0x500000)
+#define MEMORY_COUNT_MB_ADDRESS  ((uint32_t *)(SYS_VARIABLES + SYS_MEM_COUNT))
 
 void clearBSS(void *bssAddress, uint64_t bssSize)
 {
@@ -40,14 +42,14 @@ void *getStackBase()
 void *initializeKernelBinary()
 {
     void *moduleAddresses[] = {
-        sampleCodeModuleAddress,
-        sampleDataModuleAddress};
+        SAMPLE_CODE_MODULE_ADDRESS,
+        SAMPLE_DATA_MODULE_ADDRESS};
 
     uint64_t userlandModuleSize = loadModules(&endOfKernelBinary, moduleAddresses);
 
     clearBSS(&bss, &endOfKernel - &bss);
-    uint64_t allocator_capacity = *memory_count_mb_address * MB - (uint64_t)(sampleDataModuleAddress + userlandModuleSize);
-    initialize_memory_allocator(sampleDataModuleAddress + userlandModuleSize, allocator_capacity);
+    uint64_t allocator_capacity = *MEMORY_COUNT_MB_ADDRESS * MB - (uint64_t)(SAMPLE_DATA_MODULE_ADDRESS + userlandModuleSize);
+    initialize_memory_allocator(SAMPLE_DATA_MODULE_ADDRESS + userlandModuleSize, allocator_capacity);
 
     return getStackBase();
 }
@@ -64,7 +66,7 @@ int main()
         while(sys_read(0, dummy_buffer, 8) == 0) ;
         sys_clearScreen();
     }
-    create_process((Program)sampleCodeModuleAddress, sizeof(argv_shell)/sizeof(argv_shell[0]), argv_shell);
+    create_process((Program)SAMPLE_CODE_MODULE_ADDRESS, sizeof(argv_shell)/sizeof(argv_shell[0]), argv_shell);
     kernel_restart_count++;
     while (1)
         yield();

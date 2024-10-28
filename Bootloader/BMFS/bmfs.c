@@ -9,6 +9,7 @@
 #include <string.h>
 #include <strings.h>
 #include <ctype.h>
+#include <limits.h>
 
 /* Global defines */
 struct BMFSEntry
@@ -366,7 +367,7 @@ int initialize(char *diskname, char *size, char *mbr, char *boot, char *kernel)
 	{
 		while (diskSizeFactor--)
 		{
-			if (diskSize * 1024 > diskSize ) // Make sure we don't overflow
+			if (diskSize <= (ULLONG_MAX / 1024)) // Make sure we don't overflow
 			{
 				diskSize *= 1024;
 			}
@@ -449,7 +450,8 @@ int initialize(char *diskname, char *size, char *mbr, char *boot, char *kernel)
 	if (ret == 0)
 	{
 		double percent;
-		memset(buffer, 0, bufferSize);
+		if(buffer)
+			memset(buffer, 0, bufferSize);
 		writeSize = 0;
 		while (writeSize < diskSize)
 		{
@@ -479,7 +481,8 @@ int initialize(char *diskname, char *size, char *mbr, char *boot, char *kernel)
 	// Format the disk.
 	if (ret == 0)
 	{
-		rewind(disk);
+		if(disk)
+			rewind(disk);
 		format();
 	}
 
@@ -498,7 +501,7 @@ int initialize(char *diskname, char *size, char *mbr, char *boot, char *kernel)
 		}
 		else
 		{
-			printf("Error: Failed to read file '%s'\n", mbr);
+			printf("Error: Failed to read file '%s'\n", mbr ? "" : mbr);
 			ret = 1;
 		}
 	}
@@ -549,7 +552,7 @@ int initialize(char *diskname, char *size, char *mbr, char *boot, char *kernel)
 			}
 			else
 			{
-				if (ferror(disk))
+				if (disk == NULL || ferror(disk))
 				{
 					printf("Error: Failed to read file '%s'\n", kernel);
 					ret = 1;
@@ -691,7 +694,7 @@ void create(char *filename, unsigned long long maxsize)
 		}
 
 		// Add file record to Directory
-		pEntry = (struct BMFSEntry *)(Directory + first_free_entry * 64);
+		pEntry = (struct BMFSEntry *)((unsigned long long)Directory + first_free_entry * 64);
 		pEntry->StartingBlock = new_file_start;
 		pEntry->ReservedBlocks = blocks_requested;
 		pEntry->FileSize = 0;

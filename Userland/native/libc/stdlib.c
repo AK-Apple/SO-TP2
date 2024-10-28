@@ -15,7 +15,7 @@ uint64_t getchar() {
 
 
 uint64_t gets(char * buf, uint64_t length) {
-    char c;
+    int c;
     int i = 0;
     do {
         c=getchar();
