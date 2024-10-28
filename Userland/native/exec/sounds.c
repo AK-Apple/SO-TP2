@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/sounds.h"
 #include "../include/syscalls.h"
 #define MAX_SIZE 128
@@ -110,8 +112,8 @@ void play_song(int song_id){
         case 2: initializeQueueWithArray(os_initiating, OS_INITIALIZING_LENGTH); break;
         case 3: initializeQueueWithArray(you_lost, YOU_LOST_LENGTH); break;
         default: initializeQueue(); break;
-        last_note_ticks = sys_ticks_elapsed();
     }
+    last_note_ticks = sys_ticks_elapsed();
 }
 
 void playNote(MusicalNote note){

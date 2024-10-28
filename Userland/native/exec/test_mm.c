@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <stdint.h>
 #include <stddef.h>
 #include "../include/command.h"
@@ -6,7 +8,7 @@
 #include "../include/test_util.h"
 #include "../include/syscalls.h"
 
-#define MAX_BLOCKS 4096
+#define MAX_BLOCKS 255
 
 typedef struct MM_rq {
   void *address;

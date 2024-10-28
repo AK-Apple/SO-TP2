@@ -40,7 +40,9 @@
 *.x86_64
 *.hex
 
-# Debug files
+# gdb and debug files
+.gdbinit
+*.debug
 *.dSYM/
 *.su
 *.idb
@@ -295,8 +297,18 @@ fabric.properties
 /clean.sh
 /.vscode
 
-# mac
+# macOS system files
 *.DS_Store
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+*.icloud
 
-# gdb
-.gdbinit
+# PVS files
+.config
+report.tasks
+
+
+# others
+strace_out

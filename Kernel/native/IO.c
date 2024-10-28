@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "IO.h"
 #include "video.h"
 #include <stdint.h>
@@ -9,8 +11,8 @@
 
 #define SIZE_BUFFER 1000
 
-uint64_t x = 0;
-uint64_t y = 0;
+uint64_t screen_x = 0;
+uint64_t screen_y = 0;
 uint8_t fontSize = 1;
 
 // el stdout no se guarda. Solo se guardan las coordenadas de la última posición
@@ -116,13 +118,13 @@ void deleteCharAt(uint64_t * x, uint64_t * y, uint64_t backgroundColor) {
 void putCharColoured(char c, uint64_t foreGround, uint64_t backGround) {
     switch (c) {
         case 0x0A:
-            newLine(&x, &y);
+            newLine(&screen_x, &screen_y);
             break;
         case 0x08:
-            deleteCharAt(&x, &y, backGround);
+            deleteCharAt(&screen_x, &screen_y, backGround);
             break;
         default:
-            putCharAt(c, &x, &y, foreGround, backGround);
+            putCharAt(c, &screen_x, &screen_y, foreGround, backGround);
             break;
     }
 }
@@ -235,6 +237,6 @@ void sys_new_size(int newSize){
 // resetea coordenadas
 void sys_clearScreen(){
     clearScreen(BG_COLOR);
-    y = 0;
-    x = 0;
+    screen_y = 0;
+    screen_x = 0;
 }

@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "scheduling.h"
 #include "round_robin.h"
 #include "lib.h"
@@ -70,7 +72,7 @@ void reasign_children(uint64_t pid)
 
 int kill_process(uint64_t pid)
 {
-    if (pid > MAX_PROCESS_BLOCKS || pid < 1)
+    if (pid >= MAX_PROCESS_BLOCKS || pid < 1)
         return -1;
     
     reasign_children(pid);
@@ -331,7 +333,7 @@ int block(int pid)
 }
 
 int block_no_yield(int pid) {
-    if (pid > MAX_PROCESS_BLOCKS || pid < 1 || blocks[pid].process_state == UNAVAILABLE)
+    if (pid >= MAX_PROCESS_BLOCKS || pid < 1 || blocks[pid].process_state == UNAVAILABLE)
         return -1;
     blocks[pid].process_state = BLOCKED;
     return 0;
@@ -339,7 +341,7 @@ int block_no_yield(int pid) {
 
 int unblock(int pid)
 {
-    if (pid > MAX_PROCESS_BLOCKS || pid < 1)
+    if (pid >= MAX_PROCESS_BLOCKS || pid < 1)
         return -1;
 
     blocks[pid].process_state = READY;

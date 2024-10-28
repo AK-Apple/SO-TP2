@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <stdint.h>
 #include "lib.h"
 #include "video.h"
@@ -119,7 +121,7 @@ void sys_registers() {
 
     for (int i = 0; i < REGS_SIZE ; i++) {
         char buf[MAX_BUF_SIZE];
-        printf(regList[i]);
+        printf("%s", regList[i]);
         uint32_t digits = uintToBase(regs[i], buf, 16);
         printf(" : 0x");
         int zeros = 15;
@@ -127,7 +129,7 @@ void sys_registers() {
             printf("0");
             zeros--;
         }
-        printf(buf);
+        printf("%s", buf);
         putChar('\n');
     }
     regsCaptured = 0;

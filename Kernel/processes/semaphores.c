@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "lib.h"
 #include "IO.h"
 #include "interrupts.h"
@@ -32,7 +34,7 @@ static uint8_t can_pass(sem_t id, uint64_t process)
 
 uint64_t sem_open(sem_t id, uint64_t value)
 {
-    if (!valid_id(id) || value < 0) return SEM_ERROR;
+    if (!valid_id(id)) return SEM_ERROR;
 
     acquire(&lock);
 

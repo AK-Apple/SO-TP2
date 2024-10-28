@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "memory_allocator.h"
 #include "./../../Shared/shared.h"
 #include "IO.h"
@@ -24,12 +26,10 @@ typedef struct Free_List_Allocator {
 Free_List_Allocator allocator = {0};
 
 static void coalesce_node(Free_List_Node *node) {
+    if(node == NULL) return; 
     if(node->next && (void *)((void *)node + node->size) == node->next) {
         node->size += node->next->size;
-        if(node)
-            node->next = node->next->next;
-        else    
-            allocator.free_list = node->next->next;
+        node->next = node->next->next;
     }
 }
 
@@ -98,12 +98,10 @@ void *memory_alloc(size_t bytes) {
 }
 void memory_free(void *pointer) {
     if(pointer == NULL) return;
-    Allocation_Header *header = (Allocation_Header *)(pointer - sizeof(Allocation_Header));
+    Free_List_Node *free_node = (Free_List_Node *)(pointer - sizeof(Allocation_Header));
     Free_List_Node *list_iter = allocator.free_list;
     Free_List_Node *prev_node = NULL;
-    Free_List_Node *free_node = (Free_List_Node *)header;
 
-    free_node->size = header->size; // si estan en el mismo orden en el struct, entonces esto no hace nada
     free_node->next = NULL;
 
     while(list_iter && (Free_List_Node *)pointer > list_iter) {
@@ -119,8 +117,7 @@ void memory_free(void *pointer) {
         allocator.free_list = free_node;
     }
     coalesce_node(free_node);
-    if(prev_node)
-        coalesce_node(prev_node);
+    coalesce_node(prev_node);
 }
 void memory_info(Memory_Info *info, Memory_Info_Mode mode) {
     Free_List_Node *list_iter = allocator.free_list;

@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/stdlib.h"
 #include "../include/syscalls.h"
 #include "../include/string.h"
@@ -18,16 +20,16 @@ uint64_t gets(char * buf, uint64_t length) {
     do {
         c=getchar();
         if (c >= 0x20 && c <= 0x7F) {
-            *buf = c;
+            buf[i] = c;
             putchar(c);
         } else if (c == '\n') {
-            *buf = '\0';
+            buf[i] = '\0';
             putchar('\n');
             return i;
         }
-        buf++;
-    } while (i < length-1 && c != '\n');
-    *buf = '\0';
+        i++;
+    } while (i < length-1);
+    buf[i] = '\0';
     return i;
 }
 
