@@ -150,24 +150,59 @@ Ejecuta test de proceso.
 
 ### testprio
 
-Ejecuta test de prioridades.
+Ejecuta test de prioridades. Hay 3 procesos que imprimen su pid cada tanto tiempo en CPU. Hay 3 rondas:
+
+En la primera, no se cambian las prioridades.
+
+En la segunda ronda, se cambian las prioridades. El primer proceso (el de pid más bajo) tiene prioridad baja (debería imprimir su pid menos seguido). El segundo proceso es de prioridad media y el último es de prioridad alta.
+
+En la tercera ronda, los procesos tienen la misma prioridad.
 
 ### testsync \<count> \<sem>
 
-Ejecuta test de sincronización.
+Ejecuta test de sincronización. Se crean 4 procesos. Una mitad aumenta un contador y la otra mitad la disminuye. El contador es parte de una memoria compartida y las operaciones poseen riesgo de busy waiting.
+
+\<count> es la cantidad de veces que cada proceso aumenta o disminuye el contador.
+
+\<sem> = 1 ejecuta el testeo con semáforos.
+
+\<sem> = 0 ejecuta el testeo sin semáforos.
 
 ### testmman \<max> \<smart>
 
-Ejecuta test de memoria.
+Ejecuta test de memoria. Hace mallocs y libera memoria infinitamente.
+
+\<max> determina la cantidad máxima de memoria que va a reservar el test.
+
+\<smart> = 0 significa que no usa smart allocation.
+
+\<smart> = 1 significa que usa smart allocation:
+
+- Si el bloque libre más grande es más pequeño que el header, se deja de reservar memoria.
+- La cantidad máxima de memoria reservada está limitada por el bloque libre más grande.
 
 ### loop \<secs_wait> \<msg>
 
-Imprime su ID con un saludo cada determinado tiempo.
+Imprime su pid con un saludo cada tanto tiempo determinado por \<secs_wait>. También imprime un mensaje determinado por \<msg>.
 
-## TODO
+## Hotkeys
 
-Sacar eliminator de Built-in.
+### ctrl c
 
-Pasar todos los textos en inglés a español.
+Matar al proceso en foreground y volver a la shell.
 
-Explicar parámetros en los testeos.
+### ctrl z
+
+Bloquar al proceso en foreground y volver a la shell.
+
+### ctrl x
+
+Mandar al proceso en foreground a background y volver a la shell
+
+### ctrl d
+
+Para enviar EOF (end of file)
+
+### left_alt
+
+Para guardar registros

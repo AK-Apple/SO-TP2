@@ -116,7 +116,7 @@ void print_help() {
     printf_color("ctrl c", COLOR_GREEN, 0);
     printf("   : matar al proceso en foreground y volver a la shell\n");
     printf_color("ctrl z", COLOR_GREEN, 0);
-    printf("   : bloquar al proceso en foreground y volver a la shell\n");
+    printf("   : bloquear al proceso en foreground y volver a la shell\n");
     printf_color("ctrl x", COLOR_GREEN, 0);
     printf("   : mandar al proceso en foreground a background y volver a la shell\n");
     printf_color("ctrl d", COLOR_GREEN, 0);

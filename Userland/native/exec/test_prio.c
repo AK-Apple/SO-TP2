@@ -25,16 +25,17 @@ void test_prio() {
 
   printf("\nBUSY WAIT INCOMING...\n");
 
-for(int i = 0; i < 10; i++) {
   bussy_wait(WAIT);
-}
   
   printf("\nCHANGING PRIORITIES...\n");
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
     sys_change_priority(pids[i], prio[i]);
 
-  bussy_wait(WAIT);
+  for(int i = 0; i < 5; i++) {
+    bussy_wait(WAIT);
+  }
+  
   printf("\nBLOCKING...\n");
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
@@ -61,3 +62,8 @@ for(int i = 0; i < 10; i++) {
 Program get_test_prio(){
   return (Program)test_prio;
 }
+
+
+// 3 iiiiiiiiiiiiiiii
+// 4 iiiiiiiiiiiiiiii
+// 5 iiiiiiiiiiiiiiii
