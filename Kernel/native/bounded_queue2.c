@@ -4,7 +4,7 @@
 #include "bounded_queue2.h"
 #include "IO.h"
 
-#define MAX_SIZE 32 // Maximum size of the queue
+#define MAX_SIZE 3200 // Maximum size of the queue
 
 
 // Initialize the queue

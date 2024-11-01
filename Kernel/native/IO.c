@@ -9,6 +9,7 @@
 #include "interrupts.h"
 #include "keyboard.h"
 #include "pipes.h"
+#include "scheduling.h"
 
 uint64_t screen_x = 0;
 uint64_t screen_y = 0;
@@ -196,7 +197,10 @@ void putErr(char c){
 }
 
 // inspirado en la función de la API de Linux
-void sys_write(int fd, const char* buf, int count){
+void sys_write(int fd_index, const char* buf, int count)
+{
+    int fd = get_fd(fd_index);
+    // printf("writing to: %d\n", fd);
     if (fd==1)
     {
         for(int i=0; i<count; i++)
@@ -213,7 +217,7 @@ void sys_write(int fd, const char* buf, int count){
     }
     if (fd > 2)
     {
-        read_pipe(fd, buf, count);
+        write_pipe(fd, buf, count);
     }
     return;
 }

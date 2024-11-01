@@ -13,6 +13,8 @@
 
 #define MAX_BUF 1024
 
+#define SHELL_PIPE 5
+
 static Command commands[] = {
     {"help", "Muestra la lista de comandos.", (Program)print_help},
     {"song", "pone musica con beeps. Con song_id:1|2|3", (Program)play_music_cmd, "<song_id>"},
@@ -144,6 +146,7 @@ void send_to_foreground(int pid) {
 }
 
 void shell() {
+    sys_create_pipe(SHELL_PIPE);
     printf_color("Bienvenido a la Shell!! ", COLOR_GREEN, 0x000000);
     print_help();
 
@@ -228,7 +231,7 @@ void execute(char command_buffer[]) {
             int fds1[] = {STD_IN, STD_OUT, STD_ERR};
             const char *fg_bg = "foreground";
             if(piped) {
-                int pipe_id = 0; // TODO: SYSCALL GET PIPE ID
+                int pipe_id = SHELL_PIPE; // TODO: SYSCALL GET PIPE ID
                 int fds2[] = {pipe_id, STD_OUT, STD_ERR};
                 fds1[STD_OUT] = pipe_id;
                 sys_create_process_fd(processes[i].command, argc2, argv2, fds2);

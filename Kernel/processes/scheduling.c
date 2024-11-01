@@ -268,10 +268,12 @@ int create_process(Program program, int argc, char **argv, int fds[])
     blocks[new_pid].program = program;
     blocks[new_pid].argc = argc;
     blocks[new_pid].pid_to_wait = 0;
-    blocks[new_pid].file_descriptors[STDIN] = fds[STDIN]; // quiza con un for
+    blocks[new_pid].file_descriptors[STDIN] = fds[STDIN]; // TODO: quiza con un for
     blocks[new_pid].file_descriptors[STDOUT] = fds[STDOUT];
     blocks[new_pid].file_descriptors[STDERR] = fds[STDERR];
 
+    printf("fds almacenados %d, %d y %d\n", blocks[new_pid].file_descriptors[STDIN], blocks[new_pid].file_descriptors[STDOUT] = fds[STDOUT], blocks[new_pid].file_descriptors[STDERR] = fds[STDERR]);
+    
     add(&round_robin, new_pid);
     return new_pid;
 }
