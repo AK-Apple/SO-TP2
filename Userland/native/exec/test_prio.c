@@ -1,9 +1,11 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <stdint.h>
-#include <stdio.h>
 #include "../include/syscalls.h"
 #include "../include/test_util.h"
+#include "../include/stdio.h"
+#include "../include/stdlib.h"
+#include "../include/command.h"
 #define MINOR_WAIT 10000000 // TODO: Change this value to prevent a process from flooding the screen
 #define WAIT 100000000      // TODO: Change this value to make the wait long enough to see theese processes beeing run at least twice
 
@@ -58,11 +60,6 @@ void test_prio() {
     sys_kill_process(pids[i]);
 
 }
-
-Program get_test_prio(){
-  return (Program)test_prio;
-}
-
 
 // 3 iiiiiiiiiiiiiiii
 // 4 iiiiiiiiiiiiiiii

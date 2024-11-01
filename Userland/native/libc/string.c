@@ -82,3 +82,27 @@ int charcount(const char* str, char c) {
 
 	return count;
 }
+
+int char_to_upper(int c) {
+    const char OFFSET = 'a' - 'A';
+    return (c >= 'a' && c <= 'z') ? c - OFFSET : c;
+}
+
+int char_to_lower(int c) {
+    const char OFFSET = 'a' - 'A';
+    return (c >= 'A' && c <= 'Z') ? c + OFFSET : c;
+}
+
+int is_vowel(int c) {
+    c = char_to_lower(c);
+    switch(c) {
+    case 'a':
+    case 'e':
+    case 'i':
+    case 'o':
+    case 'u':
+        return 1;
+    default:
+        return 0;
+    }
+}

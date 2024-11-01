@@ -7,6 +7,7 @@
 #include "../include/eliminator.h"
 #include "../include/test_util.h"
 #include "../include/sounds.h"
+#include "../include/string.h"
 
 #define REG_SIZE 17
 #define SECONDS 0
@@ -16,6 +17,34 @@
 #define DAY_OF_THE_MONTH 7
 #define MONTH 8
 #define YEAR 9
+
+int wc(int argc, char *argv[]) {
+    int input_char = 0;
+    int line_count = 0;
+    while((input_char = getchar()) != EOF) {
+        line_count += (input_char == '\n');
+    }
+    printf("cantidad de lineas = %d\n", line_count);
+
+    return 0;
+}
+
+int cat(int argc, char *argv[]) {
+    int input_char = 0;
+    while((input_char = getchar()) != EOF) {
+        putchar(input_char);
+    }
+    return 0;
+}
+
+int filter(int argc, char *argv[]) {
+    int input_char = 0;
+    while((input_char = getchar()) != EOF) {
+        if(!is_vowel(input_char))
+            putchar(input_char);
+    }
+    return 0;
+}
 
 void play_music_cmd(uint64_t argc, char *argv[]) {
     uint64_t song_id = 1;

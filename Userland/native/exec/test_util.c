@@ -65,7 +65,7 @@ int64_t endless_loop(int argc, char* argv[]) {
   while (1);
 }
 
-int64_t endless_loop_print_seconds(int argc, char* argv[]) {
+int64_t endless_loop_print_seconds(uint64_t argc, char* argv[]) {
   if (argc < 2) {
     printf_error("[endless_loop_print_seconds] ARGCOUNT INCORRECT\nloop <seconds_wait> <msg>\n");
     return 1;
@@ -106,8 +106,4 @@ Program get_endless_loop()
 Program get_endless_loop_print()
 {
   return (Program)endless_loop_print;
-}
-
-Program get_endless_loop_print_seconds() {
-  return (Program)endless_loop_print_seconds;
 }

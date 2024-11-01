@@ -7,6 +7,8 @@
 #define COLOR_GREEN     0x0000FF00
 #define COLOR_ORANGE    0x00FF8800
 
+#define EOF (-1)
+
 #include <stdint.h>
 
 void scanf(char * fmt, ...);

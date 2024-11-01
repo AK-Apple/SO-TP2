@@ -9,5 +9,8 @@ int charcount(const char* str, char c);
 int trim_end(char* str, char c);
 int is_whitespace(char c);
 void compact_whitespace(char *str);
+int char_to_upper(int c);
+int char_to_lower(int c);
+int is_vowel(int c);
 
 #endif //TPE_STRING_H

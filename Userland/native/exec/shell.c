@@ -30,12 +30,16 @@ static Command commands[] = {
     {"block", "Cambia el estado de un proceso entre bloqueado y listo dado su PID.", (Program)block_cmd, "<pid>"},
     {"nice", "Cambia la prioridad de un proceso dado su PID y la nueva prioridad. prio:1:2:3:4:5", (Program)change_priority_cmd, "<pid> <prio>"},
 };
-static Process_Command processes[] = {
-    {"testproc", "ejecuta test de proceso", get_test_processes, "<max_proc>"},
-    {"testprio", "ejecuta test de prioridades", get_test_prio},
-    {"testsync", "ejecuta test de sincronizacion. count=countdown, sem:0|1", get_test_sync, "<count> <sem>"},
-    {"testmman", "ejecuta test de memoria. smart:0|1", get_test_mman, "<max> <smart>"},
-    {"loop", "Imprime su ID con un saludo cada una determinada cantidad de segundos. msg es un mensaje opcional", get_endless_loop_print_seconds, "<secs_wait> <msg>"},
+static Command processes[] = {
+    {"testproc", "ejecuta test de proceso", (Program)test_processes, "<max_proc>"},
+    {"testprio", "ejecuta test de prioridades", (Program)test_prio},
+    {"testsync", "ejecuta test de sincronizacion. count=countdown, sem:0|1", (Program)test_sync, "<count> <sem>"},
+    {"testmman", "ejecuta test de memoria. smart:0|1", (Program)test_mm, "<max> <smart>"},
+    {"loop", "Imprime su ID con un saludo cada una determinada cantidad de segundos. msg es un mensaje opcional", (Program)endless_loop_print_seconds, "<secs_wait> <msg>"},
+    {"wc", "cuenta la cantidad de lineas del stdin terminando con EOF(Ctrl+D)", (Program)wc},
+    {"cat", "printea el input", (Program)cat},
+    {"filter", "Filtra las vocales del input", (Program)filter},
+    {"phylo", "ejecuta programa de phylo", (Program)phylo},
 };
 int foreground_pid = 0;
 int shell_pid = 0;
@@ -224,7 +228,7 @@ void execute(char inputBuffer[]) {
     {
         if (strcmp(argv[0], processes[i].title) == 0)
         {
-            int pid = sys_create_process(processes[i].process_getter(), argc, argv);
+            int pid = sys_create_process(processes[i].command, argc, argv);
             const char *mode = "background";
             if(!send_to_background) {
                 foreground_pid = pid;

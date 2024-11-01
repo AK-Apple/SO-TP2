@@ -86,9 +86,3 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
     }
   }
 }
-
-// Obs: las funciones por motivos raros hay que agarrarlas con getters (?)
-// Asumo que "test_processes" solo tiene sentido si lo estoy apuntando en el MISMO ARCHIVO
-Program get_test_processes(){
-  return (Program)test_processes;
-}

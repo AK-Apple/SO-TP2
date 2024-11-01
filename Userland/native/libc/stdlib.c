@@ -7,8 +7,8 @@
 
 uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base);
 
-uint64_t getchar() {
-    char buf[1];
+int getchar() {
+    char buf[2] = {0};
     sys_read(0, buf, 1);
     return buf[0];
 }

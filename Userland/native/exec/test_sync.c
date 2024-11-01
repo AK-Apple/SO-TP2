@@ -5,21 +5,21 @@
 #include "../include/syscalls.h"
 #include "../include/stdio.h"
 #include "../include/stdlib.h"
-#include "test_util.h"
+#include "../include/test_util.h"
 
 #define SEM_ID 5
 #define TOTAL_PAIR_PROCESSES 2
 
 int64_t global_shared_memory;
 
-void slowInc(int64_t *p, int64_t inc) {
+void slow_inc(int64_t *p, int64_t inc) {
   int64_t aux = *p;
   sys_yield(); // This makes the race condition highly probable
   aux += inc;
   *p = aux;
 }
 
-uint64_t my_process_inc(uint64_t argc, char *argv[]) {
+int64_t my_process_inc(uint64_t argc, char *argv[]) {
   uint64_t n;
   int8_t inc;
   int8_t use_sem;
@@ -47,7 +47,7 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
         return -1;
       }
     }
-    slowInc(&global_shared_memory, inc);
+    slow_inc(&global_shared_memory, inc);
     if (use_sem) {
       if(sys_sem_post(SEM_ID) == SEM_ERROR) {
         printf_error("test_sync: ERROR sem_post with pid=%d\n", sys_get_pid());
@@ -59,7 +59,7 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
   return 0;
 }
 
-uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
+int64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
   uint64_t pids[2 * TOTAL_PAIR_PROCESSES] = {0};
   int64_t use_sem = 0;
   if (argc < 3) {
@@ -91,9 +91,4 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
   printf("Final value: %d\n", global_shared_memory);
 
   return 0;
-}
-
-Program get_test_sync()
-{
-  return test_sync;
 }

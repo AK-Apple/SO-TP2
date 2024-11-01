@@ -45,7 +45,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-typedef uint64_t (*Program)(uint64_t, char*[]);
+typedef int64_t (*Program)(uint64_t, char*[]);
 
 extern uint64_t syscall(uint64_t id, uint64_t par2, uint64_t par3, uint64_t par4);
 

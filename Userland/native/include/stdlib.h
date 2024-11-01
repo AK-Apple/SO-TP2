@@ -5,7 +5,7 @@
 
 #define MAX_BUF 1024
 
-uint64_t getchar();
+int getchar();
 
 uint64_t gets(char * buf, uint64_t length);
 
