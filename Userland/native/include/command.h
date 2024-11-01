@@ -36,5 +36,6 @@ int64_t test_sync(uint64_t argc, char *argv[]);
 int64_t test_mm(uint64_t argc, char *argv[]);
 int64_t test_pipe(uint64_t argc, char *argv[]);
 int64_t phylo(uint64_t argc, char *argv[]);
+int64_t echo_cmd(uint64_t argc, char *argv[]);
 
 #endif //TPE_COMMAND_H

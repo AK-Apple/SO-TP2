@@ -200,7 +200,6 @@ void putErr(char c){
 void sys_write(int fd_index, const char* buf, int count)
 {
     int fd = get_fd(fd_index);
-    // printf("writing to: %d\n", fd);
     if (fd==1)
     {
         for(int i=0; i<count; i++)
@@ -217,6 +216,7 @@ void sys_write(int fd_index, const char* buf, int count)
     }
     if (fd > 2)
     {
+    // printf("writing to: %d '%s'\n", fd, buf);
         write_pipe(fd, buf, count);
     }
     return;

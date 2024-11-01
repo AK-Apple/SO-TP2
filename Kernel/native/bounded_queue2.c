@@ -2,6 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "lib.h"
 #include "bounded_queue2.h"
+#include "bounded_queue.h"
 #include "IO.h"
 
 #define MAX_SIZE 3200 // Maximum size of the queue
@@ -10,7 +11,7 @@
 // Initialize the queue
 void init_queue2(queue2_t* q) {
     q->front = 0;
-    q->rear = -1;
+    q->rear = 0;
     q->size = 0;
 }
 

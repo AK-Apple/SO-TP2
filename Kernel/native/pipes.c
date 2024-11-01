@@ -81,7 +81,7 @@ int8_t close_pipe(int fd) {
 
 int64_t read_pipe(int fd, char* buf, int count)
 {
-    printf("Leyendo de pipe....\n");
+    // printf("Leyendo de pipe....\n");
     int64_t pipe = fd_to_pipe(fd);
 
     if (!pipe_is_valid(pipe)) return 0;
@@ -107,18 +107,18 @@ int64_t read_pipe(int fd, char* buf, int count)
         unblock(pipes[pipe].blocked_pid);
         pipes[pipe].blocked_pid = -1;
     }
-    printf("Termino de leer. Retorno: %d\n", to_return);
+    // printf("Termino de leer. Retorno: %d \n", to_return);
     return to_return;
 }
 
 int64_t write_pipe(int fd, const char* buf, int count)
 {
-    printf("Escribiendo en pipe....\n");
+    // printf("Escribiendo en pipe....\n");
     int64_t pipe = fd_to_pipe(fd);
 
     if (!pipe_is_valid(pipe)) return 0;
 
-    uint64_t written;
+    uint64_t written = 0;
     do
     {
         // TODO: opción para que no se bloquee si se llena el buffer y ya había un proceso bloqueado
@@ -126,7 +126,7 @@ int64_t write_pipe(int fd, const char* buf, int count)
         written += enqueue_string2(&pipes[pipe].buffer, buf, count);
         if(written < count)
         {
-            printf("escrito: %d. A escribir: %d", written, count);
+            // printf("escrito: %d. A escribir: %d", written, count);
             int64_t current_pid = get_pid();
             pipes[pipe].blocked_pid = current_pid;
             block_no_yield(current_pid);
@@ -141,6 +141,6 @@ int64_t write_pipe(int fd, const char* buf, int count)
         unblock(pipes[pipe].blocked_pid);
         pipes[pipe].blocked_pid = -1;
     }
-    printf("Termino de escribir. Retorno: %d\n", count);
+
     return count;
 }

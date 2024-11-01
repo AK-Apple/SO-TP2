@@ -272,7 +272,7 @@ int create_process(Program program, int argc, char **argv, int fds[])
     blocks[new_pid].file_descriptors[STDOUT] = fds[STDOUT];
     blocks[new_pid].file_descriptors[STDERR] = fds[STDERR];
 
-    printf("fds almacenados %d, %d y %d\n", blocks[new_pid].file_descriptors[STDIN], blocks[new_pid].file_descriptors[STDOUT] = fds[STDOUT], blocks[new_pid].file_descriptors[STDERR] = fds[STDERR]);
+    // printf("fds almacenados %d, %d y %d\n", blocks[new_pid].file_descriptors[STDIN], blocks[new_pid].file_descriptors[STDOUT] = fds[STDOUT], blocks[new_pid].file_descriptors[STDERR] = fds[STDERR]);
     
     add(&round_robin, new_pid);
     return new_pid;

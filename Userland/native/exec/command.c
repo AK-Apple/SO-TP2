@@ -46,6 +46,14 @@ int filter(int argc, char *argv[]) {
     return 0;
 }
 
+int64_t echo_cmd(uint64_t argc, char *argv[]) {
+    for(int i = 1; i < argc; i++) {
+        printf("%s ", argv[i]);
+    }
+    printf("\n");
+    return 0;
+}
+
 void play_music_cmd(uint64_t argc, char *argv[]) {
     uint64_t song_id = 1;
     if(argc >= 2) {

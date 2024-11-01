@@ -43,6 +43,7 @@ static Command processes[] = {
     {"cat", "printea el input", (Program)cat},
     {"filter", "Filtra las vocales del input", (Program)filter},
     {"phylo", "ejecuta programa de phylo", (Program)phylo},
+    {"echo", "imprime en stdout los argumentos que le pasas", (Program)echo_cmd, "<args...>"},
 };
 
 uint64_t change_priority_cmd(uint64_t argc, char *argv[]) {
