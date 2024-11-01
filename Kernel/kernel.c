@@ -11,6 +11,7 @@
 #include "scheduling.h"
 #include "interrupts.h"
 #include "defs.h"
+#include "keyboard.h"
 
 #define MB (1L << 20)
 
@@ -50,7 +51,7 @@ void *initializeKernelBinary()
     clearBSS(&bss, &endOfKernel - &bss);
     uint64_t allocator_capacity = *MEMORY_COUNT_MB_ADDRESS * MB - (uint64_t)(SAMPLE_DATA_MODULE_ADDRESS + userlandModuleSize);
     initialize_memory_allocator(SAMPLE_DATA_MODULE_ADDRESS + userlandModuleSize, allocator_capacity);
-
+    initialize_keyboard_driver();
     return getStackBase();
 }
 
@@ -63,13 +64,16 @@ int main()
     if(kernel_restart_count) {
         char dummy_buffer[32] = {0};
         printf_color("Kernel iniciado %d veces. Presiona cualquier tecla para continuar...", 0x00FFCC00, kernel_restart_count);
-        while(sys_read(0, dummy_buffer, 8) == 0) ;
+        sys_read(0, dummy_buffer, 1);
         sys_clearScreen();
     }
-    create_process((Program)SAMPLE_CODE_MODULE_ADDRESS, sizeof(argv_shell)/sizeof(argv_shell[0]), argv_shell);
+    int fds[] = {STDIN, STDOUT, STDERR};
+    create_process((Program)SAMPLE_CODE_MODULE_ADDRESS, sizeof(argv_shell)/sizeof(argv_shell[0]), argv_shell, fds);
     kernel_restart_count++;
-    while (1)
+    while (1) {
+        _hlt();
         yield();
+    }
 
     return 0;
 }

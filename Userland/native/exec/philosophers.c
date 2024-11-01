@@ -13,6 +13,7 @@
 #define CMD_ADD 'a'
 #define CMD_REMOVE 'r'
 #define CMD_PS 'p'
+#define CMD_CLEAR 'c'
 typedef enum {
     INVALID = 0,
     THINKING,
@@ -153,16 +154,18 @@ int64_t phylo(uint64_t argc, char *argv[]) {
         case CMD_PS:
             sys_print_all_processes();
             break;
+        case CMD_CLEAR:
+            sys_clear();
+            break;
         default:
             break;
         }
     }
-
+    printf("Echando a los filosofos\n");
     while(philosopher_count > 0) {
         remove_philosopher();
     }
     sys_sem_close(mutex_sem_id);
 
-    printf("TERMINO\n");
     return 0;
 }

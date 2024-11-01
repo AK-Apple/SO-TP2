@@ -7,21 +7,27 @@
 #include "font.h"
 #include "lib.h"
 #include "interrupts.h"
-
-
-#define SIZE_BUFFER 1000
+#include "keyboard.h"
 
 uint64_t screen_x = 0;
 uint64_t screen_y = 0;
 uint8_t fontSize = 1;
+static uint64_t global_foreground_color = 0x00FFFFFF;
 
 // el stdout no se guarda. Solo se guardan las coordenadas de la última posición
 
-// el stdin es un array cíclico
-static char stdinArr[SIZE_BUFFER];  
-static int sizeIn = 0;
-static int startsIn = 0;
-static uint64_t global_foreground_color = 0x00FFFFFF;
+int sys_read(int fd, char* buf, int count){
+    int i=0;
+    if (fd == STDIN){
+        for(i=0; i<count; i++){
+            buf[i] = get_stdin();
+            if ((int) buf[i] == -1)
+				return i + 1;
+        }
+    }
+    return i;
+}
+
 
 static void print_str(char *str) {
     for (int i = 0; str[i] != '\0'; i++) {
@@ -180,21 +186,6 @@ void putErr(char c){
     putCharColoured(c, 0x00ff0000, BG_COLOR);
 }
 
-void putIn(char c){
-    // caso especial donde se pasa del límite: no se pueden agregar caracteres
-    if (sizeIn >= SIZE_BUFFER-1) return;
-
-    // mete c en el vector cíclico
-    int pos = (startsIn + sizeIn) % SIZE_BUFFER;
-
-    stdinArr[pos] = c;
-    sizeIn++;
-}
-
-void clearIn(){
-    sizeIn = 0;
-}
-
 // inspirado en la función de la API de Linux
 void sys_write(int fd, const char* buf, int count){
     if (fd==1){
@@ -207,21 +198,6 @@ void sys_write(int fd, const char* buf, int count){
             putErr(buf[i]);
         }
     }
-}
-
-// inspirado en la función de la API de Linux
-int sys_read(int fd, char* buf, int count){
-    int i=0;
-    if (fd==0){
-        for(i=0; i<count && i<sizeIn; i++){
-            buf[i] = stdinArr[(startsIn + i)%SIZE_BUFFER];
-
-        }
-        startsIn+=i;
-        startsIn = startsIn%SIZE_BUFFER;
-        sizeIn-=i;
-    }
-    return i;
 }
 
 

@@ -5,10 +5,17 @@
 #include "IO.h"
 #include "lib.h"
 #include "scheduling.h"
+#include "semaphores.h"
 
 #define REGS_SIZE 18
+#define SIZE_BUFFER 1024
+#define STDIN_SEM_ID 1
 
 int keyFlag[4] = {0,0}; // index 0: bloq-mayus ; index 1: {1=shift ; 2=CTRL ; 3=alt}
+// el stdin es un array cíclico
+static char stdinArr[SIZE_BUFFER] = {0};  
+static int sizeIn = 0;
+static int startsIn = 0;
 
 const AsciiMap map[] = {
         {'\xFF', 0x20, 0x0, 2}, // CTRL + D (EOF)
@@ -163,10 +170,37 @@ int mapKey(char character, int flags[2]) {
     return '\0';
 }
 
+static void putIn(char c){
+    // caso especial donde se pasa del límite: no se pueden agregar caracteres
+    if (sizeIn >= SIZE_BUFFER-1) return;
+
+    // mete c en el vector cíclico
+    int pos = (startsIn + sizeIn) % SIZE_BUFFER;
+
+    stdinArr[pos] = c;
+    sizeIn++;
+    sem_post(STDIN_SEM_ID);
+}
+
+void initialize_keyboard_driver() {
+    sem_open(STDIN_SEM_ID, 0);
+}
+
+// inspirado en la función de la API de Linux
+int get_stdin() {
+    sem_wait(STDIN_SEM_ID);
+
+    int c = stdinArr[startsIn % SIZE_BUFFER];
+    startsIn++;
+    startsIn = startsIn % SIZE_BUFFER;
+    sizeIn--;
+
+    return c;
+}
+
 void keyboard_handler() {
     char i = getKey();      // llamada a Assembler
     int key = mapKey(i, keyFlag);
-    if(key == -1) printf("EOF!"); // TODO: EOF is (int), but functions send (char)
     switch (i) {
         case '\x3A':    // bloq-mayus
             keyFlag[0] = !keyFlag[0];
@@ -194,7 +228,20 @@ void keyboard_handler() {
             save_regs();
             break;
         default:
-            if (key != '\0') {
+            switch (key)
+            {
+            case '\0':
+                break;
+            case '\x3':
+                set_pending_action(KILL_FOREGROUND);
+                break;
+            case '\x4':
+                set_pending_action(BLOCK_FOREGROUND);
+                break;
+            case '\x5':
+                set_pending_action(FOREGROUND_TO_BACKGROUND);
+                break;
+            default:
                 putIn(key);
             }
             break;

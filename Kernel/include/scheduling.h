@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #define MAX_PROCESS_BLOCKS 64 
+#define MAX_FILE_DESCRIPTORS 16
 #define STACK_SIZE (1 << 12)  /* 4KB */
 #define INVALID_PID (-1)
 #define MAX_PRIORITY 5
@@ -29,7 +30,14 @@ typedef enum
     BLOCKED
 } State;
 
-int create_process(Program program, int argc, char **argv);
+typedef enum {
+    NONE,
+    KILL_FOREGROUND,
+    FOREGROUND_TO_BACKGROUND,
+    BLOCK_FOREGROUND,
+} PendingAction;
+
+int create_process(Program program, int argc, char **argv, int fds[]);
 
 void create_init_process();
 
@@ -55,13 +63,15 @@ void exit(uint64_t return_value);
 
 uint64_t wait_pid(uint64_t pid);
 
-void children_wait();
+void sys_set_fd(int pid, int fd_index, int value);
 
 void save_regs();
 
 void print_saved_regs();
 
 void set_current_quantum(uint64_t q);
+
+void set_pending_action(PendingAction action);
 
 // -------- SO ----------
 

@@ -41,8 +41,6 @@ static Command processes[] = {
     {"filter", "Filtra las vocales del input", (Program)filter},
     {"phylo", "ejecuta programa de phylo", (Program)phylo},
 };
-int foreground_pid = 0;
-int shell_pid = 0;
 
 uint64_t change_priority_cmd(uint64_t argc, char *argv[]) {
     if(argc < 3) {
@@ -134,68 +132,40 @@ void send_to_foreground(int pid) {
         printf_error("cant send init to foreground\n");
     }
     int process_state = sys_get_process_status(pid);
-    if(process_state == 0) {
-        foreground_pid = shell_pid;
-    }
-    else {
+    if(process_state != 0) {
         sys_unblock(pid);
-        foreground_pid = pid;
+        sys_set_fd(pid, STD_IN, STD_IN);
+        printf_color("[shell] running foreground process with pid=%d\n", COLOR_YELLOW, 0, pid);
+        sys_wait_pid(pid);
     }
 }
 
 void shell() {
     printf_color("Bienvenido a la Shell!! ", COLOR_GREEN, 0x000000);
     print_help();
-    shell_pid = sys_get_pid(); 
-    foreground_pid = shell_pid;
 
     do {
-        if(foreground_pid == shell_pid) {
-            printf_color("user@grupo20", COLOR_GREEN, 0x000000);
-            putchar(':');
-            printf_color("~", COLOR_BLUE, 0);
-            printf("$ ");
-        }
+        printf_color("user@grupo20", COLOR_GREEN, 0x000000);
+        putchar(':');
+        printf_color("~", COLOR_BLUE, 0);
+        printf("$ ");
         int break_line = 0;
         int i = 0;
         char command[MAX_BUF] = {0};
         while (!break_line) {
-            char buf[1];
-            char hasRead = sys_read(0, buf, 1);
-            if(foreground_pid != shell_pid && sys_get_process_status(foreground_pid) == 0) {
-                foreground_pid = shell_pid;
-                break;
-            }
-            if (hasRead) {
-                if(foreground_pid != shell_pid) {
-                    if(buf[0] == '\x3') {
-                        printf_color("^C Process terminated pid=%d\n", COLOR_YELLOW, 0, foreground_pid);
-                        sys_kill_process(foreground_pid);
-                        foreground_pid = shell_pid;
-                    }
-                    else if(buf[0] == '\x4') { // TODO maybe ignore its stdout
-                        printf_color("^Z Process blocked and sent to background pid=%d\n", COLOR_YELLOW, 0, foreground_pid);
-                        sys_block(foreground_pid);
-                        foreground_pid = shell_pid;
-                    }
-                    else if(buf[0] == '\x5') { // TODO maybe ignore its stdout 
-                        printf_color("^X Process sent to run in background pid=%d\n", COLOR_YELLOW, 0, foreground_pid);
-                        foreground_pid = shell_pid;
-                    }
-                    break;
-                }
-                if (!(buf[0]== 0x08 && i == 0))
-                    sys_write(1, buf, 1);
-                if (buf[0] == '\n') {
-                    execute(command);
-                    break_line = 1;
-                } else if (buf[0] == 0x08 && i > 0) {
-                    command[i - 1] = 0;
-                    i--;
-                } else if (buf[0] != 0x08) {
-                    command[i] = *buf;
-                    i++;
-                }
+            char buf[2] = {0};
+            sys_read(0, buf, 1);
+            if (!(buf[0]== 0x08 && i == 0) && i < MAX_BUF)
+                sys_write(1, buf, 1);
+            if (buf[0] == '\n') {
+                execute(command);
+                break_line = 1;
+            } else if (buf[0] == 0x08 && i > 0) {
+                command[i - 1] = 0;
+                i--;
+            } else if (buf[0] != 0x08 && i < MAX_BUF) {
+                command[i] = *buf;
+                i++;
             }
         }
     } while (1);
@@ -228,13 +198,16 @@ void execute(char inputBuffer[]) {
     {
         if (strcmp(argv[0], processes[i].title) == 0)
         {
-            int pid = sys_create_process(processes[i].command, argc, argv);
-            const char *mode = "background";
-            if(!send_to_background) {
-                foreground_pid = pid;
-                mode = "foreground";
+            if(send_to_background) {
+                int fds[] = {DEV_NULL, STD_OUT, STD_ERR};
+                int pid = sys_create_process_fd(processes[i].command, argc, argv, fds);
+                printf_color("[shell] Running %s with pid=%d in background...\n", COLOR_YELLOW, 0, argv[0], pid);
             }
-            printf_color("[shell] Running %s with pid=%d in %s...\n", COLOR_YELLOW, 0, argv[0], pid, mode);
+            else {
+                int pid = sys_create_process(processes[i].command, argc, argv);
+                printf_color("[shell] Running %s with pid=%d in foreground...\n", COLOR_YELLOW, 0, argv[0], pid);
+                sys_wait_pid(pid);
+            }
             return;
         }
     }

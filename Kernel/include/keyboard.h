@@ -11,5 +11,7 @@ typedef struct {
 extern char getKey();   // de libasm.asm
 int mapKey(char character, int flags[2]);
 void keyboard_handler();
+void initialize_keyboard_driver();
+int get_stdin();
 
 #endif

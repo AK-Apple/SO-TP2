@@ -130,7 +130,7 @@ SECTION .text
 %endmacro
 
 %macro irqHandlerMaster 1
-	pushAndSaveState
+	pushState
 
 	mov rdi, %1 ; pasaje de parametro
 	call irqDispatcher
@@ -178,7 +178,6 @@ setup_kernel_restart:
 	pushAndSaveState	; guarda registros en updating_regex
 
 	mov rdi, %1 ; pasaje de parametros
-	; mov rsi, updating_regex
 	mov rsi, rsp
 	call exceptionDispatcher
 
@@ -294,13 +293,10 @@ _exception06Handler:
 _int80Handler:
 	pushStateWithoutRax
 
-	mov 	rdi, rax ; pasaje de parametro 1
-	mov 	rsi, rbx ; pasaje de parametro 2
-
-	mov     rax, rdx ;
-	mov     rdx, rcx ; pasaje de parametro 3
-	mov     rcx, rax ; pasaje de parametro 4
-
+	;rdi, rsi, rdx, rcx, r8 y r9
+	mov 	rdi, rax
+	mov 	rsi, rbx
+	xchg 	rdx, rcx
 	call int80Dispacher; llamada a syscall
 
 	; no hacemos lo de out 20h porque es otro tipo de interrupt

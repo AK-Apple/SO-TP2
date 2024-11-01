@@ -11,6 +11,7 @@ Stack stacks[MAX_PROCESS_BLOCKS] = {0};
 uint64_t running_pid = 0;
 CircularList round_robin = {0};
 int remaining_quantum = 0;
+PendingAction pending_action = NONE;
 
 StackedRegisters saved_regs = {0};
 char regs_captured = 0;
@@ -24,6 +25,8 @@ typedef struct ProcessBlock
     Program program;
     int argc;
     char **argv;
+    int file_descriptors[MAX_FILE_DESCRIPTORS];
+    int pid_to_wait;
     StackedRegisters regs;
 } ProcessBlock;
 
@@ -76,7 +79,10 @@ int kill_process(uint64_t pid)
         return -1;
     
     reasign_children(pid);
-
+    int ppid = blocks[pid].parent_pid;
+    if(blocks[ppid].pid_to_wait == pid) {
+        unblock(ppid);
+    }
     blocks[pid].argc = 0;
     blocks[pid].argv = NULL;
     blocks[pid].program = NULL;
@@ -144,7 +150,7 @@ uint64_t schedule(uint64_t running_stack_pointer)
     remaining_quantum = 1;
     blocks[running_pid].stack_pointer = running_stack_pointer;
 
-    if(blocks[running_pid].process_state != UNAVAILABLE) {
+    if(blocks[running_pid].process_state == RUNNING) {
         blocks[running_pid].process_state = READY;
     }
 
@@ -152,6 +158,45 @@ uint64_t schedule(uint64_t running_stack_pointer)
     do {
         next_pid = next(&round_robin);
     } while(blocks[next_pid].process_state == BLOCKED);
+    if(pending_action && blocks[next_pid].file_descriptors[STDIN] == STDIN && next_pid > 1) {
+        int ppid = blocks[next_pid].parent_pid;
+        switch (pending_action)
+        {
+        case KILL_FOREGROUND:
+            printf_color("^C Process terminated pid=%d\n", COLOR_YELLOW, next_pid);
+            kill_process(next_pid);
+            break;
+        case BLOCK_FOREGROUND:
+            printf_color("^Z Process blocked and sent to background pid=%d\n", COLOR_YELLOW, next_pid);
+            block(next_pid);
+            if(blocks[next_pid].file_descriptors[STDIN] == STDIN) {
+                blocks[next_pid].file_descriptors[STDIN] = DEV_NULL;
+            }
+            if(blocks[ppid].pid_to_wait == next_pid) {
+                blocks[ppid].pid_to_wait = 0;
+                unblock(ppid);
+            }
+            break;
+        case FOREGROUND_TO_BACKGROUND:
+            printf_color("^X Process sent to run in background pid=%d\n", COLOR_YELLOW, next_pid);
+            if(blocks[next_pid].file_descriptors[STDIN] == STDIN) {
+                blocks[next_pid].file_descriptors[STDIN] = DEV_NULL;
+            }
+            if(blocks[ppid].pid_to_wait == next_pid) {
+                blocks[ppid].pid_to_wait = 0;
+                unblock(ppid);
+            }
+            break;
+        default:
+
+            break;
+        }
+        pending_action = NONE;
+        // si llamo yield(); aca se rompe todo
+        do {
+            next_pid = next(&round_robin);
+        } while(blocks[next_pid].process_state == BLOCKED);
+    }
 
     blocks[running_pid].regs = *(StackedRegisters *) running_stack_pointer;
     running_pid = next_pid;
@@ -185,7 +230,7 @@ void initializeRegisters(uint64_t new_pid, uint64_t rsp)
     memcpy((void *)rsp, &stackedRegisters, sizeof(struct StackedRegisters));
 }
 
-int create_process(Program program, int argc, char **argv)
+int create_process(Program program, int argc, char **argv, int fds[])
 {
     uint64_t new_pid = request_pid();
     if (new_pid == INVALID_PID)
@@ -222,6 +267,10 @@ int create_process(Program program, int argc, char **argv)
     blocks[new_pid].priority = 1;
     blocks[new_pid].program = program;
     blocks[new_pid].argc = argc;
+    blocks[new_pid].pid_to_wait = 0;
+    blocks[new_pid].file_descriptors[STDIN] = fds[STDIN]; // quiza con un for
+    blocks[new_pid].file_descriptors[STDOUT] = fds[STDOUT];
+    blocks[new_pid].file_descriptors[STDERR] = fds[STDERR];
 
     add(&round_robin, new_pid);
     return new_pid;
@@ -247,11 +296,17 @@ void create_init_process()
     blocks[0].priority = 1;
     blocks[0].argc = 1;
     blocks[0].argv = init_args;
+    blocks[0].file_descriptors[STDIN] = DEV_NULL;
+    blocks[0].file_descriptors[STDOUT] = STDERR;
+    blocks[0].file_descriptors[STDERR] = STDERR;
 
     add(&round_robin, 0);
     // OBS: el proceso INIT va a usar otro stack
 }
 
+void set_pending_action(PendingAction action) {
+    pending_action = action;
+}
 
 int get_processes_count()
 {
@@ -289,6 +344,10 @@ void get_all_processes()
             printf(" : %s\n", blocks[i].argc > 0 ? blocks[i].argv[0] : "UNKNOWN PROCESS");
         }
     }
+}
+
+void foreground_to_background() {
+    
 }
 
 void yield()
@@ -332,6 +391,11 @@ int block(int pid)
     return pid;
 }
 
+void sys_set_fd(int pid, int fd_index, int value) {
+    if(pid > 0)
+        blocks[pid].file_descriptors[fd_index] = value;
+}
+
 int block_no_yield(int pid) {
     if (pid >= MAX_PROCESS_BLOCKS || pid < 1 || blocks[pid].process_state == UNAVAILABLE)
         return -1;
@@ -348,12 +412,12 @@ int unblock(int pid)
     return pid;
 }
 
-// waitpid debería: guardar el estado original y esperar hasta que cambie
 uint64_t wait_pid(uint64_t pid)
 {
-    while(blocks[pid].process_state != UNAVAILABLE) {
-        yield();
-    }
+    if(blocks[pid].process_state == UNAVAILABLE) return pid;
+    int ppid = blocks[pid].parent_pid;
+    blocks[ppid].pid_to_wait = pid;
+    block(ppid);
 
     return pid;
 }
