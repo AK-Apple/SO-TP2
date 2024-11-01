@@ -34,6 +34,7 @@ int64_t test_processes(uint64_t argc, char *argv[]);
 void test_prio();
 int64_t test_sync(uint64_t argc, char *argv[]);
 int64_t test_mm(uint64_t argc, char *argv[]);
+int64_t test_pipe(uint64_t argc, char *argv[]);
 int64_t phylo(uint64_t argc, char *argv[]);
 
 #endif //TPE_COMMAND_H

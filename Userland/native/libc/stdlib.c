@@ -86,6 +86,7 @@ char* itoa(int value, char* result, int base) {
     do {
         tmp_value = value;
         value /= base;
+        result++;
         *ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz" [35 + (tmp_value - value * base)];
     } while ( value );
 

@@ -60,7 +60,7 @@ void exit(uint64_t return_value)
 {
     kill_process(get_pid());
     yield();
-};
+}
 
 void reasign_children(uint64_t pid)
 {
@@ -310,15 +310,7 @@ void set_pending_action(PendingAction action) {
 
 int get_processes_count()
 {
-    int count = 0;
-    for (int i = 0; i < MAX_PROCESS_BLOCKS; i++)
-    {
-        if (blocks[i].process_state != UNAVAILABLE)
-        {
-            count++;
-        }
-    }
-    return count;
+    return current_available_pid_index;
 }
 
 /// --------- Syscalls --------
@@ -344,10 +336,6 @@ void get_all_processes()
             printf(" : %s\n", blocks[i].argc > 0 ? blocks[i].argv[0] : "UNKNOWN PROCESS");
         }
     }
-}
-
-void foreground_to_background() {
-    
 }
 
 void yield()
@@ -421,13 +409,3 @@ uint64_t wait_pid(uint64_t pid)
 
     return pid;
 }
-
-void children_wait() {
-    uint64_t parent_pid = get_pid();
-    for(int i=0; i<MAX_PROCESS_BLOCKS; i++) {
-        if (blocks[i].parent_pid == parent_pid) {
-            wait_pid(i);
-        }
-    }
-}
-// Función no testeada

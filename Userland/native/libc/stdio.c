@@ -4,17 +4,22 @@
 #include <stdarg.h>
 #include "../include/stdlib.h"
 #include "../include/syscalls.h"
+#include "string.h"
 
 #define MAX_BUF 1024
 
 static uint64_t default_foreground_color = 0x00FFFFFF;
 
-static uint64_t vprintf_color(char *fmt, uint64_t foreground, uint64_t background, va_list vars);
-static void print_str(const char * str);
+static uint64_t vfprintf_color(int fd, char *fmt, uint64_t foreground, uint64_t background, va_list vars);
 
 void putchar(char c) {
-    char buf[1] = {c};
-    sys_write(1, buf, 1);
+    char buf[] = {c, 0};
+    sys_write(STD_OUT, buf, 1);
+}
+
+void fputchar(char c, int fd) {
+    char buf[] = {c, 0};
+    sys_write(fd, buf, 1);
 }
 
 void putcharColoured(char c, uint64_t foreground, uint64_t background) {
@@ -64,18 +69,21 @@ void scanf(char * fmt, ...) {
     va_end(args);
 }
 
-static void print_str(const char * str) {
-    uint64_t i = 0;
-    while (str[i]) {
-        putchar(str[i++]);
-    }
-}
-
 uint64_t printf_color(char * fmt, uint64_t foreground, uint64_t background, ...) {
     va_list args;
     va_start(args, background);  
 
-    uint64_t i = vprintf_color(fmt, foreground, background, args);
+    uint64_t i = vfprintf_color(STD_OUT, fmt, foreground, background, args);
+
+    va_end(args);  
+    return i;
+}
+
+uint64_t fprintf_color(int fd, char * fmt, uint64_t foreground, uint64_t background, ...) {
+    va_list args;
+    va_start(args, background);  
+
+    uint64_t i = vfprintf_color(fd, fmt, foreground, background, args);
 
     va_end(args);  
     return i;
@@ -84,11 +92,11 @@ uint64_t printf_color(char * fmt, uint64_t foreground, uint64_t background, ...)
 void printf_error(char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
-    vprintf_color(fmt, COLOR_RED, 0x000000, args);
+    vfprintf_color(STD_OUT, fmt, COLOR_RED, 0x000000, args); // deberia ser STDERR
     va_end(args);
 }
 
-static uint64_t vprintf_color(char *fmt, uint64_t foreground, uint64_t background, va_list vars) {
+static uint64_t vfprintf_color(int fd, char *fmt, uint64_t foreground, uint64_t background, va_list vars) {
     uint64_t i = 0;
 
     if(foreground != default_foreground_color) {
@@ -98,37 +106,41 @@ static uint64_t vprintf_color(char *fmt, uint64_t foreground, uint64_t backgroun
     while (fmt[i]) {
         if (fmt[i] == '%') {
             char buf[MAX_BUF] = {0};
+            uint64_t len = 0;
             switch (fmt[++i]) {
                 case 'u':
-                    uintToBase(va_arg(vars, int), buf, 10);
-                    print_str(buf);
+                    len = uintToBase(va_arg(vars, int), buf, 10);
                     break;
                 case 'd':
-                    itoa(va_arg(vars, int64_t), buf, 10);
-                    print_str(buf);
+                    len = (uint64_t)(itoa(va_arg(vars, int64_t), buf, 10) - buf);
                     break;
                 case 'x':
-                    uintToBase(va_arg(vars, int), buf, 16);
-                    print_str(buf);
+                    len = uintToBase(va_arg(vars, int), buf, 16);
                     break;
                 case 'b':
-                    uintToBase(va_arg(vars, int), buf, 2);
-                    print_str(buf);
+                    len = uintToBase(va_arg(vars, int), buf, 2);
                     break;
                 case 'c':
-                    putchar(va_arg(vars, int));
+                    len = 1;
+                    buf[0] = va_arg(vars, int);
                     break;
-                case 's':
-                    print_str(va_arg(vars, char*));
-                    break;
+                case 's':;
+                    char *str = va_arg(vars, char*);
+                    len = strlen(str);
+                    sys_write(fd, str, len);
+                    i++;
+                    continue;
                 case '%':
-                    putchar('%');
+                    len = 1;
+                    buf[0] = '%';
                     break;
                 default:
                     break;
             }
+            buf[len] = '\0';
+            sys_write(fd, buf, len);
         } else {
-            putchar(fmt[i]);
+            sys_write(fd, &fmt[i], 1);
         }
         i++;
     }
@@ -142,12 +154,17 @@ static uint64_t vprintf_color(char *fmt, uint64_t foreground, uint64_t backgroun
 void printf(char * fmt, ...) {
     va_list args;
     va_start(args, fmt);
-    vprintf_color(fmt, default_foreground_color, 0x000000, args);
+    vfprintf_color(STD_OUT, fmt, default_foreground_color, 0x000000, args);
+    va_end(args);
+}
+
+void fprinf(int fd, char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    vfprintf_color(fd, fmt, default_foreground_color, 0x000000, args);
     va_end(args);
 }
 
 void printInt(int num) {
-    char buffer[40];
-    uintToBase(num, buffer, 10);
-    print_str(buffer);
+    printf("%d", num);
 }

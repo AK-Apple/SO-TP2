@@ -35,6 +35,7 @@ static Command processes[] = {
     {"testprio", "ejecuta test de prioridades", (Program)test_prio},
     {"testsync", "ejecuta test de sincronizacion. count=countdown, sem:0|1", (Program)test_sync, "<count> <sem>"},
     {"testmman", "ejecuta test de memoria. smart:0|1", (Program)test_mm, "<max> <smart>"},
+    {"testpipe", "ejecuta test de named pipes", (Program)test_pipe},
     {"loop", "Imprime su ID con un saludo cada una determinada cantidad de segundos. msg es un mensaje opcional", (Program)endless_loop_print_seconds, "<secs_wait> <msg>"},
     {"wc", "cuenta la cantidad de lineas del stdin terminando con EOF(Ctrl+D)", (Program)wc},
     {"cat", "printea el input", (Program)cat},
@@ -104,6 +105,8 @@ void print_help() {
     printf("Comandos que crean procesos:\n");
     printf_color("<command> &", COLOR_GREEN, 0);
     printf("              : escribir '&' al final del comando para ejecutarlo en background\n");
+    printf_color("<command1> | <command2>", COLOR_GREEN, 0);
+    printf("  : escribir dos comandos separados por '|'  para pipear cmd1 a cmd2 \n");
     for (int i = 0 ; i < sizeof(processes)/sizeof(processes[0]) ; i++) {
         printf_color(processes[i].title, COLOR_ORANGE, 0);
         uint64_t total_len = strlen(processes[i].title);
@@ -171,45 +174,75 @@ void shell() {
     } while (1);
 }
 
-void execute(char inputBuffer[]) {
+void execute(char command_buffer[]) {
     int command_count = sizeof(commands) / sizeof(commands[0]);
-    compact_whitespace(inputBuffer);
-    int argc = charcount(inputBuffer, ' ') + 1;
-    char* argv[argc]; 
-    int j = 0;
-    argv[j++]=inputBuffer;
-    for(int i = 0; inputBuffer[i]!=0; i++){
-        if(inputBuffer[i]==' '){
-            inputBuffer[i]=0;
-            argv[j++]=&(inputBuffer[i+1]);
+    compact_whitespace(command_buffer);
+    int argc_max = charcount(command_buffer, ' ') + 1;
+    char* argv1[argc_max]; 
+    char* argv2[argc_max]; 
+    int argc1 = 0;
+    int argc2 = 0;
+    argv1[argc1++]=command_buffer;
+    int piped = 0;
+    int send_to_background = 0;
+    for(int i = 0; command_buffer[i]; i++){
+        switch (command_buffer[i])
+        {
+        case ' ':
+            command_buffer[i] = 0;
+            if(piped)
+                argv2[argc2++] = &(command_buffer[i+1]); 
+            else if(!send_to_background && command_buffer[i+1] != ' ')
+                argv1[argc1++] = &(command_buffer[i+1]);
+            break;
+        case '|':
+            command_buffer[i] = 0;
+            if(piped) {
+                printf_error("cant have more than one pipe in command\n");
+                return;
+            }
+            piped = 1;
+            break;
+        case '&':
+            command_buffer[i] = 0;
+            if(!piped) 
+                send_to_background = 1;
+            break;
+        default:
+            break;
         }
     }
-    int send_to_background = trim_end(argv[j-1], '&');
-    if(argv[j-1][0] == '\0') argc--;
+    if(argv1[argc1-1][0] == '\0') argc1--;
     for (int i = 0; i < command_count ; i++)
     {
-        if (strcmp(argv[0], commands[i].title) == 0)
+        if (strcmp(argv1[0], commands[i].title) == 0)
         {
-            commands[i].command(argc, argv);
+            commands[i].command(argc1, argv1);
             return;
         }
     }
     for (int i = 0; i < sizeof(processes)/sizeof(processes[0]) ; i++)
     {
-        if (strcmp(argv[0], processes[i].title) == 0)
+        if (strcmp(argv1[0], processes[i].title) == 0)
         {
+            int fds1[] = {STD_IN, STD_OUT, STD_ERR};
+            const char *fg_bg = "foreground";
+            if(piped) {
+                int pipe_id = 0; // TODO: SYSCALL GET PIPE ID
+                int fds2[] = {pipe_id, STD_OUT, STD_ERR};
+                fds1[STD_OUT] = pipe_id;
+                sys_create_process_fd(processes[i].command, argc2, argv2, fds2);
+            }
             if(send_to_background) {
-                int fds[] = {DEV_NULL, STD_OUT, STD_ERR};
-                int pid = sys_create_process_fd(processes[i].command, argc, argv, fds);
-                printf_color("[shell] Running %s with pid=%d in background...\n", COLOR_YELLOW, 0, argv[0], pid);
+                fds1[STD_IN] = DEV_NULL;
+                fg_bg = "background";
             }
-            else {
-                int pid = sys_create_process(processes[i].command, argc, argv);
-                printf_color("[shell] Running %s with pid=%d in foreground...\n", COLOR_YELLOW, 0, argv[0], pid);
+            int pid = sys_create_process_fd(processes[i].command, argc1, argv1, fds1);
+            printf_color("[shell] Running %s with pid=%d in %s...\n", COLOR_YELLOW, 0, argv1[0], pid, fg_bg);
+            if(!send_to_background)
                 sys_wait_pid(pid);
-            }
             return;
         }
     }
-    printf_error("Invalid command '%s', try 'help' command.\n", inputBuffer);
+    printf_error("Invalid command '%s', try 'help' command.\n", command_buffer);
 }

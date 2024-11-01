@@ -67,7 +67,7 @@ void divide(uint64_t argc, char *argv[]) {
         printf("%d / %d = %d\n", a, b, res);    
     }
     else {
-        printf_error("div <a> <b>\n");
+        printf_error("se recibio: '%s' '%s'\nusage: div <a> <b>\n", argv[1], argv[2]);
     }
 }
 

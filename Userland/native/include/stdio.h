@@ -24,5 +24,8 @@ void repeat_char(char c, int count);
 void putchar(char c);
 void putcharColoured(char c, uint64_t foreground, uint64_t background);
 void printf_error(char *fmt, ...);
+void fputchar(char c, int fd);
+void fprinf(int fd, char *fmt, ...);
+uint64_t fprintf_color(int fd, char * fmt, uint64_t foreground, uint64_t background, ...);
 
 #endif //TPE_STDIO_H
