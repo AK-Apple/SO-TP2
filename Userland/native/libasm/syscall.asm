@@ -34,6 +34,9 @@ GLOBAL sys_sem_open
 GLOBAL sys_sem_wait
 GLOBAL sys_sem_post
 GLOBAL sys_sem_close
+GLOBAL sys_create_pipe
+GLOBAL sys_request_pipe
+GLOBAL sys_close_pipe
 
 %macro Syscall 1
 	push    rbp 
@@ -160,6 +163,15 @@ sys_sem_post:
 
 sys_sem_close:
 	Syscall 34
+
+sys_create_pipe:
+	Syscall 35
+
+sys_request_pipe:
+	Syscall 36
+
+sys_close_pipe:
+	Syscall 37
 
 SECTION .data
 std_fds 	dd 		0, 1, 2

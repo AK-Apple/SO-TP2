@@ -73,6 +73,8 @@ void set_current_quantum(uint64_t q);
 
 void set_pending_action(PendingAction action);
 
+int64_t get_fd(int index);
+
 // -------- SO ----------
 
 typedef struct StackedRegisters
@@ -100,10 +102,6 @@ typedef struct StackedRegisters
 } StackedRegisters;
 
 void print_regs(StackedRegisters regs);
-// ------- Assembler Section ---------
 
-// void _change_process(void);
-
-// -------- end SO -------
 
 #endif

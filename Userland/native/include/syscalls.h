@@ -57,4 +57,8 @@ extern int sys_sem_wait(int64_t path);
 extern int sys_sem_post(int64_t path);
 extern int sys_sem_close(int64_t path);
 
+extern int sys_create_pipe(int fd);
+extern int sys_request_pipe();
+extern int sys_close_pipe(int fd);
+
 #endif //TPE_ARQUI_SYSCALLS_H

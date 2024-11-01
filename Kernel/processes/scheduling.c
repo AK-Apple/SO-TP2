@@ -409,3 +409,9 @@ uint64_t wait_pid(uint64_t pid)
 
     return pid;
 }
+
+
+int64_t get_fd(int index){
+    if (index >= MAX_FILE_DESCRIPTORS || index < 0) return DEV_NULL;
+    return blocks[get_pid()].file_descriptors[index];
+}

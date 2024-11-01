@@ -8,6 +8,7 @@
 #include "lib.h"
 #include "interrupts.h"
 #include "keyboard.h"
+#include "pipes.h"
 
 uint64_t screen_x = 0;
 uint64_t screen_y = 0;
@@ -16,16 +17,24 @@ static uint64_t global_foreground_color = 0x00FFFFFF;
 
 // el stdout no se guarda. Solo se guardan las coordenadas de la última posición
 
-int sys_read(int fd, char* buf, int count){
+int sys_read(int fd_index, char* buf, int count){
+    int fd = get_fd(fd_index);
     int i=0;
-    if (fd == STDIN){
-        for(i=0; i<count; i++){
+    if (fd == STDIN)
+    {
+        for (i=0; i<count; i++)
+        {
             buf[i] = get_stdin();
             if ((int) buf[i] == -1)
 				return i + 1;
         }
     }
-    return i;
+    
+    if (fd > 2)
+    {
+        return read_pipe(fd, buf, count);
+    }
+    return 0;
 }
 
 
@@ -188,16 +197,25 @@ void putErr(char c){
 
 // inspirado en la función de la API de Linux
 void sys_write(int fd, const char* buf, int count){
-    if (fd==1){
-        for(int i=0; i<count; i++){
+    if (fd==1)
+    {
+        for(int i=0; i<count; i++)
+        {
             putOut(buf[i]);
         }
     }
-    if (fd==2){
-        for(int i=0; i<count; i++){
+    if (fd==2)
+    {
+        for(int i=0; i<count; i++)
+        {
             putErr(buf[i]);
         }
     }
+    if (fd > 2)
+    {
+        read_pipe(fd, buf, count);
+    }
+    return;
 }
 
 

@@ -1,16 +1,11 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "lib.h"
+#include "bounded_queue.h"
 #include "IO.h"
 
 #define MAX_SIZE 32 // Maximum size of the queue
 
-typedef struct {
-    int data[MAX_SIZE]; // Array to hold queue elements
-    int front;          // Index of the front element
-    int rear;           // Index of the rear element
-    int size;           // Current size of the queue
-} queue_t;
 
 // Initialize the queue
 void init_queue(queue_t* q) {
@@ -51,3 +46,4 @@ uint8_t dequeue(queue_t* q, int64_t* value) {
     q->size--;
     return 1; // Indicate success
 }
+

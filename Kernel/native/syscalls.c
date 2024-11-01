@@ -9,6 +9,7 @@
 #include "scheduling.h"
 #include "memory_allocator.h"
 #include "semaphores.h"
+#include "pipes.h"
 
 
 typedef uint64_t (*Syscall)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t);
@@ -63,6 +64,11 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
         (Syscall)sem_wait, // Syscall 32
         (Syscall)sem_post, // Syscall 33
         (Syscall)sem_close, // Syscall 34
+
+        (Syscall)create_pipe, // Syscall 35
+        (Syscall)request_pipe, // Syscall 36
+        (Syscall)close_pipe, // Syscall 37
+
     };
     if(id >= sizeof(syscalls) / sizeof(syscalls[0])) {
         printf_error("[KERNEL] invalid syscall id:%d\n", id);
