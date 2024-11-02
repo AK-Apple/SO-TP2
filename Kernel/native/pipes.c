@@ -54,7 +54,7 @@ char pipe_is_valid(int pipe)
 
 int8_t create_pipe(int fd)
 {
-    printf("Creando pipe....\n");
+    // printf("Creando pipe....\n");
     int64_t pipe = fd_to_pipe(fd);
     if (pipe > MAX_PIPES || pipe < 0 || pipes[pipe].available == 1) return 0;
 
@@ -126,6 +126,11 @@ int64_t write_pipe(int fd, const char* buf, int count)
         written += enqueue_string2(&pipes[pipe].buffer, buf, count);
         if(written < count)
         {
+            if (pipes[pipe].blocked_pid != -1)
+            {
+                unblock(pipes[pipe].blocked_pid);
+                pipes[pipe].blocked_pid = -1;
+            }
             // printf("escrito: %d. A escribir: %d", written, count);
             int64_t current_pid = get_pid();
             pipes[pipe].blocked_pid = current_pid;
@@ -141,6 +146,6 @@ int64_t write_pipe(int fd, const char* buf, int count)
         unblock(pipes[pipe].blocked_pid);
         pipes[pipe].blocked_pid = -1;
     }
-
+    // printf("Termino de escribir. Retorno: %d \n", count);
     return count;
 }

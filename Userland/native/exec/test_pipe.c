@@ -9,8 +9,8 @@ int64_t read_test(uint64_t argc, char *argv[])  {
     char buffer[20] = { 0 };
     sys_read(0, buffer, 10);
     sys_write(1, buffer, 10);
-    sys_read(0, buffer, 9);
-    sys_write(1, buffer, 10);
+    sys_read(0, buffer, 8);
+    sys_write(1, buffer, 8);
     return 0;
 }
 
@@ -22,7 +22,7 @@ int64_t write_test(uint64_t argc, char *argv[])  {
 }
 
 int64_t test_pipe(uint64_t argc, char *argv[]) {
-    printf("TEST DE PIPES!!");
+    printf("TEST DE PIPES!!\n");
 
 
     sys_create_pipe(TEST_PIPE_FD);
@@ -33,5 +33,6 @@ int64_t test_pipe(uint64_t argc, char *argv[]) {
     int pid2 = sys_create_process_fd(write_test, 0, 0, fds2);
     // sys_wait_pid(pid1);
     // sys_wait_pid(pid2);
+    printf("pid read_test: %d\npid write_test: %d\n", pid1, pid2);
     return 0;
 }

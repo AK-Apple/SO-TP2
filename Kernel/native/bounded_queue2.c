@@ -80,8 +80,9 @@ uint64_t dequeue_to_buffer2(queue2_t* q, char* buffer, uint64_t size) {
         return 0;  // Failure
     }
 
+
     // Store the size of the data to be removed
-    uint64_t to_return_size = q->size;
+    uint64_t to_return_size = size > q->size ? q->size : size;
 
     // Determine how much can be copied in one go
     int available_space = MAX_SIZE - q->front;
@@ -98,7 +99,7 @@ uint64_t dequeue_to_buffer2(queue2_t* q, char* buffer, uint64_t size) {
 
     // Clear the queue by resetting its state
     q->front = (q->front + to_return_size) % MAX_SIZE;
-    q->size = 0; // Set the size to zero since the queue is now empty
+    q->size -= to_return_size;
 
     return to_return_size; // Success
 }
