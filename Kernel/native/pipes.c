@@ -22,12 +22,12 @@ uint64_t available_pipes[MAX_PIPES] = {0};
 uint64_t current_available_pipe_index = 0;
 uint64_t biggest_pipe_id = 0;
 
-int64_t pipe_to_fd(int64_t pipe)
+static int64_t pipe_to_fd(int64_t pipe)
 {
     return pipe >= 0 ? pipe + 3 : pipe;
 }
 
-int64_t fd_to_pipe(int64_t fd)
+static int64_t fd_to_pipe(int64_t fd)
 {
     return fd >= 3 ? fd - 3 : fd;
 }
@@ -52,8 +52,9 @@ char pipe_is_valid(int pipe)
     return pipe >=0 && pipe < MAX_PIPES && pipes[pipe].available;
 }
 
-int8_t create_pipe(int fd)
+int8_t create_pipe()
 {
+    int fd = request_pipe();
     int64_t pipe = fd_to_pipe(fd);
     if (pipe > MAX_PIPES || pipe < 0 || pipes[pipe].available == 1) return 0;
 
@@ -65,13 +66,14 @@ int8_t create_pipe(int fd)
     pipes[pipe].blocked_pid = -1;
 
     sem_post(MUTEX);
-    return 1;
+    return fd;
 }
 
 int8_t close_pipe(int fd) {
     int64_t pipe = fd_to_pipe(fd);
     if (!pipe_is_valid(pipe)) return 0;
-
+    char eof[] = {EOF, 0};
+    write_pipe(fd, eof, 2);
     pipes[pipe].available = 0;
     available_pipes[--current_available_pipe_index] = pipe;
     return 1;
@@ -81,8 +83,7 @@ int64_t read_pipe(int fd, char* buf, int count)
 {
     int64_t pipe = fd_to_pipe(fd);
 
-    if (!pipe_is_valid(pipe)) {
-        printf_error("[kernel] cant read a closed pipe [%d]%d\n", fd, pipe);
+    if (!pipe_is_valid(pipe) && is_empty2(&pipes[pipe].buffer)) {
         buf[0] = EOF;
         buf[1] = '\0';
         return 0;

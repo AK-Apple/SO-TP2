@@ -15,6 +15,6 @@ int sem_post(sem_t id);
 
 int sem_close(sem_t id);
 
-
+void force_enqueue(sem_t id, int pid);
 
 #endif

@@ -5,6 +5,8 @@
 #include "lib.h"
 #include "IO.h"
 #include "interrupts.h"
+#include "pipes.h"
+#include "semaphores.h"
 
 Stack stacks[MAX_PROCESS_BLOCKS] = {0}; 
 
@@ -90,6 +92,14 @@ int kill_process(uint64_t pid)
     blocks[pid].priority = 0;
     blocks[pid].process_state = UNAVAILABLE;
     blocks[pid].stack_pointer = 0;
+
+    for(int i = 0; i < MAX_FILE_DESCRIPTORS; i++) {
+        int pipe_id = blocks[pid].file_descriptors[i];
+        if(pipe_id >= STD_FILE_DESCRIPTORS) {
+            close_pipe(pipe_id);
+        }
+        blocks[pid].file_descriptors[i] = DEV_NULL;
+    }
     free_pid(pid);
     delete_value(&round_robin, pid);
 
@@ -268,12 +278,10 @@ int create_process(Program program, int argc, char **argv, int fds[])
     blocks[new_pid].program = program;
     blocks[new_pid].argc = argc;
     blocks[new_pid].pid_to_wait = 0;
-    blocks[new_pid].file_descriptors[STDIN] = fds[STDIN]; // TODO: quiza con un for
-    blocks[new_pid].file_descriptors[STDOUT] = fds[STDOUT];
-    blocks[new_pid].file_descriptors[STDERR] = fds[STDERR];
+    for(int i = 0; i < STD_FILE_DESCRIPTORS; i++) {
+        blocks[new_pid].file_descriptors[i] = fds[i];
+    }
 
-    // printf("fds almacenados %d, %d y %d\n", blocks[new_pid].file_descriptors[STDIN], blocks[new_pid].file_descriptors[STDOUT] = fds[STDOUT], blocks[new_pid].file_descriptors[STDERR] = fds[STDERR]);
-    
     add(&round_robin, new_pid);
     return new_pid;
 }
@@ -382,8 +390,12 @@ int block(int pid)
 }
 
 void sys_set_fd(int pid, int fd_index, int value) {
-    if(pid > 0)
+    if(pid > 0) {
         blocks[pid].file_descriptors[fd_index] = value;
+        if(fd_index == STDIN && value == STDIN) {
+            force_enqueue(1, pid);
+        }
+    }
 }
 
 int block_no_yield(int pid) {

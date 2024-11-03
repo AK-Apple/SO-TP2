@@ -66,7 +66,7 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
         (Syscall)sem_close, // Syscall 34
 
         (Syscall)create_pipe, // Syscall 35
-        (Syscall)request_pipe, // Syscall 36
+        (Syscall)MISSING_SYSCALL, // Syscall 36 (eliminada)
         (Syscall)close_pipe, // Syscall 37
 
     };

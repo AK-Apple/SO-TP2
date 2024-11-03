@@ -90,10 +90,12 @@ static void add_philosopher() {
     sys_sem_wait(mutex_sem_id);
     int i = philosopher_count;
     if(i >= MAX_PHILOSOPHER_COUNT) {
+        sys_sem_post(mutex_sem_id);
         printf_error("max phi count\n");
         return;
     }
     if(sys_sem_open(philosopher_sem_id(i), 0) == SEM_ERROR) {
+        sys_sem_post(mutex_sem_id);
         printf_error("error\n");
         return;
     }
@@ -101,8 +103,10 @@ static void add_philosopher() {
     itoa(i, philosopher_i_str, 10);
     char *argv_phi[] = {"philosopher", philosopher_i_str};
     pids[i] = sys_create_process((Program)philosopher, sizeof(argv_phi)/sizeof(argv_phi[0]), argv_phi);
-    if(pids[i] == -1)
+    if(pids[i] == -1) {
+        sys_sem_post(mutex_sem_id);
         return;
+    }
     philosopher_count++;
     print_state();
     sys_sem_post(mutex_sem_id);

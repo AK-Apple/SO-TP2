@@ -92,7 +92,7 @@ uint64_t fprintf_color(int fd, char * fmt, uint64_t foreground, uint64_t backgro
 void printf_error(char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
-    vfprintf_color(STD_OUT, fmt, COLOR_RED, 0x000000, args); // deberia ser STDERR
+    vfprintf_color(STD_ERR, fmt, default_foreground_color, 0x000000, args); 
     va_end(args);
 }
 

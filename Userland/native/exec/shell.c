@@ -13,8 +13,6 @@
 
 #define MAX_BUF 1024
 
-#define SHELL_PIPE 5
-
 static Command commands[] = {
     {"help", "Muestra la lista de comandos.", (Program)print_help},
     {"song", "pone musica con beeps. Con song_id:1|2|3", (Program)play_music_cmd, "<song_id>"},
@@ -133,23 +131,29 @@ void print_help() {
     printf(" : para guardar registros\n");
 }
 
-void send_to_foreground(int pid) {
+int64_t send_to_foreground(uint64_t argc, char *argv[]) {
+    if(argc < 1) {
+        printf_error("usage: fg <pid>\n");
+        return -1;
+    }
+    int pid = atoi(argv[1]);
     if(pid == 0) {
         printf_error("cant send init to foreground\n");
+        return -1;
     }
     int process_state = sys_get_process_status(pid);
     if(process_state != 0) {
-        sys_unblock(pid);
         sys_set_fd(pid, STD_IN, STD_IN);
+        sys_unblock(pid);
         printf_color("[shell] running foreground process with pid=%d\n", COLOR_YELLOW, 0, pid);
         sys_wait_pid(pid);
     }
+    return 0;
 }
 
 void shell() {
     printf_color("Bienvenido a la Shell!! ", COLOR_GREEN, 0x000000);
     print_help();
-    sys_create_pipe(SHELL_PIPE);
 
     do {
         printf_color("user@grupo20", COLOR_GREEN, 0x000000);
@@ -176,7 +180,6 @@ void shell() {
             }
         }
     } while (1);
-    sys_close_pipe(SHELL_PIPE);
 }
 
 static Program find_command(Command command_array[], int command_count, char *name) {
@@ -239,12 +242,11 @@ void execute(char command_buffer[]) {
         int fds1[] = {STD_IN, STD_OUT, STD_ERR};
         const char *fg_bg = "foreground";
         int pid_piped = 0;
+        int shell_pipe = 0;
         if(piped) {
-            int pipe_id = SHELL_PIPE; // TODO: SYSCALL GET PIPE ID
-            int fds2[] = {pipe_id, STD_OUT, STD_ERR};
-            fds1[STD_OUT] = pipe_id;
-            sys_close_pipe(pipe_id);
-            sys_create_pipe(pipe_id);
+            shell_pipe = sys_create_pipe();
+            int fds2[] = {shell_pipe, STD_OUT, STD_ERR};
+            fds1[STD_OUT] = shell_pipe;
             Program process2 = find_command(processes, sizeof(processes) / sizeof(processes[0]), argv2[0]);
             if(process2 == NULL) {
                 printf_error("[shell] second comand is invalid '%s'\n", argv2[0]);
@@ -260,8 +262,10 @@ void execute(char command_buffer[]) {
         printf_color("[shell] Running %s with pid=%d in %s...\n", COLOR_YELLOW, 0, argv1[0], pid, fg_bg);
         if(!send_to_background) 
             sys_wait_pid(pid);
-        if(piped)
+        if(piped) {
             sys_wait_pid(pid_piped);
+            sys_close_pipe(shell_pipe);
+        }
     }
     else {
         printf_error("[shell] invalid command '%s', try 'help' command\n", argv1[0]);
