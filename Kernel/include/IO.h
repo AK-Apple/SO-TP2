@@ -8,6 +8,7 @@
 #define STDOUT 1
 #define STDERR 2
 #define DEV_NULL (-1)
+#define EOF ((int)(-1))
 
 #define COLOR_RED       0x00FF0000
 #define COLOR_YELLOW    0x00CDFF00

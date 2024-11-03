@@ -147,9 +147,9 @@ void send_to_foreground(int pid) {
 }
 
 void shell() {
-    sys_create_pipe(SHELL_PIPE);
     printf_color("Bienvenido a la Shell!! ", COLOR_GREEN, 0x000000);
     print_help();
+    sys_create_pipe(SHELL_PIPE);
 
     do {
         printf_color("user@grupo20", COLOR_GREEN, 0x000000);
@@ -176,10 +176,21 @@ void shell() {
             }
         }
     } while (1);
+    sys_close_pipe(SHELL_PIPE);
+}
+
+static Program find_command(Command command_array[], int command_count, char *name) {
+    for (int i = 0; i < command_count ; i++)
+    {
+        if (strcmp(name, command_array[i].title) == 0)
+        {
+            return command_array[i].command;
+        }
+    }
+    return NULL;
 }
 
 void execute(char command_buffer[]) {
-    int command_count = sizeof(commands) / sizeof(commands[0]);
     compact_whitespace(command_buffer);
     int argc_max = charcount(command_buffer, ' ') + 1;
     char* argv1[argc_max]; 
@@ -217,36 +228,42 @@ void execute(char command_buffer[]) {
         }
     }
     if(argv1[argc1-1][0] == '\0') argc1--;
-    for (int i = 0; i < command_count ; i++)
-    {
-        if (strcmp(argv1[0], commands[i].title) == 0)
-        {
-            commands[i].command(argc1, argv1);
-            return;
-        }
+    Program command = find_command(commands, sizeof(commands) / sizeof(commands[0]), argv1[0]);
+    if(command) {
+        command(argc1, argv1);
+        return;
     }
-    for (int i = 0; i < sizeof(processes)/sizeof(processes[0]) ; i++)
-    {
-        if (strcmp(argv1[0], processes[i].title) == 0)
-        {
-            int fds1[] = {STD_IN, STD_OUT, STD_ERR};
-            const char *fg_bg = "foreground";
-            if(piped) {
-                int pipe_id = SHELL_PIPE; // TODO: SYSCALL GET PIPE ID
-                int fds2[] = {pipe_id, STD_OUT, STD_ERR};
-                fds1[STD_OUT] = pipe_id;
-                sys_create_process_fd(processes[i].command, argc2, argv2, fds2);
+
+    Program process1 = find_command(processes, sizeof(processes) / sizeof(processes[0]), argv1[0]);
+    if(process1) {
+        int fds1[] = {STD_IN, STD_OUT, STD_ERR};
+        const char *fg_bg = "foreground";
+        int pid_piped = 0;
+        if(piped) {
+            int pipe_id = SHELL_PIPE; // TODO: SYSCALL GET PIPE ID
+            int fds2[] = {pipe_id, STD_OUT, STD_ERR};
+            fds1[STD_OUT] = pipe_id;
+            sys_close_pipe(pipe_id);
+            sys_create_pipe(pipe_id);
+            Program process2 = find_command(processes, sizeof(processes) / sizeof(processes[0]), argv2[0]);
+            if(process2 == NULL) {
+                printf_error("[shell] second comand is invalid '%s'\n", argv2[0]);
+                return;
             }
-            if(send_to_background) {
-                fds1[STD_IN] = DEV_NULL;
-                fg_bg = "background";
-            }
-            int pid = sys_create_process_fd(processes[i].command, argc1, argv1, fds1);
-            printf_color("[shell] Running %s with pid=%d in %s...\n", COLOR_YELLOW, 0, argv1[0], pid, fg_bg);
-            if(!send_to_background)
-                sys_wait_pid(pid);
-            return;
+            pid_piped = sys_create_process_fd(process2, argc2, argv2, fds2);
         }
+        if(send_to_background) {
+            fds1[STD_IN] = DEV_NULL;
+            fg_bg = "background";
+        }
+        int pid = sys_create_process_fd(process1, argc1, argv1, fds1);
+        printf_color("[shell] Running %s with pid=%d in %s...\n", COLOR_YELLOW, 0, argv1[0], pid, fg_bg);
+        if(!send_to_background) 
+            sys_wait_pid(pid);
+        if(piped)
+            sys_wait_pid(pid_piped);
     }
-    printf_error("Invalid command '%s', try 'help' command.\n", command_buffer);
+    else {
+        printf_error("[shell] invalid command '%s', try 'help' command\n", argv1[0]);
+    }    
 }

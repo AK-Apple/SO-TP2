@@ -31,9 +31,10 @@ int wc(int argc, char *argv[]) {
 
 int cat(int argc, char *argv[]) {
     int input_char = 0;
-    while((input_char = getchar()) != EOF) {
+    do {
+        input_char = getchar();
         putchar(input_char);
-    }
+    } while(input_char != EOF);
     return 0;
 }
 
@@ -51,6 +52,7 @@ int64_t echo_cmd(uint64_t argc, char *argv[]) {
         printf("%s ", argv[i]);
     }
     printf("\n");
+    putchar(EOF);
     return 0;
 }
 

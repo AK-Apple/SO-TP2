@@ -29,11 +29,15 @@ int sys_read(int fd_index, char* buf, int count){
             if ((int) buf[i] == -1)
 				return i + 1;
         }
+        return i;
     }
-    
-    if (fd > 2)
+    else if (fd > 2)
     {
         return read_pipe(fd, buf, count);
+    }
+    else if(fd == DEV_NULL) {
+        buf[0] = EOF;
+        buf[1] = '\0';
     }
     return 0;
 }
@@ -138,6 +142,8 @@ void putCharColoured(char c, uint64_t foreGround, uint64_t backGround) {
             break;
         case 0x08:
             deleteCharAt(&screen_x, &screen_y, backGround);
+            break;
+        case EOF:
             break;
         default:
             putCharAt(c, &screen_x, &screen_y, foreGround, backGround);
