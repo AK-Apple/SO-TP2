@@ -6,13 +6,14 @@
 #include "../include/stdio.h"
 #include "../include/stdlib.h"
 #include "../include/command.h"
+#include "shared.h"
 #define MINOR_WAIT 10000000 // TODO: Change this value to prevent a process from flooding the screen
 #define WAIT 100000000      // TODO: Change this value to make the wait long enough to see theese processes beeing run at least twice
 
 #define TOTAL_PROCESSES 3
-#define LOWEST 1  // TODO: Change as required
-#define MEDIUM 3  // TODO: Change as required
-#define HIGHEST 5 // TODO: Change as required
+#define LOWEST PRIORITY_LOW  
+#define MEDIUM PRIORITY_MID  
+#define HIGHEST PRIORITY_HIGH 
 
 int64_t prio[TOTAL_PROCESSES] = {LOWEST, MEDIUM, HIGHEST};
 
@@ -57,7 +58,7 @@ void test_prio() {
   printf("\nKILLING...\n");
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
-    sys_kill_process(pids[i]);
+    sys_kill_process(pids[i], 0);
 
 }
 

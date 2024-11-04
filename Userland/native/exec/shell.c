@@ -9,6 +9,7 @@
 #include "../include/string.h"
 #include "../include/sounds.h"
 #include "../include/test_util.h"
+#include "shared.h"
 
 
 #define MAX_BUF 1024
@@ -26,7 +27,7 @@ static Command commands[] = {
     {"mem", "Imprime el estado de la memoria. Muestra la distribucion |size:bytes|size:free, despues stats", (Program)print_meminfo_cmd},
     {"fg", "manda un proceso a foreground", (Program)send_to_foreground, "<pid>"},
     {"block", "Cambia el estado de un proceso entre bloqueado y listo dado su PID.", (Program)block_cmd, "<pid>"},
-    {"nice", "Cambia la prioridad de un proceso dado su PID y la nueva prioridad. prio:1:2:3:4:5", (Program)change_priority_cmd, "<pid> <prio>"},
+    {"nice", "Cambia la prioridad de un proceso dado su PID y la nueva prioridad. prio:1=low ; 2=mid ; 3=high", (Program)change_priority_cmd, "<pid> <prio>"},
 };
 static Command processes[] = {
     {"testproc", "ejecuta test de proceso", (Program)test_processes, "<max_proc>"},
@@ -55,7 +56,7 @@ uint64_t change_priority_cmd(uint64_t argc, char *argv[]) {
         printf_error("invalid pid %s\n", argv[1]);
         return 1;
     }
-    if(priority < 0 || priority > 5) {
+    if(priority <= PRIORITY_NONE || priority > PRIORITY_HIGH) {
         printf_error("invalid priority %s\n", argv[2]);
         return 1;
     }
@@ -149,6 +150,7 @@ int64_t send_to_foreground(uint64_t argc, char *argv[]) {
     int process_state = sys_get_process_status(pid);
     if(process_state != 0) {
         sys_set_fd(pid, STD_IN, STD_IN);
+        sys_change_priority(pid, PRIORITY_HIGH);
         sys_unblock(pid);
         printf_color("[shell] running foreground process with pid=%d\n", COLOR_YELLOW, 0, pid);
         sys_wait_pid(pid);
@@ -264,9 +266,11 @@ void execute(char command_buffer[]) {
         }
         int pid = sys_create_process_fd(process1, argc1, argv1, fds1);
         printf_color("[shell] Running %s with pid=%d in %s...\n", COLOR_YELLOW, 0, argv1[0], pid, fg_bg);
-        if(!send_to_background) 
+        if(!send_to_background) {
+            sys_change_priority(pid, PRIORITY_HIGH);
             sys_wait_pid(pid);
-        if(piped) {
+        }
+        if(piped && sys_get_process_status(pid) == 0) {
             sys_wait_pid(pid_piped);
             sys_close_pipe(shell_pipe);
         }

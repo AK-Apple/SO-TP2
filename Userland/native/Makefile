@@ -20,7 +20,7 @@ $(MODULE): $(TOTAL_OBJ)
 	$(LD) $(LDFLAGS) -T sampleCodeModule.ld --oformat=elf64-x86-64 -o ../0000-sampleCodeModule.elf $^
 
 %.o: %.c
-	$(GCC) $(GCCFLAGS) -I./include -c $< -o $@
+	$(GCC) $(GCCFLAGS) -I./include -I../../Shared -c $< -o $@
 
 %.o : %.asm
 	$(ASM) $(ASMFLAGS) $< -o $@

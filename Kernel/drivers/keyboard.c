@@ -225,7 +225,6 @@ void keyboard_handler() {
             break;
         case '\x38':    // left-alt pressed (guarda registros)
             keyFlag[1] = 3;
-            // getRegs();
             save_regs();
             break;
         default:

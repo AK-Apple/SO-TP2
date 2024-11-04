@@ -41,7 +41,7 @@ int create_process(Program program, int argc, char **argv, int fds[]);
 
 void create_init_process();
 
-int kill_process(uint64_t pid);
+int kill_process(uint64_t pid, int recursive);
 
 int64_t get_pid();
 

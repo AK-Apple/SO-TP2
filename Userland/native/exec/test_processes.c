@@ -53,7 +53,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
         switch (action) {
           case 0:
             if (p_rqs[rq].state == RUNNING || p_rqs[rq].state == BLOCKED) {
-              if (sys_kill_process(p_rqs[rq].pid) == -1) {
+              if (sys_kill_process(p_rqs[rq].pid, 0) == -1) {
                 printf_error("test_processes: ERROR killing process\n");
                 return -1;
               }

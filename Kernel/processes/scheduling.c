@@ -1,17 +1,18 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "scheduling.h"
-#include "round_robin.h"
+// #include "round_robin.h"
 #include "lib.h"
 #include "IO.h"
 #include "interrupts.h"
 #include "pipes.h"
 #include "semaphores.h"
+#include "scheduler.h"
 
 Stack stacks[MAX_PROCESS_BLOCKS] = {0}; 
 
 uint64_t running_pid = 0;
-CircularList round_robin = {0};
+// CircularList round_robin = {0};
 int remaining_quantum = 0;
 PendingAction pending_action = NONE;
 
@@ -60,22 +61,25 @@ ProcessBlock blocks[MAX_PROCESS_BLOCKS] = {0};
 
 void exit(uint64_t return_value)
 {
-    kill_process(get_pid());
+    kill_process(get_pid(), 0);
     yield();
 }
 
-void reasign_children(uint64_t pid)
+static void reasign_children(uint64_t pid, int recursive)
 {
     for (int i = 0; i < MAX_PROCESS_BLOCKS; i++)
     {
         if (blocks[i].parent_pid == pid)
         {
-            blocks[i].parent_pid = 0;
+            if(recursive)
+                kill_process(i, recursive);
+            else 
+                blocks[i].parent_pid = 0;
         }
     }
 }
 
-int kill_process(uint64_t pid)
+int kill_process(uint64_t pid, int recursive)
 {
     if (pid >= MAX_PROCESS_BLOCKS || pid < 1)
         return -1;
@@ -84,7 +88,7 @@ int kill_process(uint64_t pid)
         setup_kernel_restart();
     }
     
-    reasign_children(pid);
+    reasign_children(pid, recursive);
     int ppid = blocks[pid].parent_pid;
     if(blocks[ppid].pid_to_wait == pid) {
         unblock(ppid);
@@ -93,6 +97,7 @@ int kill_process(uint64_t pid)
     blocks[pid].argv = NULL;
     blocks[pid].program = NULL;
     blocks[pid].parent_pid = 0;
+    int priority = blocks[pid].priority;
     blocks[pid].priority = 0;
     blocks[pid].process_state = UNAVAILABLE;
     blocks[pid].stack_pointer = 0;
@@ -105,7 +110,8 @@ int kill_process(uint64_t pid)
         blocks[pid].file_descriptors[i] = DEV_NULL;
     }
     free_pid(pid);
-    delete_value(&round_robin, pid);
+    scheduler_remove(priority, pid);
+    // delete_value(&round_robin, pid);
 
     return pid;
 }
@@ -161,31 +167,30 @@ uint64_t schedule(uint64_t running_stack_pointer)
         remaining_quantum--;
         return running_stack_pointer;
     }
-    remaining_quantum = 1;
+    remaining_quantum = scheduler_get_quantum(blocks[running_pid].priority);
     blocks[running_pid].stack_pointer = running_stack_pointer;
 
     if(blocks[running_pid].process_state == RUNNING) {
         blocks[running_pid].process_state = READY;
     }
 
-    uint64_t next_pid = 0;
-    do {
-        next_pid = next(&round_robin);
-    } while(blocks[next_pid].process_state == BLOCKED);
-    if(pending_action && blocks[next_pid].file_descriptors[STDIN] == STDIN && next_pid > 1) {
+    uint64_t next_pid = scheduler_next_pid();
+    // do {
+    //     next_pid = next(&round_robin);
+    // } while(blocks[next_pid].process_state == BLOCKED);
+    if(pending_action && blocks[next_pid].file_descriptors[STDIN] == STDIN && next_pid > 1 && blocks[next_pid].priority == PRIORITY_HIGH) {
         int ppid = blocks[next_pid].parent_pid;
         switch (pending_action)
         {
         case KILL_FOREGROUND:
             printf_color("^C Process terminated pid=%d\n", COLOR_YELLOW, next_pid);
-            kill_process(next_pid);
+            kill_process(next_pid, 1);
             break;
         case BLOCK_FOREGROUND:
             printf_color("^Z Process blocked and sent to background pid=%d\n", COLOR_YELLOW, next_pid);
             block(next_pid);
-            if(blocks[next_pid].file_descriptors[STDIN] == STDIN) {
-                blocks[next_pid].file_descriptors[STDIN] = DEV_NULL;
-            }
+            blocks[next_pid].file_descriptors[STDIN] = DEV_NULL;
+            change_priority(next_pid, PRIORITY_MID);
             if(blocks[ppid].pid_to_wait == next_pid) {
                 blocks[ppid].pid_to_wait = 0;
                 unblock(ppid);
@@ -193,9 +198,8 @@ uint64_t schedule(uint64_t running_stack_pointer)
             break;
         case FOREGROUND_TO_BACKGROUND:
             printf_color("^X Process sent to run in background pid=%d\n", COLOR_YELLOW, next_pid);
-            if(blocks[next_pid].file_descriptors[STDIN] == STDIN) {
-                blocks[next_pid].file_descriptors[STDIN] = DEV_NULL;
-            }
+            blocks[next_pid].file_descriptors[STDIN] = DEV_NULL;
+            change_priority(next_pid, PRIORITY_MID);
             if(blocks[ppid].pid_to_wait == next_pid) {
                 blocks[ppid].pid_to_wait = 0;
                 unblock(ppid);
@@ -206,11 +210,12 @@ uint64_t schedule(uint64_t running_stack_pointer)
             break;
         }
         pending_action = NONE;
-        // si llamo yield(); aca se rompe todo
-        do {
-            next_pid = next(&round_robin);
-        } while(blocks[next_pid].process_state == BLOCKED);
+        // do {
+        //     next_pid = next(&round_robin);
+        // } while(blocks[next_pid].process_state == BLOCKED);
+        next_pid = scheduler_next_pid();
     }
+    // printf("[%d]", next_pid);
 
     blocks[running_pid].regs = *(StackedRegisters *) running_stack_pointer;
     running_pid = next_pid;
@@ -278,7 +283,7 @@ int create_process(Program program, int argc, char **argv, int fds[])
     blocks[new_pid].stack_pointer = rsp;
     blocks[new_pid].process_state = READY;
     blocks[new_pid].parent_pid = running_pid;
-    blocks[new_pid].priority = 1;
+    blocks[new_pid].priority = PRIORITY_MID;
     blocks[new_pid].program = program;
     blocks[new_pid].argc = argc;
     blocks[new_pid].pid_to_wait = 0;
@@ -286,7 +291,8 @@ int create_process(Program program, int argc, char **argv, int fds[])
         blocks[new_pid].file_descriptors[i] = fds[i];
     }
 
-    add(&round_robin, new_pid);
+    scheduler_insert(PRIORITY_MID, new_pid);
+    // add(&round_robin, new_pid);
     return new_pid;
 }
 
@@ -296,26 +302,27 @@ void create_init_process()
     running_pid = 0;
     int pid = request_pid(); 
     if(pid != 0) {
-        round_robin.current_index = 0;
-        round_robin.size = 0;
+        // round_robin.current_index = 0;
+        // round_robin.size = 0;
         memset(blocks, 0, sizeof(ProcessBlock) * MAX_PROCESS_BLOCKS);
         memset(available_pids, 0, sizeof(available_pids));
         biggest_pid = 0;
         current_available_pid_index = 0;
         pid = request_pid();
     }
-    blocks[0].stack_pointer = 0;   // Se va a actualizar. El valor no importa
+    blocks[0].stack_pointer = 0;   // Se va a actualizar. el proceso INIT va a usar otro stack
     blocks[0].process_state = RUNNING;
     blocks[0].parent_pid = get_pid(); 
-    blocks[0].priority = 1;
-    blocks[0].argc = 1;
+    blocks[0].priority = PRIORITY_LOW;
+    blocks[0].argc = sizeof(init_args) / sizeof(init_args[0]);
     blocks[0].argv = init_args;
     blocks[0].file_descriptors[STDIN] = DEV_NULL;
     blocks[0].file_descriptors[STDOUT] = STDERR;
     blocks[0].file_descriptors[STDERR] = STDERR;
 
-    add(&round_robin, 0);
-    // OBS: el proceso INIT va a usar otro stack
+    scheduler_initialize();
+    scheduler_insert(blocks[0].priority, pid);
+    // add(&round_robin, 0);
 }
 
 void set_pending_action(PendingAction action) {
@@ -338,13 +345,16 @@ void get_all_processes()
 {
     static char *PROCESS_STATE_STRING[] = {"UNKNOWN", "RUNNING", "READY  ", "BLOCKED"};
     static uint64_t PROCESS_STATE_COLOR[] = {0x00999999, 0x0000FF00, 0x00CCDD00, 0x00FF0000};
+    static char *PRIORITY_STRING[] = {"NONE", "LOW ", "MID ", "HIGH"};
     printf("pid : ppid : prio : stack_pointer_64 : base_pointer_64  : status  : process_name\n");
     for (int i = 0; i < MAX_PROCESS_BLOCKS; i++)
     {
         if (blocks[i].process_state != UNAVAILABLE)
         {
-            printf("%3d : %4d : %4d : ", i, blocks[i].parent_pid, blocks[i].priority);
-            printf("%16x : %16x : ", blocks[i].stack_pointer, blocks[i].regs.rbp);
+            printf("%3d : %4d : ", i, blocks[i].parent_pid);
+            int priority = blocks[i].priority;
+            printf_color("%s", PROCESS_STATE_COLOR[priority], PRIORITY_STRING[priority]);
+            printf(" : %16x : %16x : ", blocks[i].stack_pointer, blocks[i].regs.rbp);
             uint64_t process_state = blocks[i].process_state;
             printf_color(PROCESS_STATE_STRING[process_state], PROCESS_STATE_COLOR[process_state]);
             printf(" : %s\n", blocks[i].argc > 0 ? blocks[i].argv[0] : "UNKNOWN PROCESS");
@@ -360,27 +370,36 @@ void yield()
 
 
 void change_priority(uint64_t pid, int value){
-    value = (value < MAX_PRIORITY) ? value : MAX_PRIORITY;
-    value = (value > 0) ? value : 1;
-
-    int delta = value - blocks[pid].priority;
-
-    if (delta > 0)
-    {
-        while(delta-- > 0) 
-        {
-            blocks[pid].priority++;
-            add(&round_robin, pid);
-        }
+    // value = (value < MAX_PRIORITY) ? value : MAX_PRIORITY;
+    // value = (value > 0) ? value : 1;
+    if(pid == 0 || value <= PRIORITY_NONE || value > PRIORITY_HIGH || blocks[pid].process_state == UNAVAILABLE) {
+        return;
     }
-    else if(delta < 0)
-    {
-        while(delta++ < 0) 
-        {
-            blocks[pid].priority--;
-            delete_value_ocurrence(&round_robin, pid);
-        }
+    Priority previous_priority = blocks[pid].priority;
+    if(previous_priority != value) {
+        scheduler_remove(previous_priority, pid);
+        if(blocks[pid].process_state != BLOCKED)
+            scheduler_insert(value, pid);
+        blocks[pid].priority = value;
     }
+    // int delta = value - blocks[pid].priority;
+
+    // if (delta > 0)
+    // {
+    //     while(delta-- > 0) 
+    //     {
+    //         blocks[pid].priority++;
+    //         add(&round_robin, pid);
+    //     }
+    // }
+    // else if(delta < 0)
+    // {
+    //     while(delta++ < 0) 
+    //     {
+    //         blocks[pid].priority--;
+    //         delete_value_ocurrence(&round_robin, pid);
+    //     }
+    // }
 }
 
 int block(int pid)
@@ -406,6 +425,7 @@ int block_no_yield(int pid) {
     if (pid >= MAX_PROCESS_BLOCKS || pid < 1 || blocks[pid].process_state == UNAVAILABLE)
         return -1;
     blocks[pid].process_state = BLOCKED;
+    scheduler_remove(blocks[pid].priority, pid);
     return 0;
 }
 
@@ -413,8 +433,8 @@ int unblock(int pid)
 {
     if (pid >= MAX_PROCESS_BLOCKS || pid < 1)
         return -1;
-
     blocks[pid].process_state = READY;
+    scheduler_insert(blocks[pid].priority, pid);
     return pid;
 }
 

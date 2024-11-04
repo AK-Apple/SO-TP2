@@ -12,6 +12,7 @@
 #include "interrupts.h"
 #include "defs.h"
 #include "keyboard.h"
+#include "scheduler.h"
 
 #define MB (1L << 20)
 
@@ -63,7 +64,8 @@ int main()
 
     int fds[] = {STDIN, STDOUT, STDERR};
     sys_clearScreen();
-    create_process((Program)SAMPLE_CODE_MODULE_ADDRESS, sizeof(argv_shell)/sizeof(argv_shell[0]), argv_shell, fds);
+    int shell_pid = create_process((Program)SAMPLE_CODE_MODULE_ADDRESS, sizeof(argv_shell)/sizeof(argv_shell[0]), argv_shell, fds);
+    change_priority(shell_pid, PRIORITY_HIGH);
 
     while (1) {
         _hlt();

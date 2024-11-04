@@ -35,7 +35,7 @@ extern void sys_getRegs();
 
 extern int sys_create_process_fd(Program program, int argc, char **argv, int fds[]);
 extern int sys_create_process(Program program, int argc, char **argv);
-extern int sys_kill_process(uint64_t pid);
+extern int sys_kill_process(uint64_t pid, int recursive);
 extern int sys_get_process_status(int pid);
 extern int sys_get_pid();
 extern void sys_print_all_processes();

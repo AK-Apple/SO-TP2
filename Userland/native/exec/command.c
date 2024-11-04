@@ -109,7 +109,11 @@ void kill_process(uint64_t argc, char *argv[]) {
         printf_error("invalid pid\n");
         return;
     }
-    sys_kill_process(pid);
+    int recursive = 0;
+    if(argc >= 3) {
+        recursive = satoi(argv[2]) == 1;
+    }
+    sys_kill_process(pid, recursive);
 }
 
 void print_time() {

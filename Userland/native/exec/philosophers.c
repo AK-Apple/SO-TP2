@@ -120,7 +120,7 @@ static void remove_philosopher() {
         sys_sem_wait(philosopher_sem_id(i));
         sys_sem_wait(mutex_sem_id);
     }
-    sys_kill_process(pids[i]);
+    sys_kill_process(pids[i], 0);
     sys_wait_pid(pids[i]);
     sys_sem_close(philosopher_sem_id(i));
     pids[i] = -1;

@@ -167,8 +167,8 @@ sys_sem_close:
 sys_create_pipe:
 	Syscall 35
 
-sys_request_pipe:
-	Syscall 36
+; sys_request_pipe:
+; 	Syscall 36
 
 sys_close_pipe:
 	Syscall 37

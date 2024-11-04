@@ -8,6 +8,13 @@
 #include <stdint.h>
 
 typedef enum {
+    PRIORITY_NONE,
+    PRIORITY_LOW,
+    PRIORITY_MID,
+    PRIORITY_HIGH,
+} Priority; 
+
+typedef enum {
     MEM_COMPLETE,
     MEM_REDUCED,
 } Memory_Info_Mode;
