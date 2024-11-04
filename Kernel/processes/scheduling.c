@@ -80,6 +80,10 @@ int kill_process(uint64_t pid)
     if (pid >= MAX_PROCESS_BLOCKS || pid < 1)
         return -1;
     
+    if(pid == 1) {
+        setup_kernel_restart();
+    }
+    
     reasign_children(pid);
     int ppid = blocks[pid].parent_pid;
     if(blocks[ppid].pid_to_wait == pid) {

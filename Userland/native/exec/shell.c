@@ -19,8 +19,6 @@ static Command commands[] = {
     {"time", "Muestra la hora.", (Program)print_time},
     {"eliminator", "Ejecuta el juego eliminator.", (Program)eliminator},
     {"size", "cambia tamanio de letra (entre 1 a 5).", (Program)changeSize, "<font_size>"},
-    {"div", "divide num/den", (Program)divide, "<num> <den>"},
-    {"invalidopcode", "Muestra excepcion de codigo invalido.", (Program)invalidOpcode},
     {"inforeg", "Muestra los registros guardados. (Presiona `left_alt` para guardar registros)", (Program)sys_getRegs},
     {"clear", "Limpia toda la pantalla.", (Program)sys_clear},
     {"ps", "Lista la informacion de los procesos", (Program)sys_print_all_processes},
@@ -42,6 +40,8 @@ static Command processes[] = {
     {"filter", "Filtra las vocales del input", (Program)filter},
     {"phylo", "ejecuta programa de phylo", (Program)phylo},
     {"echo", "imprime en stdout los argumentos que le pasas", (Program)echo_cmd, "<args...>"},
+    {"div", "divide num/den", (Program)divide, "<num> <den>"},
+    {"invalidopcode", "Muestra excepcion de codigo invalido.", (Program)invalidOpcode},
 };
 
 uint64_t change_priority_cmd(uint64_t argc, char *argv[]) {
@@ -92,6 +92,7 @@ uint64_t block_cmd(uint64_t argc, char *argv[]) {
 }
 
 void print_help() {
+    sys_clear();
     printf("Comandos built-in disponibles:\n");
     for (int i = 0 ; i < sizeof(commands)/sizeof(commands[0]) ; i++) {
         printf_color(commands[i].title, COLOR_ORANGE, 0);
@@ -129,6 +130,10 @@ void print_help() {
     printf("   : para enviar EOF (end of file)\n");
     printf_color("left_alt", COLOR_GREEN, 0);
     printf(" : para guardar registros\n");
+    printf_color("ctrl a", COLOR_GREEN, 0);
+    printf("   : para escribir el caracter '&' (es la alternativa a shift+6)\n");
+    printf_color("ctrl p", COLOR_GREEN, 0);
+    printf("   : para escribir el caracter '|' (es la alternativa a escribir '|' en teclado castellano)\n");
 }
 
 int64_t send_to_foreground(uint64_t argc, char *argv[]) {
@@ -152,7 +157,6 @@ int64_t send_to_foreground(uint64_t argc, char *argv[]) {
 }
 
 void shell() {
-    printf_color("Bienvenido a la Shell!! ", COLOR_GREEN, 0x000000);
     print_help();
 
     do {

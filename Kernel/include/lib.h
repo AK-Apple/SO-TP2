@@ -12,12 +12,11 @@ void * memset(void * destination, int32_t character, uint64_t length);
 void * memcpy(void * destination, const void * source, uint64_t length);
 
 int buflen(const char *s);
-void getRegs();
-void sys_registers();
 
 // assembler (libasm.asm)
 extern char * cpuVendor(char *result);
 extern void force_timer_tick();
+extern void setup_kernel_restart();
 
 extern void outb (unsigned char __value, unsigned short int __port);
 extern unsigned char inb (unsigned short int __port);

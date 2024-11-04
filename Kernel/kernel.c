@@ -60,16 +60,11 @@ int main()
     create_init_process();
     load_idt();
     static char *argv_shell[] = {"shell"};
-    static int kernel_restart_count = 0;
-    if(kernel_restart_count) {
-        char dummy_buffer[32] = {0};
-        printf_color("Kernel iniciado %d veces. Presiona cualquier tecla para continuar...", 0x00FFCC00, kernel_restart_count);
-        sys_read(0, dummy_buffer, 1);
-        sys_clearScreen();
-    }
+
     int fds[] = {STDIN, STDOUT, STDERR};
+    sys_clearScreen();
     create_process((Program)SAMPLE_CODE_MODULE_ADDRESS, sizeof(argv_shell)/sizeof(argv_shell[0]), argv_shell, fds);
-    kernel_restart_count++;
+
     while (1) {
         _hlt();
         yield();

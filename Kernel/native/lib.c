@@ -97,45 +97,6 @@ int buflen(const char *s) {
     return i;
 }
 
-#define REGS_SIZE 18
-
-uint64_t * regs = {0};
-int regsCaptured = 0;
-
-char * regList[REGS_SIZE] = {
-        "RAX", "RBX", "RCX", "RDX", "RDI", "RSI","RBP", "RSP",
-        "R08", "R09", "R10", "R11", "R12", "R13", "R14",
-        "R15", "IP ", "RFLAGS "};
-
-void getRegs() {
-    regs = storeRegs();		// llamada a Assembler
-    regsCaptured = 1;
-}
-
-void sys_registers() {
-    if (!regsCaptured) {
-        getRegs();
-    } else {
-        printf("Tenias estos registros guardados:\n");
-    }
-
-    for (int i = 0; i < REGS_SIZE ; i++) {
-        char buf[MAX_BUF_SIZE];
-        printf("%s", regList[i]);
-        uint32_t digits = uintToBase(regs[i], buf, 16);
-        printf(" : 0x");
-        int zeros = 15;
-        while(zeros > digits){
-            printf("0");
-            zeros--;
-        }
-        printf("%s", buf);
-        putChar('\n');
-    }
-    regsCaptured = 0;
-}
-
-//TODO: cambiar sys_registers() para que acepte procesos
 
 // ------- Funciones auxiliares para el Kernel -------
 

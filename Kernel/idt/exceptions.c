@@ -27,6 +27,7 @@ void exceptionDispatcher(int exception, StackedRegisters* stack_pointer) {
     }
 
     print_regs(*stack_pointer);
+    printf_error("[kernel] Killing process with pid=%d because it caused an exception.\n", get_pid());
 }
 
 static void zero_division() {

@@ -1,5 +1,8 @@
 GLOBAL cpuVendor
 GLOBAL force_timer_tick
+GLOBAL setup_kernel_restart
+EXTERN main
+EXTERN getStackBase
 
 section .text
 	
@@ -103,6 +106,10 @@ release:
     ret
 
 
+setup_kernel_restart:
+	call getStackBase
+	mov rsp, rax
+	call main
 
 ;=============================================
 

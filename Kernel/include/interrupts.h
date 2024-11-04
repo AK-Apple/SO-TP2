@@ -13,12 +13,8 @@ void _irq05Handler(void);
 
 void _int80Handler(void);
 
-// void _int80Handler(void);
-
 void _exception00Handler(void);
 void _exception06Handler(void);
-
-extern uint64_t * storeRegs();
 
 void _cli(void);
 
@@ -33,11 +29,6 @@ void picSlaveMask(uint8_t mask);
 
 // -------- SO
 
-// assembler (iterrupts.c)
-
-uint64_t _get_starting_point();
-
-// void _change_process();
 
 // -------- Fin SO
 

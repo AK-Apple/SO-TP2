@@ -7,7 +7,6 @@
 #include "scheduling.h"
 #include "semaphores.h"
 
-#define REGS_SIZE 18
 #define SIZE_BUFFER 1024
 #define STDIN_SEM_ID 1
 
@@ -57,7 +56,9 @@ const AsciiMap map[] = {
         {'\x23', 0x04, 0x0, 1},
         {'\x24', 0x05, 0x0, 1},
         {'\x25', 0x06, 0x0, 1},
-        {'\x26', 0x07, 0x0, 1},
+        {'\x7c', 0x19, 0x0, 2}, // '|' alternativa
+        {'\x26', 0x07, 0x0, 1}, // &
+        {'\x26', 0x1E, 0x0, 2}, // & alternativa
         {'\x27', 0x0C, 0x0, 0}, // '
         {'\x28', 0x09, 0x0, 1}, // (
         {'\x29', 0x0A, 0x0, 1}, // )
@@ -143,7 +144,7 @@ const AsciiMap map[] = {
         {'\x79', 0x15, 0x95, 0},  // 'y'
         {'\x7A', 0x2C, 0xAC, 0},  // 'z'
         {'\x7b', 0x28, 0x0, 0},
-        {'\x7c', 0x29, 0x0, 0},
+        {'\x7c', 0x29, 0x0, 0}, // '|'
         {'\x7d', 0x2B, 0x0, 0},
         {'\x7e', 0x1B, 0x0, 3},
         {'\x7f', 0x29, 0x0, 1},
