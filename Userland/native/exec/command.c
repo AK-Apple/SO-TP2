@@ -118,17 +118,9 @@ void kill_process(uint64_t argc, char *argv[]) {
 
 void print_time() {
     int hours = sys_time(HOURS);
-    printInt(hours);
-    printf(":");
     int minutes = sys_time(MINUTES);
-    if(minutes < 10)
-        printf("0");
-    printInt(minutes);
-    printf(", ");
-    printInt(sys_time(DAY_OF_THE_MONTH));
-    printf("/");
-    printInt(sys_time(MONTH));
-    printf("/");
-    printInt(sys_time(YEAR) + 2000);
-    printf("\n");
+    int day = sys_time(DAY_OF_THE_MONTH);
+    int month = sys_time(MONTH);
+    int year = sys_time(YEAR) + 2000;
+    printf("%2d:%2d, %2d/%2d/%4d\n", hours, minutes, day, month, year);
 }

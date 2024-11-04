@@ -16,8 +16,6 @@ uint64_t screen_y = 0;
 uint8_t fontSize = 1;
 static uint64_t global_foreground_color = 0x00FFFFFF;
 
-// el stdout no se guarda. Solo se guardan las coordenadas de la última posición
-
 int sys_read(int fd_index, char* buf, int count){
     int fd = get_fd(fd_index);
     int i=0;
@@ -222,7 +220,6 @@ void sys_write(int fd_index, const char* buf, int count)
     }
     if (fd > 2)
     {
-    // printf("writing to: %d '%s'\n", fd, buf);
         write_pipe(fd, buf, count);
     }
     return;

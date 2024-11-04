@@ -138,9 +138,7 @@ void printMenu() {
 
 void gameOver(int score) {
     printf_color("\n\tGame Over!\n", 0xFF0000, 0x000000);
-    printf("\tYour score was: ");
-    printInt(score);
-    printf("\n");
+    printf("\tYour score was: %d\n", score);
     printf("\n Press q to quit the game, press w to try again\n");
 }
 
@@ -150,8 +148,7 @@ void handleScore(int startingPoint, int lastScore) {
         for(int i=0; i<12; i++){     // borra el score anterior
             putchar(0x08);
         }
-        printf("score: ");
-        printInt(score);            // pone el nuevo score
+        printf("score: %d", score);
         lastScore = score;
     }
 }

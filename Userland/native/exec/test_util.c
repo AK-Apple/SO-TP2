@@ -89,21 +89,15 @@ int64_t endless_loop_print(int argc, char* argv[]) {
     return 1;
   }
   uint64_t wait = satoi(argv[1]);
+  int color = 0x00FFFFFF;
+  if(argc >= 3) {
+    color = satoi(argv[2]);
+  }
 
   int64_t pid = sys_get_pid();
   while (1) {
-    printf("%d ", pid);
+    printf_color("%d ", color, 0, pid);
     bussy_wait(wait);
   }
   return 0;
-}
-
-Program get_endless_loop()
-{
-  return (Program)endless_loop;
-}
-
-Program get_endless_loop_print()
-{
-  return (Program)endless_loop_print;
 }

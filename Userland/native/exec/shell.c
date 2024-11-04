@@ -15,21 +15,6 @@
 #define MAX_BUF 1024
 
 static Command commands[] = {
-    {"help", "Muestra la lista de comandos.", (Program)print_help},
-    {"song", "pone musica con beeps. Con song_id:1|2|3", (Program)play_music_cmd, "<song_id>"},
-    {"time", "Muestra la hora.", (Program)print_time},
-    {"eliminator", "Ejecuta el juego eliminator.", (Program)eliminator},
-    {"size", "cambia tamanio de letra (entre 1 a 5).", (Program)changeSize, "<font_size>"},
-    {"inforeg", "Muestra los registros guardados. (Presiona `left_alt` para guardar registros)", (Program)sys_getRegs},
-    {"clear", "Limpia toda la pantalla.", (Program)sys_clear},
-    {"ps", "Lista la informacion de los procesos", (Program)sys_print_all_processes},
-    {"kill", "mata un proceso dado un pid", (Program)kill_process, "<pid>"},
-    {"mem", "Imprime el estado de la memoria. Muestra la distribucion |size:bytes|size:free, despues stats", (Program)print_meminfo_cmd},
-    {"fg", "manda un proceso a foreground", (Program)send_to_foreground, "<pid>"},
-    {"block", "Cambia el estado de un proceso entre bloqueado y listo dado su PID.", (Program)block_cmd, "<pid>"},
-    {"nice", "Cambia la prioridad de un proceso dado su PID y la nueva prioridad. prio:1=low ; 2=mid ; 3=high", (Program)change_priority_cmd, "<pid> <prio>"},
-};
-static Command processes[] = {
     {"testproc", "ejecuta test de proceso", (Program)test_processes, "<max_proc>"},
     {"testprio", "ejecuta test de prioridades", (Program)test_prio},
     {"testsync", "ejecuta test de sincronizacion. count=countdown, sem:0|1", (Program)test_sync, "<count> <sem>"},
@@ -43,6 +28,19 @@ static Command processes[] = {
     {"echo", "imprime en stdout los argumentos que le pasas", (Program)echo_cmd, "<args...>"},
     {"div", "divide num/den", (Program)divide, "<num> <den>"},
     {"invalidopcode", "Muestra excepcion de codigo invalido.", (Program)invalidOpcode},
+    {"help", "Muestra la lista de comandos.", (Program)print_help},
+    {"song", "pone musica con beeps. Con song_id:1|2|3", (Program)play_music_cmd, "<song_id>"},
+    {"time", "Muestra la hora.", (Program)print_time},
+    {"eliminator", "Ejecuta el juego eliminator.", (Program)eliminator},
+    {"size", "cambia tamanio de letra (entre 1 a 5).", (Program)changeSize, "<font_size>"},
+    {"inforeg", "Muestra los registros guardados. (Presiona `left_alt` para guardar registros)", (Program)sys_getRegs},
+    {"clear", "Limpia toda la pantalla.", (Program)sys_clear},
+    {"ps", "Lista la informacion de los procesos", (Program)sys_print_all_processes},
+    {"kill", "mata un proceso dado un pid", (Program)kill_process, "<pid>"},
+    {"mem", "Imprime el estado de la memoria. Muestra la distribucion |size:bytes|size:free, despues stats", (Program)print_meminfo_cmd},
+    {"fg", "manda un proceso a foreground", (Program)send_to_foreground, "<pid>"},
+    {"block", "Cambia el estado de un proceso entre bloqueado y listo dado su PID.", (Program)block_cmd, "<pid>"},
+    {"nice", "Cambia la prioridad de un proceso dado su PID y la nueva prioridad. prio:1=low ; 2=mid ; 3=high", (Program)change_priority_cmd, "<pid> <prio>"},
 };
 
 uint64_t change_priority_cmd(uint64_t argc, char *argv[]) {
@@ -94,7 +92,11 @@ uint64_t block_cmd(uint64_t argc, char *argv[]) {
 
 void print_help() {
     sys_clear();
-    printf("Comandos built-in disponibles:\n");
+    printf("Comandos disponibles:\n");
+    printf_color("<command> &", COLOR_GREEN, 0);
+    printf("              : escribir '&' al final del comando para ejecutarlo en background\n");
+    printf_color("<command1> | <command2>", COLOR_GREEN, 0);
+    printf("  : escribir dos comandos separados por '|'  para pipear cmd1 a cmd2 \n");
     for (int i = 0 ; i < sizeof(commands)/sizeof(commands[0]) ; i++) {
         printf_color(commands[i].title, COLOR_ORANGE, 0);
         uint64_t total_len = strlen(commands[i].title);
@@ -102,24 +104,10 @@ void print_help() {
             total_len += strlen(commands[i].args) + 1;
             printf_color(" %s", COLOR_YELLOW, 0, commands[i].args);
         }
-        repeat_char(' ', 24 - total_len);
+        repeat_char(STD_OUT, ' ', 24 - total_len);
         printf(" : %s\n", commands[i].desc);
     }
-    printf("Comandos que crean procesos:\n");
-    printf_color("<command> &", COLOR_GREEN, 0);
-    printf("              : escribir '&' al final del comando para ejecutarlo en background\n");
-    printf_color("<command1> | <command2>", COLOR_GREEN, 0);
-    printf("  : escribir dos comandos separados por '|'  para pipear cmd1 a cmd2 \n");
-    for (int i = 0 ; i < sizeof(processes)/sizeof(processes[0]) ; i++) {
-        printf_color(processes[i].title, COLOR_ORANGE, 0);
-        uint64_t total_len = strlen(processes[i].title);
-        if(processes[i].args) {
-            total_len += strlen(processes[i].args) + 1;
-            printf_color(" %s", COLOR_YELLOW, 0, processes[i].args);
-        }
-        repeat_char(' ', 24 - total_len);
-        printf(" : %s\n", processes[i].desc);
-    }
+
     printf("Hotkeys:\n");
     printf_color("ctrl c", COLOR_GREEN, 0);
     printf("   : matar al proceso en foreground y volver a la shell\n");
@@ -188,12 +176,12 @@ void shell() {
     } while (1);
 }
 
-static Program find_command(Command command_array[], int command_count, char *name) {
-    for (int i = 0; i < command_count ; i++)
+static Program find_command(char *name) {
+    for (int i = 0; i < sizeof(commands)/sizeof(commands[0]) ; i++)
     {
-        if (strcmp(name, command_array[i].title) == 0)
+        if (strcmp(name, commands[i].title) == 0)
         {
-            return command_array[i].command;
+            return commands[i].command;
         }
     }
     return NULL;
@@ -237,13 +225,8 @@ void execute(char command_buffer[]) {
         }
     }
     if(argv1[argc1-1][0] == '\0') argc1--;
-    Program command = find_command(commands, sizeof(commands) / sizeof(commands[0]), argv1[0]);
-    if(command) {
-        command(argc1, argv1);
-        return;
-    }
 
-    Program process1 = find_command(processes, sizeof(processes) / sizeof(processes[0]), argv1[0]);
+    Program process1 = find_command(argv1[0]);
     if(process1) {
         int fds1[] = {STD_IN, STD_OUT, STD_ERR};
         const char *fg_bg = "foreground";
@@ -253,7 +236,7 @@ void execute(char command_buffer[]) {
             shell_pipe = sys_create_pipe();
             int fds2[] = {shell_pipe, STD_OUT, STD_ERR};
             fds1[STD_OUT] = shell_pipe;
-            Program process2 = find_command(processes, sizeof(processes) / sizeof(processes[0]), argv2[0]);
+            Program process2 = find_command(argv2[0]);
             if(process2 == NULL) {
                 printf_error("[shell] second comand is invalid '%s'\n", argv2[0]);
                 return;
