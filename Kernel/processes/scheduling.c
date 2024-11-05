@@ -105,7 +105,7 @@ int kill_process(uint64_t pid, int recursive)
     for(int i = 0; i < MAX_FILE_DESCRIPTORS; i++) {
         int pipe_id = blocks[pid].file_descriptors[i];
         if(pipe_id >= STD_FILE_DESCRIPTORS) {
-            close_pipe(pipe_id);
+            close_pipe_end(pipe_id);
         }
         blocks[pid].file_descriptors[i] = DEV_NULL;
     }
@@ -250,7 +250,7 @@ void initializeRegisters(uint64_t new_pid, uint64_t rsp)
     memcpy((void *)rsp, &stackedRegisters, sizeof(struct StackedRegisters));
 }
 
-int create_process(Program program, int argc, char **argv, int fds[])
+int create_process(Program program, int argc, char **argv, int64_t fds[])
 {
     uint64_t new_pid = request_pid();
     if (new_pid == INVALID_PID)
@@ -288,9 +288,17 @@ int create_process(Program program, int argc, char **argv, int fds[])
     blocks[new_pid].program = program;
     blocks[new_pid].argc = argc;
     blocks[new_pid].pid_to_wait = 0;
-    for(int i = 0; i < STD_FILE_DESCRIPTORS; i++) {
+
+    for(int i = 0; i < STD_FILE_DESCRIPTORS; i++) 
+    {
+        printf("fd: %d\n", fds[i]);
         blocks[new_pid].file_descriptors[i] = fds[i];
+        if (fds[i] >= STD_FILE_DESCRIPTORS)
+        {
+            assign_pipe_to_process(fds[i], new_pid);
+        }
     }
+    printf("New pid %d\n", new_pid);
 
     scheduler_insert(PRIORITY_MID, new_pid);
     // add(&round_robin, new_pid);

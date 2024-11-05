@@ -34,24 +34,28 @@ int64_t write_test(uint64_t argc, char *argv[])  {
 int64_t test_pipe(uint64_t argc, char *argv[]) {
     printf("TEST DE PIPES!!\n");
 
+    int64_t test_pipe_fds[2] = { 0 };
 
-    int test_pipe_fd = sys_create_pipe();
-    int fds1[] = {test_pipe_fd, STD_OUT, STD_ERR};
+    sys_create_pipe(test_pipe_fds);
+
+    int fds1[] = {test_pipe_fds[1], STD_OUT, STD_ERR};
     int pid1 = sys_create_process_fd(read_test, 0, 0, fds1);
 
-    int fds2[] = {STD_IN, test_pipe_fd, STD_ERR};
+    int fds2[] = {STD_IN, test_pipe_fds[0], STD_ERR};
     int pid2 = sys_create_process_fd(write_test, 0, 0, fds2);
     sys_wait_pid(pid1);
     sys_wait_pid(pid2);
     printf("pid read_test: %d\npid write_test: %d\n", pid1, pid2);
 
-    sys_close_pipe(test_pipe_fd);
+    sys_close_pipe(test_pipe_fds[0]);
     char *argv_echo[] = {"echo", "arg1", "arg2", "arg3", "arg4"};
-    test_pipe_fd = sys_create_pipe();
+
+    sys_create_pipe(test_pipe_fds);
+
     pid1 = sys_create_process_fd((Program)cat, 0, 0, fds1);
     pid2 = sys_create_process_fd(echo_cmd, sizeof(argv_echo)/sizeof(argv_echo[0]), argv_echo, fds2);
     sys_wait_pid(pid1);
     sys_wait_pid(pid2);
-    sys_close_pipe(test_pipe_fd);
+    sys_close_pipe(test_pipe_fds[0]);
     return 0;
 }

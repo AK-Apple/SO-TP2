@@ -146,7 +146,12 @@ int64_t send_to_foreground(uint64_t argc, char *argv[]) {
     return 0;
 }
 
+int64_t shell_pipe[2] = { 0 };
+
 void shell() {
+    
+    sys_create_pipe(shell_pipe);
+
     print_help();
 
     do {
@@ -188,6 +193,7 @@ static Program find_command(char *name) {
 }
 
 void execute(char command_buffer[]) {
+    
     compact_whitespace(command_buffer);
     int argc_max = charcount(command_buffer, ' ') + 1;
     char* argv1[argc_max]; 
@@ -197,6 +203,9 @@ void execute(char command_buffer[]) {
     argv1[argc1++]=command_buffer;
     int piped = 0;
     int send_to_background = 0;
+
+
+
     for(int i = 0; command_buffer[i]; i++){
         switch (command_buffer[i])
         {
@@ -231,23 +240,29 @@ void execute(char command_buffer[]) {
         int fds1[] = {STD_IN, STD_OUT, STD_ERR};
         const char *fg_bg = "foreground";
         int pid_piped = 0;
-        int shell_pipe = 0;
+
+        
+
         if(piped) {
-            shell_pipe = sys_create_pipe();
-            int fds2[] = {shell_pipe, STD_OUT, STD_ERR};
-            fds1[STD_OUT] = shell_pipe;
+
+            
+            int fds2[] = {shell_pipe[1], STD_OUT, STD_ERR};
+            fds1[STD_OUT] = shell_pipe[0];
+
             Program process2 = find_command(argv2[0]);
             if(process2 == NULL) {
                 printf_error("[shell] second comand is invalid '%s'\n", argv2[0]);
                 return;
             }
             pid_piped = sys_create_process_fd(process2, argc2, argv2, fds2);
+            printf("pid_piped: %d\n", pid_piped);
         }
         if(send_to_background) {
             fds1[STD_IN] = DEV_NULL;
             fg_bg = "background";
         }
         int pid = sys_create_process_fd(process1, argc1, argv1, fds1);
+        printf("pid: %d\n", pid);
         printf_color("[shell] Running %s with pid=%d in %s...\n", COLOR_YELLOW, 0, argv1[0], pid, fg_bg);
         if(!send_to_background) {
             sys_change_priority(pid, PRIORITY_HIGH);
@@ -255,7 +270,7 @@ void execute(char command_buffer[]) {
         }
         if(piped && sys_get_process_status(pid) == 0) {
             sys_wait_pid(pid_piped);
-            sys_close_pipe(shell_pipe);
+            // sys_close_pipe(shell_pipe[0]);
         }
     }
     else {
