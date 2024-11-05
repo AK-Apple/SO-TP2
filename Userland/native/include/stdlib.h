@@ -10,6 +10,7 @@ int getchar();
 uint64_t gets(char * buf, uint64_t length);
 
 uint64_t atoi(char * str);
+int64_t atoi_index(const char *str, uint64_t *index);
 char* itoa(int value, char* result, int base);
 uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base);
 

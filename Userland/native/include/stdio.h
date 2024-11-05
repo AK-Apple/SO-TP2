@@ -19,8 +19,7 @@
 void scanf(char * fmt, ...);
 uint64_t printf_color(char * fmt, uint64_t foreground, uint64_t background, ...);
 void printf(char * fmt, ...);
-void printInt(int num);
-void repeat_char(char c, int count);
+void repeat_char(int fd, char c, int count);
 void putchar(char c);
 void putcharColoured(char c, uint64_t foreground, uint64_t background);
 void printf_error(char *fmt, ...);

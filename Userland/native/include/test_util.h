@@ -8,8 +8,3 @@ int64_t satoi(char *str);
 void bussy_wait(uint64_t n);
 int64_t endless_loop(int argc, char* argv[]);
 int64_t endless_loop_print(int argc, char* argv[]);
-
-// Getters:
-
-Program get_endless_loop();
-Program get_endless_loop_print();

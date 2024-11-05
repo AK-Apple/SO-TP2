@@ -127,27 +127,27 @@ void save_regs() {
 }
 
 void print_regs(StackedRegisters regs){
-    printf("\nRAX : 0x"); k_print_integer(regs.rax, 16, 16);
-    printf("\nRBX : 0x"); k_print_integer(regs.rbx, 16, 16);
-    printf("\nRCX : 0x"); k_print_integer(regs.rcx, 16, 16);
-    printf("\nRDX : 0x"); k_print_integer(regs.rdx, 16, 16);
-    printf("\nRDI : 0x"); k_print_integer(regs.rdi, 16, 16);
-    printf("\nRSI : 0x"); k_print_integer(regs.rsi, 16, 16);
-    printf("\nRBP : 0x"); k_print_integer(regs.rbp, 16, 16);
-    printf("\nRSP : 0x"); k_print_integer(regs.rsp, 16, 16);
-    printf("\nR08 : 0x"); k_print_integer(regs.r8, 16, 16);
-    printf("\nR09 : 0x"); k_print_integer(regs.r9, 16, 16);
-    printf("\nR10 : 0x"); k_print_integer(regs.r10, 16, 16);
-    printf("\nR11 : 0x"); k_print_integer(regs.r11, 16, 16);
-    printf("\nR12 : 0x"); k_print_integer(regs.r12, 16, 16);
-    printf("\nR13 : 0x"); k_print_integer(regs.r13, 16, 16);
-    printf("\nR14 : 0x"); k_print_integer(regs.r14, 16, 16);
-    printf("\nR15 : 0x"); k_print_integer(regs.r15, 16, 16);
-    printf("\nRIP : 0x"); k_print_integer(regs.rip, 16, 16);
-    printf("\nRFLAGS : 0x"); k_print_integer(regs.rflags, 16, 16);
-    printf("\nCS : 0x"); k_print_integer(regs.cs, 16, 16);
-    printf("\nSS : 0x"); k_print_integer(regs.ss, 16, 16);
-    printf("\n\n");
+    printf("\nRAX  : 0x%16x", regs.rax);
+    printf("\nRBX  : 0x%16x", regs.rbx); 
+    printf("\nRCX  : 0x%16x", regs.rcx); 
+    printf("\nRDX  : 0x%16x", regs.rdx); 
+    printf("\nRDI  : 0x%16x", regs.rdi); 
+    printf("\nRSI  : 0x%16x", regs.rsi); 
+    printf("\nRBP  : 0x%16x", regs.rbp); 
+    printf("\nRSP  : 0x%16x", regs.rsp); 
+    printf("\nR08  : 0x%16x", regs.r8);
+    printf("\nR09  : 0x%16x", regs.r9);
+    printf("\nR10  : 0x%16x", regs.r10); 
+    printf("\nR11  : 0x%16x", regs.r11); 
+    printf("\nR12  : 0x%16x", regs.r12); 
+    printf("\nR13  : 0x%16x", regs.r13); 
+    printf("\nR14  : 0x%16x", regs.r14); 
+    printf("\nR15  : 0x%16x", regs.r15); 
+    printf("\nRIP  : 0x%16x", regs.rip); 
+    printf("\nFLAG : 0x%16x", regs.rflags);
+    printf("\nCS   : 0x%16x", regs.cs);
+    printf("\nSS   : 0x%16x", regs.ss);
+    printf("\n");
 }
 
 void print_saved_regs()
@@ -167,7 +167,7 @@ uint64_t schedule(uint64_t running_stack_pointer)
         remaining_quantum--;
         return running_stack_pointer;
     }
-    remaining_quantum = scheduler_get_quantum(blocks[running_pid].priority);
+
     blocks[running_pid].stack_pointer = running_stack_pointer;
 
     if(blocks[running_pid].process_state == RUNNING) {
@@ -217,9 +217,9 @@ uint64_t schedule(uint64_t running_stack_pointer)
         next_pid = scheduler_next_pid();
     }
     // printf("[%d]", next_pid);
-
     blocks[running_pid].regs = *(StackedRegisters *) running_stack_pointer;
     running_pid = next_pid;
+    remaining_quantum = scheduler_get_quantum(blocks[running_pid].priority);
 
     blocks[next_pid].process_state = RUNNING;
     return blocks[next_pid].stack_pointer;

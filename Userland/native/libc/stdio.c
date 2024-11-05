@@ -1,9 +1,9 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-#include "../include/stdio.h"
+#include "stdio.h"
 #include <stdarg.h>
-#include "../include/stdlib.h"
-#include "../include/syscalls.h"
+#include "stdlib.h"
+#include "syscalls.h"
 #include "string.h"
 
 #define MAX_BUF 1024
@@ -34,17 +34,17 @@ void putcharColoured(char c, uint64_t foreground, uint64_t background) {
     }
 }
 
-void repeat_char(char c, int count) {
-    while(count-- > 0) {
-        putchar(c);
-    }
+void repeat_char(int fd, char c, int count) {
+    char buf[count];
+    memset(buf, c, count);
+    sys_write(fd, buf, count);
 }
 
 void scanf(char * fmt, ...) {
     va_list args;
     va_start(args, fmt);
 
-    char buf[MAX_BUF];
+    char buf[MAX_BUF] = {0};
 
     for (int i = 0; fmt[i] != '\0' ; i++) {
         if (fmt[i++] == '%') {
@@ -106,8 +106,11 @@ static uint64_t vfprintf_color(int fd, char *fmt, uint64_t foreground, uint64_t 
     while (fmt[i]) {
         if (fmt[i] == '%') {
             char buf[MAX_BUF] = {0};
+            i++;
+            uint64_t padding = atoi_index(fmt, &i);
+            padding = (padding == 0) ? 1 : padding;
             uint64_t len = 0;
-            switch (fmt[++i]) {
+            switch (fmt[i]) {
                 case 'u':
                     len = uintToBase(va_arg(vars, int), buf, 10);
                     break;
@@ -138,6 +141,9 @@ static uint64_t vfprintf_color(int fd, char *fmt, uint64_t foreground, uint64_t 
                     break;
             }
             buf[len] = '\0';
+            if(padding - len > 0) {
+                repeat_char(fd, '0', padding - len);
+            }
             sys_write(fd, buf, len);
         } else {
             sys_write(fd, &fmt[i], 1);
@@ -163,8 +169,4 @@ void fprinf(int fd, char *fmt, ...) {
     va_start(args, fmt);
     vfprintf_color(fd, fmt, default_foreground_color, 0x000000, args);
     va_end(args);
-}
-
-void printInt(int num) {
-    printf("%d", num);
 }

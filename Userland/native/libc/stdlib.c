@@ -1,9 +1,9 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-#include "../include/stdlib.h"
-#include "../include/syscalls.h"
-#include "../include/string.h"
-#include "../include/stdio.h"
+#include "stdlib.h"
+#include "syscalls.h"
+#include "string.h"
+#include "stdio.h"
 
 uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base);
 
@@ -44,6 +44,18 @@ uint64_t atoi(char * str) { // ascii to integer
         res = res * 10 + (str[i] - '0');
     }
     return res;
+}
+
+int64_t atoi_index(const char *str, uint64_t *index) {
+    int64_t result = 0;
+
+    // Convert characters to integer
+    while (str[*index] >= '0' && str[*index] <= '9') {
+        result = result * 10 + (str[*index] - '0');
+        *index += 1;
+    }
+
+    return result;
 }
 
 uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base) {

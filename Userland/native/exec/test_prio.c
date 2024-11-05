@@ -1,14 +1,13 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <stdint.h>
-#include "../include/syscalls.h"
-#include "../include/test_util.h"
-#include "../include/stdio.h"
-#include "../include/stdlib.h"
-#include "../include/command.h"
+#include "syscalls.h"
+#include "test_util.h"
+#include "stdio.h"
+#include "stdlib.h"
+#include "command.h"
 #include "shared.h"
-#define MINOR_WAIT 10000000 // TODO: Change this value to prevent a process from flooding the screen
-#define WAIT 100000000      // TODO: Change this value to make the wait long enough to see theese processes beeing run at least twice
+#define WAIT 400000000
 
 #define TOTAL_PROCESSES 3
 #define LOWEST PRIORITY_LOW  
@@ -18,13 +17,15 @@
 int64_t prio[TOTAL_PROCESSES] = {LOWEST, MEDIUM, HIGHEST};
 
 void test_prio() {
-
-  int64_t pids[TOTAL_PROCESSES];
-  char *loop_argv[] = {"endless_loop_print", "20000000"};
+  int64_t pids[TOTAL_PROCESSES] = {0};
+  char *print_color[] = {"255", "65280", "16711680"};
+  char *loop_argv[] = {"endless_loop_print", "17000000", ""};
   uint64_t i;
 
-  for (i = 0; i < TOTAL_PROCESSES; i++)
-    pids[i] = sys_create_process(get_endless_loop_print(), sizeof(loop_argv)/sizeof(loop_argv[0]), loop_argv);
+  for (i = 0; i < TOTAL_PROCESSES; i++) {
+    loop_argv[2] = (i < sizeof(print_color) / sizeof(print_color[0])) ? print_color[i] : "16777215";
+    pids[i] = sys_create_process((Program)endless_loop_print, sizeof(loop_argv)/sizeof(loop_argv[0]), loop_argv);
+  }
 
   printf("\nBUSY WAIT INCOMING...\n");
 
@@ -34,7 +35,7 @@ void test_prio() {
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
     sys_change_priority(pids[i], prio[i]);
-
+  sys_print_all_processes();
   for(int i = 0; i < 5; i++) {
     bussy_wait(WAIT);
   }
@@ -61,7 +62,3 @@ void test_prio() {
     sys_kill_process(pids[i], 0);
 
 }
-
-// 3 iiiiiiiiiiiiiiii
-// 4 iiiiiiiiiiiiiiii
-// 5 iiiiiiiiiiiiiiii
