@@ -160,29 +160,29 @@ void memory_info(Memory_Info *info, Memory_Info_Mode mode) {
     info->header_size = sizeof(Buddy_Header);
 
     if(mode == MEM_REDUCED) return;
-    printf_color("Heap from 0x%x to 0x%x with allocator type: %s\n", 0x0000AA00, allocator.base_address, end_address, info->allocator_type);
+    printf_color("Heap from 0x%lx to 0x%lx with allocator type: %s\n", 0x0000AA00, allocator.base_address, end_address, info->allocator_type);
 
     while(current_pointer - allocator.base_address < total_memory) {
         Buddy_Header *header = (Buddy_Header *) current_pointer;
         uint64_t block_size = index_to_size(header->bucket_index);
         if(header->intended_size) {
-            printf_color("|%d:%d", 0x00DDDDFF, block_size, header->intended_size);
+            printf_color("|%lu:%lu", 0x00DDDDFF, block_size, header->intended_size);
             internal_fragmentation += block_size - header->intended_size - sizeof(Buddy_Header);
             used_memory += block_size;
         }
         else {
-            printf_color("|%d:free", 0x00888888, block_size);
+            printf_color("|%lu:free", 0x00888888, block_size);
         }
         current_pointer += block_size;
     }
     info->used_memory = used_memory;
     info->internal_fragmentation = internal_fragmentation;
     info->free_memory = total_memory- used_memory;
-    printf("\nTotal memory: %d bytes\n", total_memory);
-    printf("Used memory %d bytes\n", used_memory);
-    printf("Free memory %d bytes\n", total_memory - used_memory);
-    printf("internal fragmentation %d bytes\n", internal_fragmentation);
-    printf("Largest free block %d bytes\n", largest_free_block_bytes);
+    printf("\nTotal memory: %lu bytes\n", total_memory);
+    printf("Used memory %lu bytes\n", used_memory);
+    printf("Free memory %lu bytes\n", total_memory - used_memory);
+    printf("internal fragmentation %lu bytes\n", internal_fragmentation);
+    printf("Largest free block %lu bytes\n", largest_free_block_bytes);
 }
 
 #endif

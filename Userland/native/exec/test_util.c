@@ -77,7 +77,7 @@ int64_t endless_loop_print_seconds(uint64_t argc, char* argv[]) {
   while (1) {
     if(argc >= 3)
       printf("[%s] ", argv[2]);
-    printf("%d\n", pid);
+    printf("%ld\n", pid);
     sys_sleep(wait);
   }
   return 0;

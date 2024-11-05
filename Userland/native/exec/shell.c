@@ -77,11 +77,11 @@ uint64_t block_cmd(uint64_t argc, char *argv[]) {
         }
         else if(sys_get_process_status(pid) == 3) {
             sys_unblock(pid);
-            printf("unblocked process %d\n", pid);
+            printf("unblocked process %ld\n", pid);
         }  
         else {
             sys_block(pid);
-            printf("blocked process %d\n", pid);
+            printf("blocked process %ld\n", pid);
         }
     }
     else {

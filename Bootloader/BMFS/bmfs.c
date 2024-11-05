@@ -236,7 +236,7 @@ void list()
 {
 	int tint;
 
-	printf("%s\nDisk Size: %d MiB\n", diskname, disksize);
+	printf("%s\nDisk Size: %u MiB\n", diskname, disksize);
 	printf("Name                            |            Size (B)|      Reserved (MiB)\n");
 	printf("==========================================================================\n");
 	for (tint = 0; tint < 64; tint++)			// Max 64 entries
@@ -252,7 +252,7 @@ void list()
 		}
 		else										// Valid entry
 		{
-			printf("%-32s %20lld %20lld\n", entry.FileName, entry.FileSize, (entry.ReservedBlocks*2));
+			printf("%-32s %20llu %20llu\n", entry.FileName, entry.FileSize, (entry.ReservedBlocks*2));
 		}
 	}
 }
@@ -406,7 +406,8 @@ int initialize(char *diskname, char *size, char *mbr, char *boot, char *kernel)
 		bootFile = fopen(boot, "rb");
 		if (bootFile == NULL )
 		{
-			printf("Error: Unable to open %s file '%s'\n", bootFileType, boot);
+			if(bootFileType)
+				printf("Error: Unable to open %s file '%s'\n", bootFileType, boot);
 			ret = 1;
 		}
 	}
@@ -501,7 +502,7 @@ int initialize(char *diskname, char *size, char *mbr, char *boot, char *kernel)
 		}
 		else
 		{
-			printf("Error: Failed to read file '%s'\n", mbr ? "" : mbr);
+			printf("Error: Failed to read file '%s'\n", mbr ? mbr : "");
 			ret = 1;
 		}
 	}
@@ -509,7 +510,7 @@ int initialize(char *diskname, char *size, char *mbr, char *boot, char *kernel)
 	// Write the boot loader if it was specified by the caller.
 	if (ret == 0 && bootFile !=NULL)
 	{
-		printf("Writing %s file.\n", bootFileType);
+		printf("Writing %s file.\n", bootFileType ? bootFileType : "");
 		fseek(disk, 8192, SEEK_SET);
 		for (;;)
 		{
@@ -689,7 +690,7 @@ void create(char *filename, unsigned long long maxsize)
 
 		if (new_file_start == 0) 
 		{
-			printf("Cannot create file of size %lld MiB.\n", maxsize);
+			printf("Cannot create file of size %llu MiB.\n", maxsize);
 			return;
 		}
 

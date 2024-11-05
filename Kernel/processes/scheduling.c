@@ -1,7 +1,6 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "scheduling.h"
-// #include "round_robin.h"
 #include "lib.h"
 #include "IO.h"
 #include "interrupts.h"
@@ -12,7 +11,6 @@
 Stack stacks[MAX_PROCESS_BLOCKS] = {0}; 
 
 uint64_t running_pid = 0;
-// CircularList round_robin = {0};
 int remaining_quantum = 0;
 PendingAction pending_action = NONE;
 
@@ -111,7 +109,6 @@ int kill_process(uint64_t pid, int recursive)
     }
     free_pid(pid);
     scheduler_remove(priority, pid);
-    // delete_value(&round_robin, pid);
 
     return pid;
 }
@@ -127,26 +124,26 @@ void save_regs() {
 }
 
 void print_regs(StackedRegisters regs){
-    printf("\nRAX  : 0x%16x", regs.rax);
-    printf("\nRBX  : 0x%16x", regs.rbx); 
-    printf("\nRCX  : 0x%16x", regs.rcx); 
-    printf("\nRDX  : 0x%16x", regs.rdx); 
-    printf("\nRDI  : 0x%16x", regs.rdi); 
-    printf("\nRSI  : 0x%16x", regs.rsi); 
-    printf("\nRBP  : 0x%16x", regs.rbp); 
-    printf("\nRSP  : 0x%16x", regs.rsp); 
-    printf("\nR08  : 0x%16x", regs.r8);
-    printf("\nR09  : 0x%16x", regs.r9);
-    printf("\nR10  : 0x%16x", regs.r10); 
-    printf("\nR11  : 0x%16x", regs.r11); 
-    printf("\nR12  : 0x%16x", regs.r12); 
-    printf("\nR13  : 0x%16x", regs.r13); 
-    printf("\nR14  : 0x%16x", regs.r14); 
-    printf("\nR15  : 0x%16x", regs.r15); 
-    printf("\nRIP  : 0x%16x", regs.rip); 
-    printf("\nFLAG : 0x%16x", regs.rflags);
-    printf("\nCS   : 0x%16x", regs.cs);
-    printf("\nSS   : 0x%16x", regs.ss);
+    printf("\nRAX  : 0x%16lx", regs.rax);
+    printf("\nRBX  : 0x%16lx", regs.rbx); 
+    printf("\nRCX  : 0x%16lx", regs.rcx); 
+    printf("\nRDX  : 0x%16lx", regs.rdx); 
+    printf("\nRDI  : 0x%16lx", regs.rdi); 
+    printf("\nRSI  : 0x%16lx", regs.rsi); 
+    printf("\nRBP  : 0x%16lx", regs.rbp); 
+    printf("\nRSP  : 0x%16lx", regs.rsp); 
+    printf("\nR08  : 0x%16lx", regs.r8);
+    printf("\nR09  : 0x%16lx", regs.r9);
+    printf("\nR10  : 0x%16lx", regs.r10); 
+    printf("\nR11  : 0x%16lx", regs.r11); 
+    printf("\nR12  : 0x%16lx", regs.r12); 
+    printf("\nR13  : 0x%16lx", regs.r13); 
+    printf("\nR14  : 0x%16lx", regs.r14); 
+    printf("\nR15  : 0x%16lx", regs.r15); 
+    printf("\nRIP  : 0x%16lx", regs.rip); 
+    printf("\nFLAG : 0x%16lx", regs.rflags);
+    printf("\nCS   : 0x%16lx", regs.cs);
+    printf("\nSS   : 0x%16lx", regs.ss);
     printf("\n");
 }
 
@@ -175,9 +172,7 @@ uint64_t schedule(uint64_t running_stack_pointer)
     }
 
     uint64_t next_pid = scheduler_next_pid();
-    // do {
-    //     next_pid = next(&round_robin);
-    // } while(blocks[next_pid].process_state == BLOCKED);
+
     if(pending_action && blocks[next_pid].file_descriptors[STDIN] == STDIN && next_pid > 1 && blocks[next_pid].priority == PRIORITY_HIGH) {
         int ppid = blocks[next_pid].parent_pid;
         switch (pending_action)
@@ -210,12 +205,8 @@ uint64_t schedule(uint64_t running_stack_pointer)
             break;
         }
         pending_action = NONE;
-        // do {
-        //     next_pid = next(&round_robin);
-        // } while(blocks[next_pid].process_state == BLOCKED);
         next_pid = scheduler_next_pid();
     }
-    // printf("[%d]", next_pid);
     blocks[running_pid].regs = *(StackedRegisters *) running_stack_pointer;
     running_pid = next_pid;
     remaining_quantum = scheduler_get_quantum(blocks[running_pid].priority);
@@ -292,7 +283,6 @@ int create_process(Program program, int argc, char **argv, int fds[])
     }
 
     scheduler_insert(PRIORITY_MID, new_pid);
-    // add(&round_robin, new_pid);
     return new_pid;
 }
 
@@ -302,8 +292,6 @@ void create_init_process()
     running_pid = 0;
     int pid = request_pid(); 
     if(pid != 0) {
-        // round_robin.current_index = 0;
-        // round_robin.size = 0;
         memset(blocks, 0, sizeof(ProcessBlock) * MAX_PROCESS_BLOCKS);
         memset(available_pids, 0, sizeof(available_pids));
         biggest_pid = 0;
@@ -322,7 +310,6 @@ void create_init_process()
 
     scheduler_initialize();
     scheduler_insert(blocks[0].priority, pid);
-    // add(&round_robin, 0);
 }
 
 void set_pending_action(PendingAction action) {
@@ -333,8 +320,6 @@ int get_processes_count()
 {
     return current_available_pid_index;
 }
-
-/// --------- Syscalls --------
 
 int64_t get_pid()
 {
@@ -351,10 +336,10 @@ void get_all_processes()
     {
         if (blocks[i].process_state != UNAVAILABLE)
         {
-            printf("%3d : %4d : ", i, blocks[i].parent_pid);
+            printf("%3d : %4lu : ", i, blocks[i].parent_pid);
             int priority = blocks[i].priority;
             printf_color("%s", PROCESS_STATE_COLOR[priority+1], PRIORITY_STRING[priority]);
-            printf(" : %16x : %16x : ", blocks[i].stack_pointer, blocks[i].regs.rbp);
+            printf(" : %16lx : %16lx : ", blocks[i].stack_pointer, blocks[i].regs.rbp);
             uint64_t process_state = blocks[i].process_state;
             printf_color(PROCESS_STATE_STRING[process_state], PROCESS_STATE_COLOR[process_state]);
             printf(" : %s\n", blocks[i].argc > 0 ? blocks[i].argv[0] : "UNKNOWN PROCESS");
@@ -369,9 +354,7 @@ void yield()
 }
 
 
-void change_priority(uint64_t pid, int value){
-    // value = (value < MAX_PRIORITY) ? value : MAX_PRIORITY;
-    // value = (value > 0) ? value : 1;
+void change_priority(uint64_t pid, int value) {
     if(pid == 0 || value > PRIORITY_HIGH || blocks[pid].process_state == UNAVAILABLE) {
         return;
     }
@@ -382,24 +365,6 @@ void change_priority(uint64_t pid, int value){
             scheduler_insert(value, pid);
         blocks[pid].priority = value;
     }
-    // int delta = value - blocks[pid].priority;
-
-    // if (delta > 0)
-    // {
-    //     while(delta-- > 0) 
-    //     {
-    //         blocks[pid].priority++;
-    //         add(&round_robin, pid);
-    //     }
-    // }
-    // else if(delta < 0)
-    // {
-    //     while(delta++ < 0) 
-    //     {
-    //         blocks[pid].priority--;
-    //         delete_value_ocurrence(&round_robin, pid);
-    //     }
-    // }
 }
 
 int block(int pid)
