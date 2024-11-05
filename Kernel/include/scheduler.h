@@ -8,15 +8,9 @@
 #include "shared.h"
 
 typedef struct {
-    int high_priority[MAX_PROCESS_BLOCKS];
-    int mid_priority[MAX_PROCESS_BLOCKS];
-    int low_priority[MAX_PROCESS_BLOCKS];
-    int high_priority_index;
-    int mid_priority_index;
-    int low_priority_index;
-    int high_priority_count;
-    int mid_priority_count;
-    int low_priority_count;
+    int queue[PRIORITY_NONE][MAX_PROCESS_BLOCKS];
+    int index[PRIORITY_NONE];
+    int count[PRIORITY_NONE];
     int mid_priority_turns;
 } Scheduler;
 

@@ -107,9 +107,9 @@ static uint64_t vfprintf_color(int fd, char *fmt, uint64_t foreground, uint64_t 
         if (fmt[i] == '%') {
             char buf[MAX_BUF] = {0};
             i++;
-            uint64_t padding = atoi_index(fmt, &i);
+            int64_t padding = atoi_index(fmt, &i);
             padding = (padding == 0) ? 1 : padding;
-            uint64_t len = 0;
+            int64_t len = 0;
             switch (fmt[i]) {
                 case 'u':
                     len = uintToBase(va_arg(vars, int), buf, 10);
