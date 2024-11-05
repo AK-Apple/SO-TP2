@@ -8,14 +8,14 @@
 #include <stdint.h>
 
 typedef enum {
-    PRIORITY_NONE,
-    PRIORITY_LOW,
+    PRIORITY_LOW = 0,
     PRIORITY_MID,
     PRIORITY_HIGH,
+    PRIORITY_NONE,
 } Priority; 
 
 typedef enum {
-    MEM_COMPLETE,
+    MEM_COMPLETE = 0,
     MEM_REDUCED,
 } Memory_Info_Mode;
 

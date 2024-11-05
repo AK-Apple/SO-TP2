@@ -9,84 +9,43 @@ void scheduler_initialize() {
 }
 
 int scheduler_next_pid() {
-    if(scheduler.high_priority_index >= scheduler.high_priority_count) {
-        scheduler.high_priority_index = 0;
+    if(scheduler.index[PRIORITY_HIGH] >= scheduler.count[PRIORITY_HIGH]) {
+        scheduler.index[PRIORITY_HIGH] = 0;
 
-        if(scheduler.mid_priority_turns >= SCHEDULER_LOW_PRIORITY_RATE || scheduler.mid_priority_count == 0) {
+        if(scheduler.mid_priority_turns >= SCHEDULER_LOW_PRIORITY_RATE || scheduler.count[PRIORITY_MID] == 0) {
             scheduler.mid_priority_turns = 0;
-            scheduler.low_priority_index %= scheduler.low_priority_count;
-            return scheduler.low_priority[scheduler.low_priority_index++];
+            scheduler.index[PRIORITY_LOW] %= scheduler.count[PRIORITY_LOW];
+            return scheduler.queue[PRIORITY_LOW][scheduler.index[PRIORITY_LOW]++];
         }
 
-        scheduler.mid_priority_index %= scheduler.mid_priority_count;
+        scheduler.index[PRIORITY_MID] %= scheduler.count[PRIORITY_MID];
         scheduler.mid_priority_turns++;
-        return scheduler.mid_priority[scheduler.mid_priority_index++];
+        return scheduler.queue[PRIORITY_MID][scheduler.index[PRIORITY_MID]++];
     }
 
-    return scheduler.high_priority[scheduler.high_priority_index++];
+    return scheduler.queue[PRIORITY_HIGH][scheduler.index[PRIORITY_HIGH]++];
 }
 
 int scheduler_insert(Priority priority, int pid) {
-    switch (priority)
-    {
-    case PRIORITY_HIGH:
-        if(scheduler.high_priority_count >= MAX_PROCESS_BLOCKS) {
-            printf_error("schduler cant add\n");
-            return -1;
-        }
-        scheduler.high_priority[scheduler.high_priority_count++] = pid;
-        break;
-    case PRIORITY_MID:
-        if(scheduler.mid_priority_count >= MAX_PROCESS_BLOCKS) {
-            printf_error("schduler cant add\n");
-            return -1;
-        }
-        scheduler.mid_priority[scheduler.mid_priority_count++] = pid;
-        break;
-    case PRIORITY_LOW:
-        if(scheduler.low_priority_count >= MAX_PROCESS_BLOCKS) {
-            printf_error("schduler cant add\n");
-            return -1;
-        }
-        scheduler.low_priority[scheduler.low_priority_count++] = pid;
-        break;
-    default:
-        printf_error("inexistent priority\n");
+    if(priority > PRIORITY_HIGH)
         return -1;
-    }
-    return 0;
+    if(scheduler.count[priority] >= MAX_PROCESS_BLOCKS)
+        return -1;
+    scheduler.queue[priority][scheduler.count[priority]++] = pid;
+
+    return scheduler.count[priority] - 1;
 }
 
 int scheduler_remove(Priority priority, int pid) {
-    switch (priority)
-    {
-    case PRIORITY_HIGH:
-        for(int i = 0; i < scheduler.high_priority_count; i++) {
-            if(scheduler.high_priority[i] == pid) {
-                scheduler.high_priority[i] = scheduler.high_priority[--scheduler.high_priority_count];
-                return 0;
-            }
+    if(priority > PRIORITY_HIGH)
+        return -1;
+    for(int i = 0; i < scheduler.count[priority]; i++) {
+        if(scheduler.queue[priority][i] == pid) {
+            scheduler.queue[priority][i] = scheduler.queue[priority][--scheduler.count[priority]];
+            return 0;
         }
-        break;
-    case PRIORITY_MID:
-        for(int i = 0; i < scheduler.mid_priority_count; i++) {
-            if(scheduler.mid_priority[i] == pid) {
-                scheduler.mid_priority[i] = scheduler.mid_priority[--scheduler.mid_priority_count];
-                return 0;
-            }
-        }
-        break;
-    case PRIORITY_LOW:
-        for(int i = 0; i < scheduler.low_priority_count; i++) {
-            if(scheduler.low_priority[i] == pid) {
-                scheduler.low_priority[i] = scheduler.low_priority[--scheduler.low_priority_count];
-                return 0;
-            }
-        }
-        break;
-    default:
-        break;
     }
+
     return -1;
 }
 
@@ -99,22 +58,19 @@ int scheduler_get_quantum(Priority priority) {
         return 0;
     case PRIORITY_LOW:
         return 0;
+    case PRIORITY_NONE:
+    default:
     }
     return 0;
 }
 
 void scheduler_print() {
     printf("\nHIGH PRIORITY: ");
-    for(int i = 0; i < scheduler.high_priority_count; i++) {
-        printf("%d%c", scheduler.high_priority[i], scheduler.high_priority_index == i ? ']' : ' ');
-    }
-    printf("\nMID PRIORITY: ");
-    for(int i = 0; i < scheduler.mid_priority_count; i++) {
-        printf("%d%c", scheduler.mid_priority[i], scheduler.mid_priority_index == i ? ']' : ' ');
-    }
-    printf("\nLOW PRIORITY: ");
-    for(int i = 0; i < scheduler.low_priority_count; i++) {
-        printf("%d%c", scheduler.low_priority[i], scheduler.low_priority_index == i ? ']' : ' ');
+    for(int queue_index = 0; queue_index < PRIORITY_NONE; queue_index++) {
+        printf("\n%s PRIORITY: ");
+        for(int i = 0; i < scheduler.count[queue_index]; i++) {
+            printf("%d%c", scheduler.queue[queue_index][i], scheduler.index[queue_index] == i ? ']' : ' ');
+        }
     }
     printf("\n");
 }

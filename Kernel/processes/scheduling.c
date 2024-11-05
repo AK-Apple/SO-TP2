@@ -354,7 +354,7 @@ void get_all_processes()
 {
     static char *PROCESS_STATE_STRING[] = {"UNKNOWN", "RUNNING", "READY  ", "BLOCKED"};
     static uint64_t PROCESS_STATE_COLOR[] = {0x00999999, 0x0000FF00, 0x00CCDD00, 0x00FF0000};
-    static char *PRIORITY_STRING[] = {"NONE", "LOW ", "MID ", "HIGH"};
+    static char *PRIORITY_STRING[] = {"LOW ", "MID ", "HIGH", "NONE"};
     printf("pid : ppid : prio : stack_pointer_64 : base_pointer_64  : status  : process_name\n");
     for (int i = 0; i < MAX_PROCESS_BLOCKS; i++)
     {
@@ -362,7 +362,7 @@ void get_all_processes()
         {
             printf("%3d : %4d : ", i, blocks[i].parent_pid);
             int priority = blocks[i].priority;
-            printf_color("%s", PROCESS_STATE_COLOR[priority], PRIORITY_STRING[priority]);
+            printf_color("%s", PROCESS_STATE_COLOR[priority+1], PRIORITY_STRING[priority]);
             printf(" : %16x : %16x : ", blocks[i].stack_pointer, blocks[i].regs.rbp);
             uint64_t process_state = blocks[i].process_state;
             printf_color(PROCESS_STATE_STRING[process_state], PROCESS_STATE_COLOR[process_state]);
@@ -381,7 +381,7 @@ void yield()
 void change_priority(uint64_t pid, int value){
     // value = (value < MAX_PRIORITY) ? value : MAX_PRIORITY;
     // value = (value > 0) ? value : 1;
-    if(pid == 0 || value <= PRIORITY_NONE || value > PRIORITY_HIGH || blocks[pid].process_state == UNAVAILABLE) {
+    if(pid == 0 || value > PRIORITY_HIGH || blocks[pid].process_state == UNAVAILABLE) {
         return;
     }
     Priority previous_priority = blocks[pid].priority;

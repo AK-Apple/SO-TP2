@@ -40,7 +40,7 @@ static Command commands[] = {
     {"mem", "Imprime el estado de la memoria. Muestra la distribucion |size:bytes|size:free, despues stats", (Program)print_meminfo_cmd},
     {"fg", "manda un proceso a foreground", (Program)send_to_foreground, "<pid>"},
     {"block", "Cambia el estado de un proceso entre bloqueado y listo dado su PID.", (Program)block_cmd, "<pid>"},
-    {"nice", "Cambia la prioridad de un proceso dado su PID y la nueva prioridad. prio:1=low ; 2=mid ; 3=high", (Program)change_priority_cmd, "<pid> <prio>"},
+    {"nice", "Cambia la prioridad de un proceso dado su PID y la nueva prioridad. prio:0=low ; 1=mid ; 2=high", (Program)change_priority_cmd, "<pid> <prio>"},
 };
 
 uint64_t change_priority_cmd(uint64_t argc, char *argv[]) {
@@ -54,7 +54,7 @@ uint64_t change_priority_cmd(uint64_t argc, char *argv[]) {
         printf_error("invalid pid %s\n", argv[1]);
         return 1;
     }
-    if(priority <= PRIORITY_NONE || priority > PRIORITY_HIGH) {
+    if(priority > PRIORITY_HIGH) {
         printf_error("invalid priority %s\n", argv[2]);
         return 1;
     }
