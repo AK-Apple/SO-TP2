@@ -1,5 +1,5 @@
-#ifndef SCHEDULING_H
-#define SCHEDULING_H
+#ifndef PROCESS_SO_H
+#define PROCESS_SO_H
 
 #include <stdint.h>
 #include "shared.h"

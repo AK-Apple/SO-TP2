@@ -1,5 +1,7 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "../include/shell.h"
 #include "../include/syscalls.h"
 #include "../include/command.h"
@@ -104,7 +106,7 @@ void print_help() {
             total_len += strlen(commands[i].args) + 1;
             printf_color(" %s", COLOR_YELLOW, 0, commands[i].args);
         }
-        repeat_char(STD_OUT, ' ', 24 - total_len);
+        repeat_char(STDOUT, ' ', 24 - total_len);
         printf(" : %s\n", commands[i].desc);
     }
 
@@ -137,7 +139,7 @@ int64_t send_to_foreground(uint64_t argc, char *argv[]) {
     }
     int process_state = sys_get_process_status(pid);
     if(process_state != 0) {
-        sys_set_fd(pid, STD_IN, STD_IN);
+        sys_set_fd(pid, STDIN, STDIN);
         sys_change_priority(pid, PRIORITY_HIGH);
         sys_unblock(pid);
         printf_color("[shell] running foreground process with pid=%d\n", COLOR_YELLOW, 0, pid);
@@ -146,12 +148,7 @@ int64_t send_to_foreground(uint64_t argc, char *argv[]) {
     return 0;
 }
 
-fd_t shell_pipe[2] = { 0 };
-
 void shell() {
-    
-    sys_create_pipe(shell_pipe);
-
     print_help();
 
     do {
@@ -193,7 +190,6 @@ static Program find_command(char *name) {
 }
 
 void execute(char command_buffer[]) {
-    
     compact_whitespace(command_buffer);
     int argc_max = charcount(command_buffer, ' ') + 1;
     char* argv1[argc_max]; 
@@ -203,8 +199,6 @@ void execute(char command_buffer[]) {
     argv1[argc1++]=command_buffer;
     int piped = 0;
     int send_to_background = 0;
-
-
 
     for(int i = 0; command_buffer[i]; i++){
         switch (command_buffer[i])
@@ -237,40 +231,30 @@ void execute(char command_buffer[]) {
 
     Program process1 = find_command(argv1[0]);
     if(process1) {
-        fd_t fds1[] = {STD_IN, STD_OUT, STD_ERR};
+        fd_t fds1[] = {STDIN, STDOUT, STDERR};
         const char *fg_bg = "foreground";
-        pid_t pid_piped = 0;
-
-        
-
         if(piped) {
-
-            
-            fd_t fds2[] = {shell_pipe[1], STD_OUT, STD_ERR};
-            fds1[STD_OUT] = shell_pipe[0];
+            fd_t shell_pipe[2] = { 0 };
+            sys_create_pipe(shell_pipe);
+            fd_t fds2[] = {shell_pipe[1], STDOUT, STDERR};
+            fds1[STDOUT] = shell_pipe[0];
 
             Program process2 = find_command(argv2[0]);
             if(process2 == NULL) {
                 printf_error("[shell] second comand is invalid '%s'\n", argv2[0]);
                 return;
             }
-            pid_piped = sys_create_process_fd(process2, argc2, argv2, fds2);
-            printf("pid_piped: %d\n", pid_piped);
+            sys_create_process_fd(process2, argc2, argv2, fds2);
         }
         if(send_to_background) {
-            fds1[STD_IN] = DEV_NULL;
+            fds1[STDIN] = DEVNULL;
             fg_bg = "background";
         }
-        int pid = sys_create_process_fd(process1, argc1, argv1, fds1);
-        printf("pid: %d\n", pid);
+        pid_t pid = sys_create_process_fd(process1, argc1, argv1, fds1);
         printf_color("[shell] Running %s with pid=%d in %s...\n", COLOR_YELLOW, 0, argv1[0], pid, fg_bg);
         if(!send_to_background) {
             sys_change_priority(pid, PRIORITY_HIGH);
             sys_wait_pid(pid);
-        }
-        if(piped && sys_get_process_status(pid) == 0) {
-            sys_wait_pid(pid_piped);
-            // sys_close_pipe(shell_pipe[0]);
         }
     }
     else {

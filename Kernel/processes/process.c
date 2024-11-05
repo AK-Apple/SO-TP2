@@ -1,6 +1,6 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-#include "scheduling.h"
+#include "process.h"
 #include "lib.h"
 #include "IO.h"
 #include "interrupts.h"
@@ -102,11 +102,11 @@ pid_t kill_process(pid_t pid, int recursive)
     blocks[pid].stack_pointer = 0;
 
     for(int i = 0; i < MAX_FILE_DESCRIPTORS; i++) {
-        int pipe_id = blocks[pid].file_descriptors[i];
+        fd_t pipe_id = blocks[pid].file_descriptors[i];
         if(pipe_id >= STD_FILE_DESCRIPTORS) {
             close_pipe_end(pipe_id);
         }
-        blocks[pid].file_descriptors[i] = DEV_NULL;
+        blocks[pid].file_descriptors[i] = DEVNULL;
     }
     free_pid(pid);
     scheduler_remove(priority, pid);
@@ -185,7 +185,7 @@ uint64_t schedule(uint64_t running_stack_pointer)
         case BLOCK_FOREGROUND:
             printf_color("^Z Process blocked and sent to background pid=%d\n", COLOR_YELLOW, next_pid);
             block(next_pid);
-            blocks[next_pid].file_descriptors[STDIN] = DEV_NULL;
+            blocks[next_pid].file_descriptors[STDIN] = DEVNULL;
             change_priority(next_pid, PRIORITY_MID);
             if(blocks[ppid].pid_to_wait == next_pid) {
                 blocks[ppid].pid_to_wait = 0;
@@ -194,7 +194,7 @@ uint64_t schedule(uint64_t running_stack_pointer)
             break;
         case FOREGROUND_TO_BACKGROUND:
             printf_color("^X Process sent to run in background pid=%d\n", COLOR_YELLOW, next_pid);
-            blocks[next_pid].file_descriptors[STDIN] = DEV_NULL;
+            blocks[next_pid].file_descriptors[STDIN] = DEVNULL;
             change_priority(next_pid, PRIORITY_MID);
             if(blocks[ppid].pid_to_wait == next_pid) {
                 blocks[ppid].pid_to_wait = 0;
@@ -282,14 +282,12 @@ pid_t create_process(Program program, int argc, char **argv, fd_t fds[])
 
     for(int i = 0; i < STD_FILE_DESCRIPTORS; i++) 
     {
-        printf("fd: %d\n", fds[i]);
         blocks[new_pid].file_descriptors[i] = fds[i];
         if (fds[i] >= STD_FILE_DESCRIPTORS)
         {
             assign_pipe_to_process(fds[i], new_pid);
         }
     }
-    printf("New pid %d\n", new_pid);
 
     scheduler_insert(PRIORITY_MID, new_pid);
     return new_pid;
@@ -313,7 +311,7 @@ void create_init_process()
     blocks[0].priority = PRIORITY_LOW;
     blocks[0].argc = sizeof(init_args) / sizeof(init_args[0]);
     blocks[0].argv = init_args;
-    blocks[0].file_descriptors[STDIN] = DEV_NULL;
+    blocks[0].file_descriptors[STDIN] = DEVNULL;
     blocks[0].file_descriptors[STDOUT] = STDERR;
     blocks[0].file_descriptors[STDERR] = STDERR;
 
@@ -345,7 +343,7 @@ void get_all_processes()
     {
         if (blocks[i].process_state != UNAVAILABLE)
         {
-            printf("%3d : %4lu : ", i, blocks[i].parent_pid);
+            printf("%3d : %4ld : ", i, blocks[i].parent_pid);
             int priority = blocks[i].priority;
             printf_color("%s", PROCESS_STATE_COLOR[priority+1], PRIORITY_STRING[priority]);
             printf(" : %16lx : %16lx : ", blocks[i].stack_pointer, blocks[i].regs.rbp);
@@ -424,6 +422,6 @@ pid_t wait_pid(pid_t pid)
 
 
 pid_t get_fd(fd_t index){
-    if (index >= MAX_FILE_DESCRIPTORS || index < 0) return DEV_NULL;
+    if (index >= MAX_FILE_DESCRIPTORS || index < 0) return DEVNULL;
     return blocks[get_pid()].file_descriptors[index];
 }

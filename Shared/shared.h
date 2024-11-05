@@ -1,11 +1,18 @@
 #ifndef SHARED_H
 #define SHARED_H
 
+#include <stddef.h>
+#include <stdint.h>
+
 #define SEM_SUCCESS 1
 #define SEM_ERROR 0
 
-#include <stddef.h>
-#include <stdint.h>
+typedef int64_t fd_t;
+
+#define STDIN ((fd_t)0)
+#define STDOUT ((fd_t)1)
+#define STDERR ((fd_t)2)
+#define DEVNULL ((fd_t)(-1L))
 
 typedef enum {
     PRIORITY_LOW = 0,
@@ -29,8 +36,6 @@ typedef struct Memory_Info {
     const char *allocator_type;
     Memory_Info_Mode mode;
 } Memory_Info;
-
-typedef int64_t fd_t;
 
 typedef int64_t pid_t;
 

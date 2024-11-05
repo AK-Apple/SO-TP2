@@ -2,7 +2,7 @@
 #define QUEUE2_H
 
 #include <stdint.h>
-#include "scheduling.h"
+#include "process.h"
 
 #define MAX_SIZE2 2048
 

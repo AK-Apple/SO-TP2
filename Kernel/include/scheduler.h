@@ -4,7 +4,7 @@
 #define SCHEDULER_LOW_PRIORITY_RATE 3
 
 #include <stdint.h>
-#include "scheduling.h"
+#include "process.h"
 #include "shared.h"
 
 typedef struct {

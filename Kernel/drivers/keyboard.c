@@ -4,7 +4,7 @@
 #include "video.h"
 #include "IO.h"
 #include "lib.h"
-#include "scheduling.h"
+#include "process.h"
 #include "semaphores.h"
 
 #define SIZE_BUFFER 1024

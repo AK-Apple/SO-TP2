@@ -5,7 +5,7 @@
 #include "exceptions.h"
 #include "IO.h"
 #include "lib.h"
-#include "scheduling.h"
+#include "process.h"
 
 #define ZERO_EXCEPTION_ID 0
 #define INVALID_OPCODE_ID 1

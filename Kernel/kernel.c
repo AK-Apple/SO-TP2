@@ -8,7 +8,7 @@
 #include <idtLoader.h>
 #include "memory_allocator.h"
 #include "IO.h"
-#include "scheduling.h"
+#include "process.h"
 #include "interrupts.h"
 #include "defs.h"
 #include "keyboard.h"

@@ -174,4 +174,4 @@ sys_close_pipe:
 	Syscall 37
 
 SECTION .data
-std_fds 	dd 		0, 1, 2
+std_fds 	dq 		0, 1, 2

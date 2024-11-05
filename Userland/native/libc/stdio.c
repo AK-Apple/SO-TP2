@@ -1,6 +1,7 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "stdio.h"
+#include "shared.h"
 #include <stdarg.h>
 #include "stdlib.h"
 #include "syscalls.h"
@@ -14,7 +15,7 @@ static uint64_t vfprintf_color(int fd, char *fmt, uint64_t foreground, uint64_t 
 
 void putchar(char c) {
     char buf[] = {c, 0};
-    sys_write(STD_OUT, buf, 1);
+    sys_write(STDOUT, buf, 1);
 }
 
 void fputchar(char c, int fd) {
@@ -73,7 +74,7 @@ uint64_t printf_color(char * fmt, uint64_t foreground, uint64_t background, ...)
     va_list args;
     va_start(args, background);  
 
-    uint64_t i = vfprintf_color(STD_OUT, fmt, foreground, background, args);
+    uint64_t i = vfprintf_color(STDOUT, fmt, foreground, background, args);
 
     va_end(args);  
     return i;
@@ -92,7 +93,7 @@ uint64_t fprintf_color(int fd, char * fmt, uint64_t foreground, uint64_t backgro
 void printf_error(char *fmt, ...) {
     va_list args;
     va_start(args, fmt);
-    vfprintf_color(STD_ERR, fmt, default_foreground_color, 0x000000, args); 
+    vfprintf_color(STDERR, fmt, default_foreground_color, 0x000000, args); 
     va_end(args);
 }
 
@@ -167,7 +168,7 @@ static uint64_t vfprintf_color(int fd, char *fmt, uint64_t foreground, uint64_t 
 void printf(char * fmt, ...) {
     va_list args;
     va_start(args, fmt);
-    vfprintf_color(STD_OUT, fmt, default_foreground_color, 0x000000, args);
+    vfprintf_color(STDOUT, fmt, default_foreground_color, 0x000000, args);
     va_end(args);
 }
 

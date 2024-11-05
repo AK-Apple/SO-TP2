@@ -2,7 +2,7 @@
 #define QUEUE_H
 
 #include <stdint.h>
-#include "scheduling.h"
+#include "process.h"
 
 #define MAX_SIZE MAX_PROCESS_BLOCKS
 

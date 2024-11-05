@@ -33,7 +33,7 @@ extern int sys_getWindowSize(int elem);
 
 extern void sys_getRegs();
 
-extern int sys_create_process_fd(Program program, int argc, char **argv, int fds[]);
+extern int sys_create_process_fd(Program program, int argc, char **argv, fd_t fds[]);
 extern int sys_create_process(Program program, int argc, char **argv);
 extern int sys_kill_process(uint64_t pid, int recursive);
 extern int sys_get_process_status(int pid);
@@ -44,7 +44,7 @@ extern int sys_block(int pid);
 extern int sys_unblock(int pid);
 extern void sys_yield();
 extern uint64_t sys_wait_pid(uint64_t pid);
-extern void sys_set_fd(int pid, int fd_index, int value);
+extern void sys_set_fd(int pid, fd_t fd_index, fd_t value);
 extern void sys_exit(uint64_t return_value);
 
 extern void *sys_memory_alloc(size_t bytes);

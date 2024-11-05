@@ -6,7 +6,7 @@
 #include "lib.h"
 #include "interrupts.h"
 #include "sound.h"
-#include "scheduling.h"
+#include "process.h"
 #include "memory_allocator.h"
 #include "semaphores.h"
 #include "pipes.h"
@@ -67,7 +67,7 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
 
         (Syscall)create_pipe, // Syscall 35
         (Syscall)MISSING_SYSCALL, // Syscall 36 (eliminada)
-        (Syscall)close_pipe, // Syscall 37
+        (Syscall)close_pipe_end, // Syscall 37
 
     };
     if(id >= sizeof(syscalls) / sizeof(syscalls[0])) {

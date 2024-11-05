@@ -8,7 +8,6 @@
 int8_t create_pipe(fd_t* fd_buffer);
 int64_t read_pipe(fd_t fd, char* buf, int count);
 int64_t write_pipe(fd_t fd, const char* buf, int count);
-int8_t close_pipe(fd_t fd);
 void assign_pipe_to_process(fd_t fd, int pid);
 void close_pipe_end(fd_t fd);
 

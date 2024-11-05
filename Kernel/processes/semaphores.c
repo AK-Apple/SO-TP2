@@ -5,7 +5,7 @@
 #include "interrupts.h"
 #include "semaphores.h"
 #include "bounded_queue.h"
-#include "scheduling.h"
+#include "process.h"
 
 #define MAX_SEMAPHORES (MAX_PROCESS_BLOCKS * 4)
 #define NO_PRIORITY -1

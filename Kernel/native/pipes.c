@@ -6,7 +6,7 @@
 
 // TODO: que cada pipe tenga un semáforo distinto?
 #define MUTEX 30
-#define MAX_PIPES 10
+#define MAX_PIPES MAX_PROCESS_BLOCKS
 
 typedef struct
 {
@@ -77,7 +77,7 @@ char pipe_is_valid(int pipe)
 int8_t create_pipe(fd_t* fd_buffer)
 {
     int64_t pipe = request_pipe();
-    if (pipe > MAX_PIPES || pipe < 0 || pipes[pipe].available == 1) 
+    if (pipe >= MAX_PIPES || pipe < 0 || pipes[pipe].available == 1) 
     {
         printf_error("Pipe couldnt be created\n");
         return 0;
@@ -94,21 +94,6 @@ int8_t create_pipe(fd_t* fd_buffer)
 
     sem_post(MUTEX);
     pipe_to_fd(pipe, fd_buffer);
-    return 1;
-}
-
-// TODO: ¿close_pipe realmente anda? ¿Cómo leo el EOF del pipe si está cerrado?
-
-int8_t close_pipe(fd_t fd) {
-    int64_t pipe = fd_to_pipe(fd);
-    if (!pipe_is_valid(pipe)) return 0;
-    char eof[] = {EOF, 0};
-    write_pipe(fd, eof, 2);
-    pipes[pipe].available = 0;
-    available_pipes[--current_available_pipe_index] = pipe;
-
-    printf_error("File descriptor [%d] has been closed \n", fd);
-
     return 1;
 }
 
@@ -179,7 +164,7 @@ int64_t write_pipe(fd_t fd, const char* buf, int count)
 
     if (pipes[pipe].writer_pid != get_pid())
     {
-        printf_error("Cant write from this pid [%d]. Should write from pid [%d] instead. Pipe ID: %d, File Descriptor: %d\n", get_pid(), pipes[pipe].reader_pid, pipe, fd);
+        printf_error("Cant write from this pid [%d]. Should write from pid [%d] instead. Pipe ID: %d, File Descriptor: %d '%s'\n", get_pid(), pipes[pipe].reader_pid, pipe, fd, buf[0] == -1 ?"EOF":"N");
         return 0;
     }
     
@@ -246,7 +231,6 @@ void assign_pipe_to_process(fd_t fd, int pid)
             printf_error("File descriptor [%d] is already occupied\n", fd);
         }
     }
-    printf_error("File descriptor [%d] has assigned pid [%d] \n", fd, pid);
 }
 
 void close_pipe_end(fd_t fd)
@@ -254,17 +238,22 @@ void close_pipe_end(fd_t fd)
     int64_t pipe = fd_to_pipe(fd);
 
     if (!pipe_is_valid(pipe)) {
-        printf_error("[kernel] Wrong file descriptor [%d]. Pipe ID: %d \n", fd, pipe);
         return;
     }
 
     if (is_read_end(fd))
     {
         pipes[pipe].writer_pid = -1;
+        char eof[] = {EOF, 0};
+        enqueue_string2(&pipes[pipe].buffer, eof, 2);
     }
     else
     {
         pipes[pipe].reader_pid = -1;
     }
-    printf_error("File descriptor [%d] has been cleared \n", fd);
+
+    if(pipes[pipe].writer_pid == -1 && pipes[pipe].reader_pid == -1) {
+        pipes[pipe].available = 0;
+        available_pipes[--current_available_pipe_index] = pipe;
+    }
 }

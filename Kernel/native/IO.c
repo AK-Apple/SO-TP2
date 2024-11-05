@@ -9,7 +9,7 @@
 #include "interrupts.h"
 #include "keyboard.h"
 #include "pipes.h"
-#include "scheduling.h"
+#include "process.h"
 
 uint64_t screen_x = 0;
 uint64_t screen_y = 0;
@@ -33,7 +33,7 @@ int sys_read(int fd_index, char* buf, int count){
     {
         return read_pipe(fd, buf, count);
     }
-    else if(fd == DEV_NULL) {
+    else if(fd == DEVNULL) {
         buf[0] = EOF;
         buf[1] = '\0';
     }

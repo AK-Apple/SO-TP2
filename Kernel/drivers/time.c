@@ -3,7 +3,7 @@
 #include "time.h"
 #include "lib.h"
 #include "interrupts.h"
-#include "scheduling.h"
+#include "process.h"
 #include "IO.h"
 
 uint64_t ticks = 0;

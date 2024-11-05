@@ -2,12 +2,9 @@
 #define TPE_ARQUI_IO_H
 
 #include <stdint.h>
+#include "shared.h"
 
-#define STD_FILE_DESCRIPTORS 3
-#define STDIN 0
-#define STDOUT 1
-#define STDERR 2
-#define DEV_NULL (-1)
+#define STD_FILE_DESCRIPTORS ((fd_t)(3))
 #define EOF ((int)(-1))
 
 #define COLOR_RED       0x00FF0000
