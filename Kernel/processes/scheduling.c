@@ -178,7 +178,8 @@ uint64_t schedule(uint64_t running_stack_pointer)
     // do {
     //     next_pid = next(&round_robin);
     // } while(blocks[next_pid].process_state == BLOCKED);
-    if(pending_action && blocks[next_pid].file_descriptors[STDIN] == STDIN && next_pid > 1 && blocks[next_pid].priority == PRIORITY_HIGH) {
+    if(pending_action && blocks[next_pid].file_descriptors[STDIN] == STDIN && blocks[next_pid].priority == PRIORITY_HIGH) {
+        if (next_pid == 1) pending_action = 0;
         int ppid = blocks[next_pid].parent_pid;
         switch (pending_action)
         {
