@@ -108,34 +108,6 @@ int k_strcmp(const char *str1, const char *str2) {
     return *(unsigned char*)str1 - *(unsigned char*)str2;
 }
 
-
-
-void k_print_int_dec(int64_t number) {
-    if (number < 0) {
-        putChar('-');  // Handle negative sign for negative numbers
-        number = -number;  // Convert to positive for easier handling
-    }
-
-    if (number == 0) {
-        putChar('0');  // Special case for 0
-        return;
-    }
-
-    // Calculate and store the digits in reverse order
-    char buffer[20];  // Buffer to hold the digits (enough for a 64-bit integer)
-    int index = 0;
-
-    while (number > 0) {
-        buffer[index++] = (number % 10) + '0';  // Store the least significant digit as a character
-        number /= 10;  // Remove the last digit
-    }
-
-    // Print the digits in the correct order
-    while (index > 0) {
-        putChar(buffer[--index]);  // Print the digits from most significant to least significant
-    }
-}
-
 void k_print_integer(uint64_t number, uint64_t padding, uint64_t base) {
     uint64_t length = 0;
     uint64_t numberReverse = 0; 

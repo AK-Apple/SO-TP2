@@ -19,7 +19,7 @@ uint64_t gets(char * buf, uint64_t length) {
     int i = 0;
     do {
         c=getchar();
-        if (c >= 0x20 && c <= 0x7F) {
+        if (c >= 0x20) {
             buf[i] = c;
             putchar(c);
         } else if (c == '\n') {

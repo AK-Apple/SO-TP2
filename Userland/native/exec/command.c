@@ -74,7 +74,7 @@ void divide(uint64_t argc, char *argv[]) {
         a = satoi(argv[1]);    
         b = satoi(argv[2]);
         int64_t res = a / b;
-        printf("%d / %d = %d\n", a, b, res);    
+        printf("%ld / %ld = %ld\n", a, b, res);    
     }
     else {
         printf_error("se recibio: '%s' '%s'\nusage: div <a> <b>\n", argv[1], argv[2]);
@@ -101,7 +101,7 @@ void changeSize(uint64_t argc, char *argv[]) {
 void kill_process(uint64_t argc, char *argv[]) {
     int pid = satoi(argv[1]);
     printf("[killing process] pid=%d\n", pid);
-    if(argc != 2) {
+    if(argc < 2) {
         printf_error("invalid arguments\n"); 
         return;
     }

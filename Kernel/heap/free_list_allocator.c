@@ -136,18 +136,18 @@ void memory_info(Memory_Info *info, Memory_Info_Mode mode) {
     info->mode = mode;
 
     if(mode == MEM_REDUCED) return;
-    printf_color("Heap from 0x%x to 0x%x with allocator type: %s\n", 0x0000AA00, allocator.base_address, end_address, info->allocator_type);
+    printf_color("Heap from 0x%lx to 0x%lx with allocator type: %s\n", 0x0000AA00, allocator.base_address, end_address, info->allocator_type);
     
     while(current_pointer - allocator.base_address < total_memory) {
         if((Free_List_Node *)current_pointer == list_iter) {
             Free_List_Node *node = (Free_List_Node *)current_pointer;
-            printf_color("|%d:free", 0x00888888, node->size);
+            printf_color("|%lu:free", 0x00888888, node->size);
             list_iter = list_iter->next;
             current_pointer += node->size;
         }
         else {
             Allocation_Header *header = (Allocation_Header *)current_pointer;
-            printf_color("|%d:%d", 0x00DDDDFF, header->size, header->intended_size);
+            printf_color("|%lu:%lu", 0x00DDDDFF, header->size, header->intended_size);
             internal_fragmentation += header->size - header->intended_size - sizeof(Allocation_Header);
             current_pointer += header->size;
             used_memory += header->size;
@@ -156,11 +156,11 @@ void memory_info(Memory_Info *info, Memory_Info_Mode mode) {
     info->used_memory = used_memory;
     info->free_memory = total_memory - used_memory;
     info->internal_fragmentation = internal_fragmentation;
-    printf("\nTotal memory: %d bytes\n", total_memory);
-    printf("Used memory %d bytes\n", used_memory);
-    printf("Free memory %d bytes\n", total_memory - used_memory);
-    printf("internal fragmentation %d bytes\n", internal_fragmentation);
-    printf("largest free block %d bytes\n", largest_free_block_bytes);
+    printf("\nTotal memory: %lu bytes\n", total_memory);
+    printf("Used memory %lu bytes\n", used_memory);
+    printf("Free memory %lu bytes\n", total_memory - used_memory);
+    printf("internal fragmentation %lu bytes\n", internal_fragmentation);
+    printf("largest free block %lu bytes\n", largest_free_block_bytes);
 
 }
 #endif

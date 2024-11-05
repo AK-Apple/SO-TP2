@@ -111,11 +111,18 @@ static uint64_t vfprintf_color(int fd, char *fmt, uint64_t foreground, uint64_t 
             padding = (padding == 0) ? 1 : padding;
             int64_t len = 0;
             switch (fmt[i]) {
+                case 'l':
+                    i++;
+                    if(fmt[i] == 'u')
+                        len = uintToBase(va_arg(vars, uint64_t), buf, 10);
+                    else if(fmt[i] == 'd')
+                        len =  (uint64_t)(itoa(va_arg(vars, int64_t), buf, 10) - buf);
+                    break;
                 case 'u':
-                    len = uintToBase(va_arg(vars, int), buf, 10);
+                    len = uintToBase(va_arg(vars, uint32_t), buf, 10);
                     break;
                 case 'd':
-                    len = (uint64_t)(itoa(va_arg(vars, int64_t), buf, 10) - buf);
+                    len = (uint64_t)(itoa(va_arg(vars, int32_t), buf, 10) - buf);
                     break;
                 case 'x':
                     len = uintToBase(va_arg(vars, int), buf, 16);

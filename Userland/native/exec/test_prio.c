@@ -23,7 +23,7 @@ void test_prio() {
   uint64_t i;
 
   for (i = 0; i < TOTAL_PROCESSES; i++) {
-    loop_argv[2] = (i < sizeof(print_color) / sizeof(print_color[0])) ? print_color[i] : "16777215";
+    loop_argv[2] = print_color[i % (sizeof(print_color) / sizeof(print_color[0]))];
     pids[i] = sys_create_process((Program)endless_loop_print, sizeof(loop_argv)/sizeof(loop_argv[0]), loop_argv);
   }
 

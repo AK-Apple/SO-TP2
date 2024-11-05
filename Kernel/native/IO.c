@@ -56,6 +56,21 @@ static uint64_t vprintf(char *fmt, va_list vars) {
             uint64_t padding = k_atoi_index(fmt, &i);
             padding = (padding == 0) ? 1 : padding;
             switch (fmt[i]) {
+                case 'l':
+                    i++;
+                    switch (fmt[i])
+                    {
+                    case 'd':
+                    case 'u':
+                        k_print_integer(va_arg(vars, uint64_t), padding, 10);
+                        break;
+                    case 'x':
+                        k_print_integer(va_arg(vars, uint64_t), padding, 16);
+                        break;
+                    default:
+                        break;
+                    }
+                    break;
                 case 'd':
                     k_print_integer(va_arg(vars, int), padding, 10);
                     break;
@@ -63,7 +78,7 @@ static uint64_t vprintf(char *fmt, va_list vars) {
                     k_print_integer(va_arg(vars, int), padding, 16);
                     break;
                 case 'b':
-                    k_print_integer(va_arg(vars, int), padding, 2);
+                    k_print_integer(va_arg(vars, uint64_t), padding, 2);
                     break;
                 case 'c':
                     putOut(va_arg(vars, int));

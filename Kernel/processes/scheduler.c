@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "scheduler.h"
 #include "IO.h"
 #include "lib.h"
@@ -55,19 +57,18 @@ int scheduler_get_quantum(Priority priority) {
     case PRIORITY_HIGH:
         return 1;
     case PRIORITY_MID:
-        return 0;
     case PRIORITY_LOW:
-        return 0;
     case PRIORITY_NONE:
+        return 0;
     default:
     }
     return 0;
 }
 
 void scheduler_print() {
-    printf("\nHIGH PRIORITY: ");
+    char *PRIORITY_STR[] = {"LOW", "MID", "HIGH", "NONE"};
     for(int queue_index = 0; queue_index < PRIORITY_NONE; queue_index++) {
-        printf("\n%s PRIORITY: ");
+        printf("\n%s PRIORITY: ", PRIORITY_STR[queue_index]);
         for(int i = 0; i < scheduler.count[queue_index]; i++) {
             printf("%d%c", scheduler.queue[queue_index][i], scheduler.index[queue_index] == i ? ']' : ' ');
         }

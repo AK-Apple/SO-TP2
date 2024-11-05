@@ -88,7 +88,7 @@ int64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
   }
   if (use_sem)
     sys_sem_close(SEM_ID);
-  printf("Final value: %d\n", global_shared_memory);
+  printf("Final value: %ld\n", global_shared_memory);
 
   return 0;
 }
