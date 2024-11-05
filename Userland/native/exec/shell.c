@@ -146,7 +146,7 @@ int64_t send_to_foreground(uint64_t argc, char *argv[]) {
     return 0;
 }
 
-int64_t shell_pipe[2] = { 0 };
+fd_t shell_pipe[2] = { 0 };
 
 void shell() {
     
@@ -237,16 +237,16 @@ void execute(char command_buffer[]) {
 
     Program process1 = find_command(argv1[0]);
     if(process1) {
-        int fds1[] = {STD_IN, STD_OUT, STD_ERR};
+        fd_t fds1[] = {STD_IN, STD_OUT, STD_ERR};
         const char *fg_bg = "foreground";
-        int pid_piped = 0;
+        pid_t pid_piped = 0;
 
         
 
         if(piped) {
 
             
-            int fds2[] = {shell_pipe[1], STD_OUT, STD_ERR};
+            fd_t fds2[] = {shell_pipe[1], STD_OUT, STD_ERR};
             fds1[STD_OUT] = shell_pipe[0];
 
             Program process2 = find_command(argv2[0]);

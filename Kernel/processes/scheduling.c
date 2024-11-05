@@ -11,7 +11,7 @@
 
 Stack stacks[MAX_PROCESS_BLOCKS] = {0}; 
 
-uint64_t running_pid = 0;
+pid_t running_pid = 0;
 // CircularList round_robin = {0};
 int remaining_quantum = 0;
 PendingAction pending_action = NONE;
@@ -23,21 +23,21 @@ typedef struct ProcessBlock
 {
     uint64_t stack_pointer;
     State process_state;
-    uint64_t parent_pid;
+    pid_t parent_pid;
     uint64_t priority;
     Program program;
     int argc;
     char **argv;
-    int file_descriptors[MAX_FILE_DESCRIPTORS];
-    int pid_to_wait;
+    fd_t file_descriptors[MAX_FILE_DESCRIPTORS];
+    pid_t pid_to_wait;
     StackedRegisters regs;
 } ProcessBlock;
 
-uint64_t available_pids[MAX_PROCESS_BLOCKS] = {0};
+pid_t available_pids[MAX_PROCESS_BLOCKS] = {0};
 uint64_t current_available_pid_index = 0;
 uint64_t biggest_pid = 0;
 
-uint64_t request_pid()
+pid_t request_pid()
 {
     if (current_available_pid_index >= biggest_pid)
     {
@@ -52,20 +52,21 @@ uint64_t request_pid()
     return available_pids[current_available_pid_index++];
 }
 
-void free_pid(int pid)
+void free_pid(pid_t pid)
 {
     available_pids[--current_available_pid_index] = pid;
 }
 
 ProcessBlock blocks[MAX_PROCESS_BLOCKS] = {0};
 
+// TODO: para qué es el return_value?
 void exit(uint64_t return_value)
 {
     kill_process(get_pid(), 0);
     yield();
 }
 
-static void reasign_children(uint64_t pid, int recursive)
+static void reasign_children(pid_t pid, int recursive)
 {
     for (int i = 0; i < MAX_PROCESS_BLOCKS; i++)
     {
@@ -79,7 +80,7 @@ static void reasign_children(uint64_t pid, int recursive)
     }
 }
 
-int kill_process(uint64_t pid, int recursive)
+pid_t kill_process(pid_t pid, int recursive)
 {
     if (pid >= MAX_PROCESS_BLOCKS || pid < 1)
         return -1;
@@ -116,7 +117,7 @@ int kill_process(uint64_t pid, int recursive)
     return pid;
 }
 
-int get_process_status(uint64_t pid)
+int get_process_status(pid_t pid)
 {
     return blocks[pid].process_state;
 }
@@ -174,7 +175,7 @@ uint64_t schedule(uint64_t running_stack_pointer)
         blocks[running_pid].process_state = READY;
     }
 
-    uint64_t next_pid = scheduler_next_pid();
+    pid_t next_pid = scheduler_next_pid();
     // do {
     //     next_pid = next(&round_robin);
     // } while(blocks[next_pid].process_state == BLOCKED);
@@ -236,7 +237,7 @@ void set_current_quantum(uint64_t q) {
     remaining_quantum = q;
 }
 
-void initializeRegisters(uint64_t new_pid, uint64_t rsp)
+void initializeRegisters(pid_t new_pid, uint64_t rsp)
 {
     StackedRegisters stackedRegisters = (StackedRegisters){0};
     stackedRegisters.rflags = 0x202;
@@ -250,9 +251,9 @@ void initializeRegisters(uint64_t new_pid, uint64_t rsp)
     memcpy((void *)rsp, &stackedRegisters, sizeof(struct StackedRegisters));
 }
 
-int create_process(Program program, int argc, char **argv, int64_t fds[])
+pid_t create_process(Program program, int argc, char **argv, fd_t fds[])
 {
-    uint64_t new_pid = request_pid();
+    pid_t new_pid = request_pid();
     if (new_pid == INVALID_PID)
     {
         return -1;
@@ -309,7 +310,7 @@ void create_init_process()
 {
     static char *init_args[] = {"INIT"};
     running_pid = 0;
-    int pid = request_pid(); 
+    pid_t pid = request_pid(); 
     if(pid != 0) {
         // round_robin.current_index = 0;
         // round_robin.size = 0;
@@ -345,7 +346,7 @@ int get_processes_count()
 
 /// --------- Syscalls --------
 
-int64_t get_pid()
+pid_t get_pid()
 {
     return running_pid;
 }
@@ -378,7 +379,7 @@ void yield()
 }
 
 
-void change_priority(uint64_t pid, int value){
+void change_priority(pid_t pid, int value){
     // value = (value < MAX_PRIORITY) ? value : MAX_PRIORITY;
     // value = (value > 0) ? value : 1;
     if(pid == 0 || value > PRIORITY_HIGH || blocks[pid].process_state == UNAVAILABLE) {
@@ -411,7 +412,7 @@ void change_priority(uint64_t pid, int value){
     // }
 }
 
-int block(int pid)
+pid_t block(pid_t pid)
 {
     if(block_no_yield(pid) == -1) 
         return -1;
@@ -421,16 +422,16 @@ int block(int pid)
     return pid;
 }
 
-void sys_set_fd(int pid, int fd_index, int value) {
+void sys_set_fd(pid_t pid, fd_t fd_index, fd_t fd) {
     if(pid > 0) {
-        blocks[pid].file_descriptors[fd_index] = value;
-        if(fd_index == STDIN && value == STDIN) {
+        blocks[pid].file_descriptors[fd_index] = fd;
+        if(fd_index == STDIN && fd == STDIN) {
             force_enqueue(1, pid);
         }
     }
 }
 
-int block_no_yield(int pid) {
+pid_t block_no_yield(pid_t pid) {
     if (pid >= MAX_PROCESS_BLOCKS || pid < 1 || blocks[pid].process_state == UNAVAILABLE)
         return -1;
     blocks[pid].process_state = BLOCKED;
@@ -438,7 +439,7 @@ int block_no_yield(int pid) {
     return 0;
 }
 
-int unblock(int pid)
+pid_t unblock(pid_t pid)
 {
     if (pid >= MAX_PROCESS_BLOCKS || pid < 1)
         return -1;
@@ -447,7 +448,7 @@ int unblock(int pid)
     return pid;
 }
 
-uint64_t wait_pid(uint64_t pid)
+pid_t wait_pid(pid_t pid)
 {
     if(blocks[pid].process_state == UNAVAILABLE) return pid;
     int ppid = blocks[pid].parent_pid;
@@ -458,7 +459,7 @@ uint64_t wait_pid(uint64_t pid)
 }
 
 
-int64_t get_fd(int index){
+pid_t get_fd(fd_t index){
     if (index >= MAX_FILE_DESCRIPTORS || index < 0) return DEV_NULL;
     return blocks[get_pid()].file_descriptors[index];
 }

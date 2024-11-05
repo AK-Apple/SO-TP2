@@ -2,6 +2,7 @@
 #define SCHEDULING_H
 
 #include <stdint.h>
+#include "shared.h"
 
 #define MAX_PROCESS_BLOCKS 64 
 #define MAX_FILE_DESCRIPTORS 16
@@ -37,33 +38,33 @@ typedef enum {
     BLOCK_FOREGROUND,
 } PendingAction;
 
-int create_process(Program program, int argc, char **argv, int fds[]);
+pid_t create_process(Program program, int argc, char **argv, fd_t fds[]);
 
 void create_init_process();
 
-int kill_process(uint64_t pid, int recursive);
+pid_t kill_process(pid_t pid, int recursive);
 
-int64_t get_pid();
+pid_t get_pid();
 
-int get_process_status(uint64_t pid);
+int get_process_status(pid_t pid);
 
 void get_all_processes();
 
 void yield();
 
-void change_priority(uint64_t pid, int value);
+void change_priority(pid_t pid, int value);
 
-int block(int pid);
+pid_t block(pid_t pid);
 
-int block_no_yield(int pid);
+pid_t block_no_yield(pid_t pid);
 
-int unblock(int pid);
+pid_t unblock(pid_t pid);
 
 void exit(uint64_t return_value);
 
-uint64_t wait_pid(uint64_t pid);
+pid_t wait_pid(pid_t pid);
 
-void sys_set_fd(int pid, int fd_index, int value);
+void sys_set_fd(pid_t pid, fd_t fd_index, fd_t value);
 
 void save_regs();
 
@@ -73,7 +74,7 @@ void set_current_quantum(uint64_t q);
 
 void set_pending_action(PendingAction action);
 
-int64_t get_fd(int index);
+fd_t get_fd(fd_t index);
 
 // -------- SO ----------
 

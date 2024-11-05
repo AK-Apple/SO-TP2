@@ -62,9 +62,9 @@ int main()
     load_idt();
     static char *argv_shell[] = {"shell"};
 
-    int fds[] = {STDIN, STDOUT, STDERR};
+    fd_t fds[] = {STDIN, STDOUT, STDERR};
     sys_clearScreen();
-    int shell_pid = create_process((Program)SAMPLE_CODE_MODULE_ADDRESS, sizeof(argv_shell)/sizeof(argv_shell[0]), argv_shell, fds);
+    pid_t shell_pid = create_process((Program)SAMPLE_CODE_MODULE_ADDRESS, sizeof(argv_shell)/sizeof(argv_shell[0]), argv_shell, fds);
     change_priority(shell_pid, PRIORITY_HIGH);
 
     while (1) {

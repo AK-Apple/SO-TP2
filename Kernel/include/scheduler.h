@@ -15,9 +15,9 @@ typedef struct {
 } Scheduler;
 
 void scheduler_initialize();
-int scheduler_next_pid();
-int scheduler_insert(Priority priority, int pid);
-int scheduler_remove(Priority priority, int pid);
+pid_t scheduler_next_pid();
+int scheduler_insert(Priority priority, pid_t pid);
+int scheduler_remove(Priority priority, pid_t pid);
 int scheduler_get_quantum(Priority priority);
 void scheduler_print();
 

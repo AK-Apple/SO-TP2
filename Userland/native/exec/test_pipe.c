@@ -34,15 +34,15 @@ int64_t write_test(uint64_t argc, char *argv[])  {
 int64_t test_pipe(uint64_t argc, char *argv[]) {
     printf("TEST DE PIPES!!\n");
 
-    int64_t test_pipe_fds[2] = { 0 };
+    fd_t test_pipe_fds[2] = { 0 };
 
     sys_create_pipe(test_pipe_fds);
 
-    int fds1[] = {test_pipe_fds[1], STD_OUT, STD_ERR};
-    int pid1 = sys_create_process_fd(read_test, 0, 0, fds1);
+    fd_t fds1[] = {test_pipe_fds[1], STD_OUT, STD_ERR};
+    pid_t pid1 = sys_create_process_fd(read_test, 0, 0, fds1);
 
-    int fds2[] = {STD_IN, test_pipe_fds[0], STD_ERR};
-    int pid2 = sys_create_process_fd(write_test, 0, 0, fds2);
+    fd_t fds2[] = {STD_IN, test_pipe_fds[0], STD_ERR};
+    pid_t pid2 = sys_create_process_fd(write_test, 0, 0, fds2);
     sys_wait_pid(pid1);
     sys_wait_pid(pid2);
     printf("pid read_test: %d\npid write_test: %d\n", pid1, pid2);

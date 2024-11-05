@@ -29,7 +29,7 @@ uint64_t biggest_pipe_id = 0;
 // ---------- Funciones de mapping de File Descriptors a Pipes y viceversa -------
 
 
-static void pipe_to_fd(int64_t pipe, int64_t* fd_buffer)
+static void pipe_to_fd(int64_t pipe, fd_t* fd_buffer)
 {
     fd_buffer[0] = 2 * pipe + 3;       // buffer[0] = fd impar = read end
     fd_buffer[1] = 2 * pipe + 4;       // buffer[1] = fd par   = write end
@@ -37,7 +37,7 @@ static void pipe_to_fd(int64_t pipe, int64_t* fd_buffer)
 // 0 <-> 3, 4
 // 1 <-> 5, 6
 
-static int64_t fd_to_pipe(int64_t fd)
+static int64_t fd_to_pipe(fd_t fd)
 {
     if (fd < 3){
         printf_error("File Descriptor [%d] will never point to a pipe. Must be >= 3\n", fd);
@@ -46,7 +46,7 @@ static int64_t fd_to_pipe(int64_t fd)
     return (fd - 3) / 2;
 }
 
-static int8_t is_read_end(int64_t fd)
+static int8_t is_read_end(fd_t fd)
 {
     return fd % 2 == 1; 
 }
@@ -74,7 +74,7 @@ char pipe_is_valid(int pipe)
 }
 
 
-int8_t create_pipe(int64_t* fd_buffer)
+int8_t create_pipe(fd_t* fd_buffer)
 {
     int64_t pipe = request_pipe();
     if (pipe > MAX_PIPES || pipe < 0 || pipes[pipe].available == 1) 
@@ -99,7 +99,7 @@ int8_t create_pipe(int64_t* fd_buffer)
 
 // TODO: ¿close_pipe realmente anda? ¿Cómo leo el EOF del pipe si está cerrado?
 
-int8_t close_pipe(int fd) {
+int8_t close_pipe(fd_t fd) {
     int64_t pipe = fd_to_pipe(fd);
     if (!pipe_is_valid(pipe)) return 0;
     char eof[] = {EOF, 0};
@@ -108,12 +108,12 @@ int8_t close_pipe(int fd) {
     available_pipes[--current_available_pipe_index] = pipe;
 
     printf_error("File descriptor [%d] has been closed \n", fd);
-    
+
     return 1;
 }
 
 // Requires a write_end of pipe = fd impar
-int64_t read_pipe(int fd, char* buf, int count)
+int64_t read_pipe(fd_t fd, char* buf, int count)
 {
     int64_t pipe = fd_to_pipe(fd);
 
@@ -162,7 +162,7 @@ int64_t read_pipe(int fd, char* buf, int count)
 
 
 // Requires a read_end of pipe = fd impar
-int64_t write_pipe(int fd, const char* buf, int count)
+int64_t write_pipe(fd_t fd, const char* buf, int count)
 {
     int64_t pipe = fd_to_pipe(fd);
 
@@ -215,13 +215,13 @@ int64_t write_pipe(int fd, const char* buf, int count)
     return count;
 }
 
-void assign_pipe_to_process(int fd, int pid)
+void assign_pipe_to_process(fd_t fd, int pid)
 {
     int64_t pipe = fd_to_pipe(fd);
 
     if (!pipe_is_valid(pipe)) {
         printf_error("[kernel] Wrong file descriptor [%d]. Pipe ID: %d \n", fd, pipe);
-        return 0;
+        return;
     }
 
     if (is_read_end(fd))
@@ -249,13 +249,13 @@ void assign_pipe_to_process(int fd, int pid)
     printf_error("File descriptor [%d] has assigned pid [%d] \n", fd, pid);
 }
 
-void close_pipe_end(int fd)
+void close_pipe_end(fd_t fd)
 {
     int64_t pipe = fd_to_pipe(fd);
 
     if (!pipe_is_valid(pipe)) {
         printf_error("[kernel] Wrong file descriptor [%d]. Pipe ID: %d \n", fd, pipe);
-        return 0;
+        return;
     }
 
     if (is_read_end(fd))

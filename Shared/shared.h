@@ -30,4 +30,8 @@ typedef struct Memory_Info {
     Memory_Info_Mode mode;
 } Memory_Info;
 
+typedef int64_t fd_t;
+
+typedef int64_t pid_t;
+
 #endif

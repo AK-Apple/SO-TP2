@@ -8,7 +8,7 @@ void scheduler_initialize() {
     memset(&scheduler, 0, sizeof(Scheduler));
 }
 
-int scheduler_next_pid() {
+pid_t scheduler_next_pid() {
     if(scheduler.index[PRIORITY_HIGH] >= scheduler.count[PRIORITY_HIGH]) {
         scheduler.index[PRIORITY_HIGH] = 0;
 
@@ -26,7 +26,7 @@ int scheduler_next_pid() {
     return scheduler.queue[PRIORITY_HIGH][scheduler.index[PRIORITY_HIGH]++];
 }
 
-int scheduler_insert(Priority priority, int pid) {
+int scheduler_insert(Priority priority, pid_t pid) {
     if(priority > PRIORITY_HIGH)
         return -1;
     if(scheduler.count[priority] >= MAX_PROCESS_BLOCKS)
@@ -36,7 +36,7 @@ int scheduler_insert(Priority priority, int pid) {
     return scheduler.count[priority] - 1;
 }
 
-int scheduler_remove(Priority priority, int pid) {
+int scheduler_remove(Priority priority, pid_t pid) {
     if(priority > PRIORITY_HIGH)
         return -1;
     for(int i = 0; i < scheduler.count[priority]; i++) {
