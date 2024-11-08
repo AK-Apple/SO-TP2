@@ -6,6 +6,7 @@
 #include "semaphores.h"
 #include "bounded_queue.h"
 #include "process.h"
+#include "scheduler.h"
 
 #define MAX_SEMAPHORES (MAX_PROCESS_BLOCKS * 4)
 #define NO_PRIORITY -1

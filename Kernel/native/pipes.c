@@ -1,7 +1,7 @@
 #include "pipes.h"
 #include "lib.h"
 #include "IO.h"
-#include "bounded_queue2.h"
+#include "pqueue.h"
 #include "semaphores.h"
 #include "scheduler.h"
 
@@ -11,7 +11,7 @@
 
 typedef struct
 {
-    queue2_t buffer;
+    pqueue_t buffer;
     char available;
     int64_t blocked_pid;    // Desventaja: solo puede haber un elemento bloqueado.
     int64_t writer_pid;
@@ -27,8 +27,7 @@ uint64_t available_pipes[MAX_PIPES] = {0};
 uint64_t current_available_pipe_index = 0;
 uint64_t biggest_pipe_id = 0;
 
-// ---------- Funciones de mapping de File Descriptors a Pipes y viceversa -------
-
+// ---------- Funciones Auxiliares -------
 
 static void pipe_to_fd(int64_t pipe, fd_t* fd_buffer)
 {
@@ -52,7 +51,7 @@ static int8_t is_read_end(fd_t fd)
     return fd % 2 == 1; 
 }
 
-// -------------------- End --------------------
+// -------------------- Fin de Funciones Auxiliares --------------------
 
 int64_t request_pipe()
 {
@@ -88,7 +87,7 @@ int8_t create_pipe(fd_t* fd_buffer)
     sem_wait(MUTEX);
 
     pipes[pipe].available = 1;
-    init_queue2(&pipes[pipe].buffer);
+    init_pqueue(&pipes[pipe].buffer);
     pipes[pipe].blocked_pid = -1;
     pipes[pipe].reader_pid = -1;
     pipes[pipe].writer_pid = -1;
@@ -98,12 +97,12 @@ int8_t create_pipe(fd_t* fd_buffer)
     return 1;
 }
 
-// Requires a write_end of pipe = fd impar
+// Requires a write_end of pipe = fd par
 int64_t read_pipe(fd_t fd, char* buf, int count)
 {
     int64_t pipe = fd_to_pipe(fd);
 
-    if (!pipe_is_valid(pipe) && is_empty2(&pipes[pipe].buffer)) {
+    if (!pipe_is_valid(pipe) && p_is_empty(&pipes[pipe].buffer)) {
         buf[0] = EOF;
         buf[1] = '\0';
         return 0;
@@ -125,7 +124,7 @@ int64_t read_pipe(fd_t fd, char* buf, int count)
     do
     {
         sem_wait(MUTEX);
-        to_return = dequeue_to_buffer2(&pipes[pipe].buffer, buf, count);
+        to_return = p_dequeue_to_buffer(&pipes[pipe].buffer, buf, count);
         if(!to_return)
         {
             int64_t current_pid = get_pid();
@@ -169,13 +168,12 @@ int64_t write_pipe(fd_t fd, const char* buf, int count)
         return 0;
     }
     
-
     uint64_t written = 0;
     do
     {
         // TODO: opción para que no se bloquee si se llena el buffer y ya había un proceso bloqueado
         sem_wait(MUTEX);
-        written += enqueue_string2(&pipes[pipe].buffer, buf, count);
+        written += p_enqueue_string(&pipes[pipe].buffer, buf, count);
         if(written < count)
         {
             if (pipes[pipe].blocked_pid != -1)
@@ -235,7 +233,7 @@ void assign_pipe_to_process(fd_t fd, int pid)
 }
 
 void close_pipe_end(fd_t fd)
-{
+{   
     int64_t pipe = fd_to_pipe(fd);
 
     if (!pipe_is_valid(pipe)) {
@@ -246,15 +244,30 @@ void close_pipe_end(fd_t fd)
     {
         pipes[pipe].writer_pid = -1;
         char eof[] = {EOF, 0};
-        enqueue_string2(&pipes[pipe].buffer, eof, 2);
+        p_enqueue_string(&pipes[pipe].buffer, eof, 2);
     }
     else
     {
         pipes[pipe].reader_pid = -1;
     }
 
-    if(pipes[pipe].writer_pid == -1 && pipes[pipe].reader_pid == -1) {
+    if(pipes[pipe].writer_pid == -1 && pipes[pipe].reader_pid == -1) 
+    {
         pipes[pipe].available = 0;
         available_pipes[--current_available_pipe_index] = pipe;
     }
+}
+
+uint8_t pipe_is_closable(fd_t fd)
+{
+    int64_t pipe = fd_to_pipe(fd);
+    if (!pipe_is_valid(pipe)) 
+    {
+        return 0;
+    }
+    if(pipes[pipe].writer_pid == -1 && pipes[pipe].reader_pid == -1) 
+    {
+        return 1;
+    }
+    return 0;
 }

@@ -1,11 +1,12 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "lib.h"
-#include "bounded_queue2.h"
+#include "pqueue.h"
 #include "IO.h"
 
 // Initialize the queue
-void init_queue2(queue2_t* q) {
+void init_pqueue(pqueue_t* q) 
+{
     q->front = 0;
     q->rear = 0;
     q->size = 0;
@@ -13,18 +14,18 @@ void init_queue2(queue2_t* q) {
 }
 
 // Check if the queue is full
-uint8_t is_full2(queue2_t* q) {
+uint8_t p_is_full(pqueue_t* q) {
     return q->size == MAX_SIZE2;
 }
 
 // Check if the queue is empty
-uint8_t is_empty2(queue2_t* q) {
+uint8_t p_is_empty(pqueue_t* q) {
     return q->size == 0;
 }
 
 // Enqueue function
-uint8_t enqueue2(queue2_t* q, char value) {
-    if (is_full2(q)) {
+uint8_t p_enqueue(pqueue_t* q, char value) {
+    if (p_is_full(q)) {
         printf_error("Queue is full!\n");
         return 0; // Indicate failure
     }
@@ -34,7 +35,7 @@ uint8_t enqueue2(queue2_t* q, char value) {
     return 1; // Indicate success
 }
 
-uint64_t enqueue_string2(queue2_t* q, const char* string, uint64_t size) {
+uint64_t p_enqueue_string(pqueue_t* q, const char* string, uint64_t size) {
 
     if (MAX_SIZE2 - q->size < size) {
         size = MAX_SIZE2 - q->size;
@@ -61,8 +62,8 @@ uint64_t enqueue_string2(queue2_t* q, const char* string, uint64_t size) {
 }
 
 // Dequeue function
-uint8_t dequeue2(queue2_t* q, char* value) {
-    if (is_empty2(q)) {
+uint8_t p_dequeue(pqueue_t* q, char* value) {
+    if (p_is_empty(q)) {
         return 0; // Indicate failure
     }
     *value = q->data[q->front];
@@ -71,7 +72,7 @@ uint8_t dequeue2(queue2_t* q, char* value) {
     return 1; // Indicate success
 }
 
-uint64_t dequeue_to_buffer2(queue2_t* q, char* buffer, uint64_t size) {
+uint64_t p_dequeue_to_buffer(pqueue_t* q, char* buffer, uint64_t size) {
     // Check if the queue is empty
     if (q->size == 0 || q->size < size) {
         return 0;  // Failure
