@@ -10,44 +10,57 @@ void init_pqueue(pqueue_t* q)
     q->front = 0;
     q->rear = 0;
     q->size = 0;
-    memset(q->data, 0, MAX_SIZE2);
+    memset(q->data, 0, IO_BUF_SIZE);
 }
 
 // Check if the queue is full
-uint8_t p_is_full(pqueue_t* q) {
-    return q->size == MAX_SIZE2;
+uint8_t p_is_full(pqueue_t* q) 
+{
+    return q->size == IO_BUF_SIZE;
 }
 
 // Check if the queue is empty
-uint8_t p_is_empty(pqueue_t* q) {
+uint8_t p_is_empty(pqueue_t* q) 
+{
     return q->size == 0;
 }
 
 // Enqueue function
-uint8_t p_enqueue(pqueue_t* q, char value) {
-    if (p_is_full(q)) {
+uint8_t p_enqueue(pqueue_t* q, char value) 
+{
+    if (p_is_full(q)) 
+    {
         printf_error("Queue is full!\n");
         return 0; // Indicate failure
     }
-    q->rear = (q->rear + 1) % MAX_SIZE2; // Circular increment
+    q->rear = (q->rear + 1) % IO_BUF_SIZE; // Circular increment
     q->data[q->rear] = value;
     q->size++;
     return 1; // Indicate success
 }
 
-uint64_t p_enqueue_string(pqueue_t* q, const char* string, uint64_t size) {
+uint64_t p_enqueue_string(pqueue_t* q, const char* string, uint64_t size) 
+{
+    if (q->size == IO_BUF_SIZE) 
+    {
+        return 0; // Queue is full, nothing enqueued
+    }
 
-    if (MAX_SIZE2 - q->size < size) {
-        size = MAX_SIZE2 - q->size;
+
+    if (IO_BUF_SIZE - q->size < size) 
+    {
+        size = IO_BUF_SIZE - q->size;
     }
 
     // Calculate the available space in the queue
-    int available_space = MAX_SIZE2 - q->rear;
+    int available_space = IO_BUF_SIZE - q->rear;
 
     // Copy to the end of the current data segment
-    if (size <= available_space) {
+    if (size <= available_space) 
+    {
         memcpy(&q->data[q->rear], string, size);
-    } else {
+    } else 
+    {
         // Copy to the end of the data segment
         memcpy(&q->data[q->rear], string, available_space);
         // Copy the remaining part to the beginning of the array
@@ -55,40 +68,46 @@ uint64_t p_enqueue_string(pqueue_t* q, const char* string, uint64_t size) {
     }
 
     // Update the rear index and size of the queue
-    q->rear = (q->rear + size) % MAX_SIZE2;
+    q->rear = (q->rear + size) % IO_BUF_SIZE;
     q->size += size;
 
     return size;
 }
 
 // Dequeue function
-uint8_t p_dequeue(pqueue_t* q, char* value) {
-    if (p_is_empty(q)) {
+uint8_t p_dequeue(pqueue_t* q, char* value) 
+{
+    if (p_is_empty(q)) 
+    {
         return 0; // Indicate failure
     }
     *value = q->data[q->front];
-    q->front = (q->front + 1) % MAX_SIZE2; // Circular increment
+    q->front = (q->front + 1) % IO_BUF_SIZE; // Circular increment
     q->size--;
     return 1; // Indicate success
 }
 
-uint64_t p_dequeue_to_buffer(pqueue_t* q, char* buffer, uint64_t size) {
+uint64_t p_dequeue_to_buffer(pqueue_t* q, char* buffer, uint64_t size) 
+{
     // Check if the queue is empty
-    if (q->size == 0 || q->size < size) {
+    if (q->size == 0) 
+    {
         return 0;  // Failure
     }
 
 
     // Store the size of the data to be removed
-    uint64_t to_return_size = size;
+    uint64_t to_return_size = q->size < size ? q->size : size;
 
     // Determine how much can be copied in one go
-    int available_space = MAX_SIZE2 - q->front;
+    int available_space = IO_BUF_SIZE - q->front;
 
     // Copy data from the queue to the buffer
-    if (to_return_size <= available_space) {
+    if (to_return_size <= available_space) 
+    {
         memcpy(buffer, &q->data[q->front], to_return_size);
-    } else {
+    } else 
+    {
         // Copy to the buffer from the front to the end of the data segment
         memcpy(buffer, &q->data[q->front], available_space);
         // Copy the remaining part to the buffer
@@ -96,7 +115,7 @@ uint64_t p_dequeue_to_buffer(pqueue_t* q, char* buffer, uint64_t size) {
     }
 
     // Clear the queue by resetting its state
-    q->front = (q->front + to_return_size) % MAX_SIZE2;
+    q->front = (q->front + to_return_size) % IO_BUF_SIZE;
     q->size -= to_return_size;
 
     return to_return_size; // Success

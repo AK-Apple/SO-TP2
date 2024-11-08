@@ -4,10 +4,10 @@
 #include <stdint.h>
 #include "process.h"
 
-#define MAX_SIZE2 2048
+#define IO_BUF_SIZE 64
 
 typedef struct {
-    char data[MAX_SIZE2]; // Array to hold queue elements
+    char data[IO_BUF_SIZE]; // Array to hold queue elements
     int front;          // Index of the front element
     int rear;           // Index of the rear element
     int size;           // Current size of the queue

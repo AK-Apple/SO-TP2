@@ -6,7 +6,7 @@
 #include "scheduler.h"
 
 // TODO: que cada pipe tenga un semáforo distinto?
-#define MUTEX 30
+#define MUTEX_BASE MAX_PROCESS_BLOCKS
 #define MAX_PIPES MAX_PROCESS_BLOCKS
 
 typedef struct
@@ -16,6 +16,7 @@ typedef struct
     int64_t blocked_pid;    // Desventaja: solo puede haber un elemento bloqueado.
     int64_t writer_pid;
     int64_t reader_pid;
+    sem_t mutex;
 } pipe_t;
 
 
@@ -82,9 +83,9 @@ int8_t create_pipe(fd_t* fd_buffer)
         printf_error("Pipe couldnt be created\n");
         return 0;
     }
-
-    sem_open(MUTEX, 1);
-    sem_wait(MUTEX);
+    pipes[pipe].mutex = MUTEX_BASE + (sem_t)pipe;
+    sem_open(pipes[pipe].mutex, 1);
+    sem_wait(pipes[pipe].mutex);
 
     pipes[pipe].available = 1;
     init_pqueue(&pipes[pipe].buffer);
@@ -92,7 +93,7 @@ int8_t create_pipe(fd_t* fd_buffer)
     pipes[pipe].reader_pid = -1;
     pipes[pipe].writer_pid = -1;
 
-    sem_post(MUTEX);
+    sem_post(pipes[pipe].mutex);
     pipe_to_fd(pipe, fd_buffer);
     return 1;
 }
@@ -121,30 +122,41 @@ int64_t read_pipe(fd_t fd, char* buf, int count)
     }
     
     uint64_t to_return;
+    uint64_t chars_read = 0;
     do
     {
-        sem_wait(MUTEX);
-        to_return = p_dequeue_to_buffer(&pipes[pipe].buffer, buf, count);
-        if(!to_return)
+        sem_wait(pipes[pipe].mutex);
+        to_return = p_dequeue_to_buffer(&pipes[pipe].buffer, &buf[chars_read], count - chars_read); // si no lee nada, devuelve 0
+        chars_read += to_return;
+
+        // printf_error("lectura exitosa. Leido: [%d]. Falta [%d]\n", to_return, count - chars_read);
+
+        if(chars_read < count)
         {
+            if (pipes[pipe].blocked_pid != -1)
+            {
+                unblock(pipes[pipe].blocked_pid);
+                pipes[pipe].blocked_pid = -1;
+            }
+            // printf_error("buffer vacio\n");
             int64_t current_pid = get_pid();
             pipes[pipe].blocked_pid = current_pid;
             block_no_yield(current_pid);
-            sem_post(MUTEX);
+            sem_post(pipes[pipe].mutex);
             yield();
         }
-    } while(!to_return);
-    sem_post(MUTEX);
+    } while(chars_read < count);
+    sem_post(pipes[pipe].mutex);
 
     if (pipes[pipe].blocked_pid != -1)
     {
         unblock(pipes[pipe].blocked_pid);
         pipes[pipe].blocked_pid = -1;
     }
+    // printf_error("lectura exitosa. Leido: [%d]\n", to_return);
 
     return to_return;
 }
-
 
 // Requires a read_end of pipe = fd impar
 int64_t write_pipe(fd_t fd, const char* buf, int count)
@@ -171,24 +183,28 @@ int64_t write_pipe(fd_t fd, const char* buf, int count)
     uint64_t written = 0;
     do
     {
-        // TODO: opción para que no se bloquee si se llena el buffer y ya había un proceso bloqueado
-        sem_wait(MUTEX);
-        written += p_enqueue_string(&pipes[pipe].buffer, buf, count);
-        if(written < count)
+        sem_wait(pipes[pipe].mutex);
+        written += p_enqueue_string(&pipes[pipe].buffer, &buf[written], count - written);
+
+        // printf_error("Escritura exitosa. Escrito = [%d]. Falta = [%d]\n", written, count - written);
+
+        if(written < count)     // si se llena el buffer, written < count
         {
             if (pipes[pipe].blocked_pid != -1)
             {
                 unblock(pipes[pipe].blocked_pid);
                 pipes[pipe].blocked_pid = -1;
             }
+            // printf_error("read desbloqueado\n");
             int64_t current_pid = get_pid();
             pipes[pipe].blocked_pid = current_pid;
             block_no_yield(current_pid);
-            sem_post(MUTEX);
+            sem_post(pipes[pipe].mutex);
+            // printf_error("write bloqueado\n");
             yield();
         }
     } while(written < count);
-    sem_post(MUTEX);
+    sem_post(pipes[pipe].mutex);
 
     if (pipes[pipe].blocked_pid != -1)
     {
@@ -258,16 +274,16 @@ void close_pipe_end(fd_t fd)
     }
 }
 
-uint8_t pipe_is_closable(fd_t fd)
-{
-    int64_t pipe = fd_to_pipe(fd);
-    if (!pipe_is_valid(pipe)) 
-    {
-        return 0;
-    }
-    if(pipes[pipe].writer_pid == -1 && pipes[pipe].reader_pid == -1) 
-    {
-        return 1;
-    }
-    return 0;
-}
+// uint8_t pipe_is_closable(fd_t fd)
+// {
+//     int64_t pipe = fd_to_pipe(fd);
+//     if (!pipe_is_valid(pipe)) 
+//     {
+//         return 0;
+//     }
+//     if(pipes[pipe].writer_pid == -1 && pipes[pipe].reader_pid == -1) 
+//     {
+//         return 1;
+//     }
+//     return 0;
+// }
