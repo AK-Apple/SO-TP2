@@ -39,8 +39,8 @@ static int right(int i) {
 }
 
 static void print_state() {
-    const char state_str[] = {'_', 'T', 'H', 'E'};
-    // const char state_str[] = {'_', '.', '.', 'E'};
+    // const char state_str[] = {'_', 'T', 'H', 'E'};
+    const char state_str[] = {'_', '.', '.', 'E'};
     for(int i = 0; i < philosopher_count; i++) {
         printf("%c ", state_str[state[i]]);
     }

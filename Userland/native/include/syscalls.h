@@ -46,11 +46,12 @@ extern void sys_yield();
 extern uint64_t sys_wait_pid(uint64_t pid);
 extern void sys_set_fd(int pid, fd_t fd_index, fd_t value);
 extern void sys_exit(uint64_t return_value);
+extern int64_t sys_get_exit_code();
+extern void sys_set_foreground(pid_t pid);
 
 extern void *sys_memory_alloc(size_t bytes);
 extern void sys_memory_free(void *pointer);
 extern void sys_memory_info(Memory_Info *info, Memory_Info_Mode mode);
-// size_t sys_memory_largest_block();
 
 extern int sys_sem_open(int64_t path, int init);
 extern int sys_sem_wait(int64_t path);
@@ -58,7 +59,6 @@ extern int sys_sem_post(int64_t path);
 extern int sys_sem_close(int64_t path);
 
 extern int8_t sys_create_pipe(fd_t* fd_buffer);
-// extern int sys_request_pipe();
 extern int sys_close_pipe(fd_t fd);
 
 #endif //TPE_ARQUI_SYSCALLS_H

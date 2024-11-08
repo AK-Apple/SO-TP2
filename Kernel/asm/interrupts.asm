@@ -148,8 +148,9 @@ SECTION .text
 
 	popState
 	
-	add rsp, 8
-	push exit
+	mov rdi, -2
+	mov QWORD[rsp], exit
+
 	iretq
 
 %endmacro

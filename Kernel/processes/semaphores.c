@@ -83,10 +83,6 @@ int sem_wait(sem_t id)
     return SEM_SUCCESS;
 }
 
-void force_enqueue(sem_t id, int pid) {
-    enqueue(&sem_queues[id], pid);
-}
-
 int sem_post(sem_t id)
 {
     if (invalid_semaphore(id)) return SEM_ERROR;

@@ -33,7 +33,8 @@ int cat(int argc, char *argv[]) {
     int input_char = 0;
     do {
         input_char = getchar();
-        putchar(input_char);
+        if(input_char != '\b')
+            putchar(input_char);
     } while(input_char != EOF);
     return 0;
 }
@@ -41,7 +42,7 @@ int cat(int argc, char *argv[]) {
 int filter(int argc, char *argv[]) {
     int input_char = 0;
     while((input_char = getchar()) != EOF) {
-        if(!is_vowel(input_char))
+        if(!is_vowel(input_char) && input_char != '\b')
             putchar(input_char);
     }
     return 0;
@@ -49,7 +50,16 @@ int filter(int argc, char *argv[]) {
 
 int64_t echo_cmd(uint64_t argc, char *argv[]) {
     for(int i = 1; i < argc; i++) {
-        printf("%s ", argv[i]);
+        int last_cut_index = 0;
+        for(int j = 0; argv[i][j]; j++) {
+            if(argv[i][j] == '#' && argv[i][j+1] == '?') {
+                argv[i][j] = '\0';
+                printf("%s%ld", &argv[i][last_cut_index], sys_get_exit_code());
+                j++;
+                last_cut_index = j + 1;
+            }
+        }
+        printf("%s ", &argv[i][last_cut_index]);
     }
     printf("\n");
     putchar(EOF);

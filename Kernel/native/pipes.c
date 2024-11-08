@@ -3,6 +3,7 @@
 #include "IO.h"
 #include "bounded_queue2.h"
 #include "semaphores.h"
+#include "scheduler.h"
 
 // TODO: que cada pipe tenga un semáforo distinto?
 #define MUTEX 30

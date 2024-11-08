@@ -10,22 +10,13 @@
 #include "memory_allocator.h"
 #include "semaphores.h"
 #include "pipes.h"
-
+#include "scheduler.h"
 
 typedef uint64_t (*Syscall)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t);
 
-void MISSING_SYSCALL() {
-    printf_error("[KERNEL] missing syscall\n");
-}
-
-void syscall_halt() {
-    set_current_quantum(0);
-    _hlt();
-}
-
 uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_t param_3, uint64_t param_4, uint64_t param_5) {
     static const Syscall syscalls[] = {
-        (Syscall)syscall_halt, // Syscall 0
+        (Syscall)_hlt, // Syscall 0
         (Syscall)play_sound, // Syscall 1
         (Syscall)seconds_sleep,// Syscall 2
         (Syscall)sys_read, // Syscall 3
@@ -58,20 +49,21 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
         (Syscall)memory_alloc, // Syscall 27
         (Syscall)memory_free, // Syscall 28
         (Syscall)memory_info, // Syscall 29
-        (Syscall)MISSING_SYSCALL, // #define SYS_LARGEST_FREE_BLOCK 30 (eliminada)
+
+        (Syscall)get_last_exit_code, // Syscall 30
 
         (Syscall)sem_open, // Syscall 31
         (Syscall)sem_wait, // Syscall 32
         (Syscall)sem_post, // Syscall 33
         (Syscall)sem_close, // Syscall 34
 
-        (Syscall)create_pipe, // Syscall 35
-        (Syscall)MISSING_SYSCALL, // Syscall 36 (eliminada)
+        (Syscall)set_foreground, // Syscall 35 
+        (Syscall)create_pipe, // Syscall 36
         (Syscall)close_pipe_end, // Syscall 37
 
     };
     if(id >= sizeof(syscalls) / sizeof(syscalls[0])) {
-        printf_error("[KERNEL] invalid syscall id:%d\n", id);
+        printf_error("[KERNEL] invalid syscall id:%lu\n", id);
         return 1;
     }
     return syscalls[id](param_1, param_2, param_3, param_4, param_5);

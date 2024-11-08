@@ -52,7 +52,6 @@ void *initializeKernelBinary()
     clearBSS(&bss, &endOfKernel - &bss);
     uint64_t allocator_capacity = *MEMORY_COUNT_MB_ADDRESS * MB - (uint64_t)(SAMPLE_DATA_MODULE_ADDRESS + userlandModuleSize);
     initialize_memory_allocator(SAMPLE_DATA_MODULE_ADDRESS + userlandModuleSize, allocator_capacity);
-    initialize_keyboard_driver();
     return getStackBase();
 }
 
@@ -65,7 +64,7 @@ int main()
     fd_t fds[] = {STDIN, STDOUT, STDERR};
     sys_clearScreen();
     pid_t shell_pid = create_process((Program)SAMPLE_CODE_MODULE_ADDRESS, sizeof(argv_shell)/sizeof(argv_shell[0]), argv_shell, fds);
-    change_priority(shell_pid, PRIORITY_HIGH);
+    set_foreground(shell_pid);
 
     while (1) {
         _hlt();

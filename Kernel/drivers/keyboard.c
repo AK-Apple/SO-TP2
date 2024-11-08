@@ -5,10 +5,8 @@
 #include "IO.h"
 #include "lib.h"
 #include "process.h"
-#include "semaphores.h"
 
 #define SIZE_BUFFER 1024
-#define STDIN_SEM_ID 1
 
 int keyFlag[4] = {0,0}; // index 0: bloq-mayus ; index 1: {1=shift ; 2=CTRL ; 3=alt}
 // el stdin es un array cíclico
@@ -180,16 +178,14 @@ static void putIn(char c){
 
     stdinArr[pos] = c;
     sizeIn++;
-    sem_post(STDIN_SEM_ID);
+    unblock(get_foreground());
 }
 
-void initialize_keyboard_driver() {
-    sem_open(STDIN_SEM_ID, 0);
-}
-
-// inspirado en la función de la API de Linux
 int get_stdin() {
-    sem_wait(STDIN_SEM_ID);
+    if(sizeIn <= 0) {
+        sizeIn = 0;
+        block(get_foreground());
+    }
 
     int c = stdinArr[startsIn % SIZE_BUFFER];
     startsIn++;

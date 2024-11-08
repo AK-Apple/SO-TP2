@@ -10,9 +10,16 @@ void scheduler_initialize() {
     memset(&scheduler, 0, sizeof(Scheduler));
 }
 
+void yield()
+{
+    scheduler.remaining_quantum = 0;
+    force_timer_tick();
+}
+
 pid_t scheduler_next_pid() {
     if(scheduler.index[PRIORITY_HIGH] >= scheduler.count[PRIORITY_HIGH]) {
         scheduler.index[PRIORITY_HIGH] = 0;
+        scheduler.remaining_quantum = 0;
 
         if(scheduler.mid_priority_turns >= SCHEDULER_LOW_PRIORITY_RATE || scheduler.count[PRIORITY_MID] == 0) {
             scheduler.mid_priority_turns = 0;
@@ -25,13 +32,12 @@ pid_t scheduler_next_pid() {
         return scheduler.queue[PRIORITY_MID][scheduler.index[PRIORITY_MID]++];
     }
 
+    scheduler.remaining_quantum = 1;
     return scheduler.queue[PRIORITY_HIGH][scheduler.index[PRIORITY_HIGH]++];
 }
 
 int scheduler_insert(Priority priority, pid_t pid) {
-    if(priority > PRIORITY_HIGH)
-        return -1;
-    if(scheduler.count[priority] >= MAX_PROCESS_BLOCKS)
+    if(priority > PRIORITY_HIGH || scheduler.count[priority] >= MAX_PROCESS_BLOCKS)
         return -1;
     scheduler.queue[priority][scheduler.count[priority]++] = pid;
 
@@ -51,18 +57,8 @@ int scheduler_remove(Priority priority, pid_t pid) {
     return -1;
 }
 
-int scheduler_get_quantum(Priority priority) {
-    switch (priority)
-    {
-    case PRIORITY_HIGH:
-        return 1;
-    case PRIORITY_MID:
-    case PRIORITY_LOW:
-    case PRIORITY_NONE:
-        return 0;
-    default:
-    }
-    return 0;
+int scheduler_consume_quantum() {
+    return scheduler.remaining_quantum--;
 }
 
 void scheduler_print() {
