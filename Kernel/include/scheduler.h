@@ -12,14 +12,16 @@ typedef struct {
     int index[PRIORITY_NONE];
     int count[PRIORITY_NONE];
     int mid_priority_turns;
+    int remaining_quantum;
 } Scheduler;
 
 void scheduler_initialize();
 pid_t scheduler_next_pid();
 int scheduler_insert(Priority priority, pid_t pid);
 int scheduler_remove(Priority priority, pid_t pid);
-int scheduler_get_quantum(Priority priority);
+int scheduler_consume_quantum();
 void scheduler_print();
+void yield();
 
 
 #endif

@@ -9,7 +9,7 @@ uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base);
 
 int getchar() {
     char buf[2] = {0};
-    sys_read(0, buf, 1);
+    sys_read(STDIN, buf, 1);
     return buf[0];
 }
 
@@ -102,7 +102,10 @@ char* itoa(int value, char* result, int base) {
         *ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz" [35 + (tmp_value - value * base)];
     } while ( value );
 
-    if (tmp_value < 0) *ptr++ = '-';
+    if (tmp_value < 0) {
+        *ptr++ = '-';
+        result++;
+    }
     *ptr-- = '\0';
   
     // Reverse the string
@@ -128,7 +131,7 @@ void putSquare(uint32_t hexColor, uint64_t x, uint64_t y, uint64_t size) {
 
 char getKey() {
     char c[1];
-    if(sys_read(0, c, 1) <= 0){
+    if(sys_read(STDIN, c, 1) <= 0){
         c[0] = 0;
     }
     return c[0];

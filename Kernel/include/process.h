@@ -50,8 +50,6 @@ int get_process_status(pid_t pid);
 
 void get_all_processes();
 
-void yield();
-
 void change_priority(pid_t pid, int value);
 
 pid_t block(pid_t pid);
@@ -60,19 +58,23 @@ pid_t block_no_yield(pid_t pid);
 
 pid_t unblock(pid_t pid);
 
-void exit(uint64_t return_value);
+void exit(int64_t return_value);
 
 pid_t wait_pid(pid_t pid);
 
 void sys_set_fd(pid_t pid, fd_t fd_index, fd_t value);
 
+int64_t get_last_exit_code();
+
 void save_regs();
 
 void print_saved_regs();
 
-void set_current_quantum(uint64_t q);
-
 void set_pending_action(PendingAction action);
+
+void set_foreground(pid_t pid);
+
+pid_t get_foreground();
 
 fd_t get_fd(fd_t index);
 

@@ -27,6 +27,7 @@ GLOBAL sys_yield
 GLOBAL sys_wait_pid
 GLOBAL sys_set_fd
 GLOBAL sys_exit
+GLOBAL sys_get_exit_code
 GLOBAL sys_memory_alloc
 GLOBAL sys_memory_free
 GLOBAL sys_memory_info
@@ -37,6 +38,7 @@ GLOBAL sys_sem_close
 GLOBAL sys_create_pipe
 GLOBAL sys_request_pipe
 GLOBAL sys_close_pipe
+GLOBAL sys_set_foreground
 
 %macro Syscall 1
 	push    rbp 
@@ -152,6 +154,9 @@ sys_memory_free:
 sys_memory_info:
 	Syscall 29
 
+sys_get_exit_code:
+	Syscall 30
+
 sys_sem_open:
 	Syscall 31
 
@@ -164,11 +169,11 @@ sys_sem_post:
 sys_sem_close:
 	Syscall 34
 
-sys_create_pipe:
+sys_set_foreground:
 	Syscall 35
 
-; sys_request_pipe:
-; 	Syscall 36
+sys_create_pipe:
+	Syscall 36
 
 sys_close_pipe:
 	Syscall 37

@@ -139,9 +139,7 @@ int64_t send_to_foreground(uint64_t argc, char *argv[]) {
     }
     int process_state = sys_get_process_status(pid);
     if(process_state != 0) {
-        sys_set_fd(pid, STDIN, STDIN);
-        sys_change_priority(pid, PRIORITY_HIGH);
-        sys_unblock(pid);
+        sys_set_foreground(pid);
         printf_color("[shell] running foreground process with pid=%d\n", COLOR_YELLOW, 0, pid);
         sys_wait_pid(pid);
     }
@@ -160,19 +158,16 @@ void shell() {
         int i = 0;
         char command[MAX_BUF] = {0};
         while (!break_line) {
-            char buf[2] = {0};
-            sys_read(0, buf, 1);
-            if (!(buf[0]== 0x08 && i == 0) && i < MAX_BUF)
-                sys_write(1, buf, 1);
-            if (buf[0] == '\n') {
+            char input_char = getchar();
+            if (!(input_char == '\b' && i == 0) && i < MAX_BUF)
+                putchar(input_char);
+            if (input_char == '\n') {
                 execute(command);
                 break_line = 1;
-            } else if (buf[0] == 0x08 && i > 0) {
-                command[i - 1] = 0;
-                i--;
-            } else if (buf[0] != 0x08 && i < MAX_BUF) {
-                command[i] = *buf;
-                i++;
+            } else if (input_char == '\b' && i > 0) {
+                command[--i] = 0;
+            } else if (input_char != '\b' && i < MAX_BUF) {
+                command[i++] = input_char;
             }
         }
     } while (1);
@@ -253,7 +248,7 @@ void execute(char command_buffer[]) {
         pid_t pid = sys_create_process_fd(process1, argc1, argv1, fds1);
         printf_color("[shell] Running %s with pid=%d in %s...\n", COLOR_YELLOW, 0, argv1[0], pid, fg_bg);
         if(!send_to_background) {
-            sys_change_priority(pid, PRIORITY_HIGH);
+            sys_set_foreground(pid);
             sys_wait_pid(pid);
         }
     }
