@@ -99,7 +99,7 @@ void changeSize(uint64_t argc, char *argv[]) {
 }
 
 void kill_process(uint64_t argc, char *argv[]) {
-    int pid = satoi(argv[1]);
+    pid_t pid = satoi(argv[1]);
     printf("[killing process] pid=%d\n", pid);
     if(argc < 2) {
         printf_error("invalid arguments\n"); 
