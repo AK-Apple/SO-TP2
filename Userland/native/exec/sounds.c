@@ -186,3 +186,43 @@ char next_part_instantly(){
     playNote(note_to_play);
     return 1;
 }
+
+// ---------------------------------- NEW ----------------------------------
+
+void play_song_continuous(int song_id)
+{
+    int song_length = 0;
+    MusicalNote* song;
+    switch(song_id){
+        case 1: 
+        {
+            song = retro_song; 
+            song_length = RETRO_SONG_LENGHT; 
+            break;
+        }
+        case 2:
+        {
+            song = os_initiating; 
+            song_length = OS_INITIALIZING_LENGTH; 
+            break;
+        }
+        case 3: 
+        {
+            song = you_lost; 
+            song_length = YOU_LOST_LENGTH; 
+            break;
+        }
+        default:
+        {
+            song = NULL; 
+            song_length = 0; 
+            break;
+        }
+    }
+    for (int i=0; i < song_length; i++){
+        playNote(song[i]);
+        sys_ticks_sleep(5);
+        sys_nosound();
+    }
+    
+}

@@ -39,6 +39,7 @@ GLOBAL sys_create_pipe
 GLOBAL sys_request_pipe
 GLOBAL sys_close_pipe
 GLOBAL sys_set_foreground
+GLOBAL sys_ticks_sleep
 
 %macro Syscall 1
 	push    rbp 
@@ -177,6 +178,9 @@ sys_create_pipe:
 
 sys_close_pipe:
 	Syscall 37
+
+sys_ticks_sleep:
+	Syscall 38
 
 SECTION .data
 std_fds 	dq 		0, 1, 2

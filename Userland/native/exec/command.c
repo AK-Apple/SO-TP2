@@ -74,8 +74,8 @@ void play_music_cmd(uint64_t argc, char *argv[]) {
             song_id = 1;
         }
     }
-    play_song(song_id);
-    while (next_part()); // esto bloquea la consola, quiza en un futura hacer que corra en background
+    play_song_continuous(song_id);
+    // while (next_part()); // esto bloquea la consola, quiza en un futura hacer que corra en background
 }
 
 void divide(uint64_t argc, char *argv[]) {

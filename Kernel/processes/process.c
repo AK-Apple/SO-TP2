@@ -6,6 +6,9 @@
 #include "interrupts.h"
 #include "pipes.h"
 #include "scheduler.h"
+#include "sleep_manager.h"
+#include "time.h"
+#include "sound.h"
 
 typedef struct ProcessBlock
 {
@@ -19,6 +22,7 @@ typedef struct ProcessBlock
     fd_t file_descriptors[MAX_FILE_DESCRIPTORS];
     pid_t pid_to_wait;
     StackedRegisters regs;
+    uint8_t is_sleeping;
 } ProcessBlock;
 
 Stack stacks[MAX_PROCESS_BLOCKS] = {0}; 
@@ -82,16 +86,28 @@ pid_t kill_process(pid_t pid, int recursive)
     if (pid >= MAX_PROCESS_BLOCKS || pid < 1)
         return -1;
     
-    if(pid == 1) {
+    if (pid == 1) {
         setup_kernel_restart();
+    }
+
+    if (blocks[pid].is_sleeping)
+    {
+        wake_forced(pid);
+    }
+
+    if (get_player() == pid)
+    {
+        nosound();
     }
     
     reasign_children(pid, recursive);
     int ppid = blocks[pid].parent_pid;
-    if(pid == foreground_pid) {
+    if (pid == foreground_pid) 
+    {
         set_foreground(1);
     }
-    if(blocks[ppid].pid_to_wait == pid) {
+    if(blocks[ppid].pid_to_wait == pid) 
+    {
         unblock(ppid);
     }
     blocks[pid].argc = 0;
@@ -103,9 +119,11 @@ pid_t kill_process(pid_t pid, int recursive)
     blocks[pid].process_state = UNAVAILABLE;
     blocks[pid].stack_pointer = 0;
 
-    for(int i = 0; i < MAX_FILE_DESCRIPTORS; i++) {
+    for(int i = 0; i < MAX_FILE_DESCRIPTORS; i++) 
+    {
         fd_t pipe_id = blocks[pid].file_descriptors[i];
-        if(pipe_id >= STD_FILE_DESCRIPTORS) {
+        if(pipe_id >= STD_FILE_DESCRIPTORS) 
+        {
             close_pipe_end(pipe_id);
         }
         blocks[pid].file_descriptors[i] = DEVNULL;
@@ -167,6 +185,8 @@ uint64_t schedule(uint64_t running_stack_pointer)
     if(scheduler_consume_quantum() > 0) {
         return running_stack_pointer;
     }
+
+    wake_available();
 
     blocks[running_pid].stack_pointer = running_stack_pointer;
     blocks[running_pid].regs = *(StackedRegisters *) running_stack_pointer;
@@ -393,7 +413,7 @@ pid_t block_no_yield(pid_t pid) {
 
 pid_t unblock(pid_t pid)
 {
-    if (pid >= MAX_PROCESS_BLOCKS || pid < 1 || blocks[pid].process_state != BLOCKED)
+    if (pid >= MAX_PROCESS_BLOCKS || pid < 1 || blocks[pid].process_state != BLOCKED || blocks[pid].is_sleeping)
         return -1;
     blocks[pid].process_state = READY;
     scheduler_insert(blocks[pid].priority, pid);
@@ -414,4 +434,9 @@ pid_t wait_pid(pid_t pid)
 pid_t get_fd(fd_t index){
     if (index >= MAX_FILE_DESCRIPTORS || index < 0) return DEVNULL;
     return blocks[get_pid()].file_descriptors[index];
+}
+
+void set_sleeping_state(uint8_t is_sleeping, pid_t pid)
+{
+    blocks[pid].is_sleeping = is_sleeping;
 }

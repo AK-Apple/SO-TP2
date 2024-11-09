@@ -30,20 +30,20 @@ uint8_t p_enqueue(pqueue_t* q, char value)
 {
     if (p_is_full(q)) 
     {
-        printf_error("Queue is full!\n");
-        return 0; // Indicate failure
+        return 0;
     }
-    q->rear = (q->rear + 1) % IO_BUF_SIZE; // Circular increment
     q->data[q->rear] = value;
+    q->rear = (q->rear + 1) % IO_BUF_SIZE;
+
     q->size++;
-    return 1; // Indicate success
+    return 1;
 }
 
 uint64_t p_enqueue_string(pqueue_t* q, const char* string, uint64_t size) 
 {
     if (q->size == IO_BUF_SIZE) 
     {
-        return 0; // Queue is full, nothing enqueued
+        return 0;
     }
 
 
@@ -120,3 +120,5 @@ uint64_t p_dequeue_to_buffer(pqueue_t* q, char* buffer, uint64_t size)
 
     return to_return_size; // Success
 }
+
+// TODO: eliminar otros comentarios innecesarios y las funciones que usan memcpy

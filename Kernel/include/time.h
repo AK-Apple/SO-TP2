@@ -23,4 +23,6 @@ uint8_t sys_getTime(int descriptor);
 void ticks_sleep(uint64_t ticks_to_sleep);
 void seconds_sleep(uint64_t seconds_to_sleep);
 
+void dont_handle_ticks();
+
 #endif

@@ -6,19 +6,37 @@
 #include "process.h"
 #include "IO.h"
 
+uint8_t dont_handle_ticks_flag = 0;
+
 uint64_t ticks = 0;
 
-
-void timer_handler() {
-	ticks++;
+void dont_handle_ticks()
+{
+    dont_handle_ticks_flag ++;
 }
 
-uint64_t ticks_elapsed() {
+
+void timer_handler() 
+{
+    if(dont_handle_ticks_flag)
+    {
+        dont_handle_ticks_flag --;
+        return;
+    }
+    else
+    {
+        ticks++;
+    }
+}
+
+uint64_t ticks_elapsed() 
+{
 	return ticks;
 }
 
 
-uint64_t seconds_elapsed() {
+uint64_t seconds_elapsed() 
+{
 	return ticks / 18;
 }
 

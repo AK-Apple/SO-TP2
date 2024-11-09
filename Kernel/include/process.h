@@ -78,6 +78,8 @@ pid_t get_foreground();
 
 fd_t get_fd(fd_t index);
 
+void set_sleeping_state(uint8_t is_sleeping, pid_t pid);
+
 // -------- SO ----------
 
 typedef struct StackedRegisters

@@ -3,6 +3,8 @@
 #include "scheduler.h"
 #include "IO.h"
 #include "lib.h"
+#include "time.h"
+#include "interrupts.h"
 
 Scheduler scheduler = {0};
 
@@ -13,6 +15,7 @@ void scheduler_initialize() {
 void yield()
 {
     scheduler.remaining_quantum = 0;
+    dont_handle_ticks();
     force_timer_tick();
 }
 

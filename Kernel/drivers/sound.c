@@ -3,6 +3,14 @@
 #include <sound.h>
 #include <time.h>
 #include <lib.h>
+#include "process.h"
+
+pid_t player = INVALID_PID;
+
+pid_t get_player()
+{
+    return player;
+}
 
 // fuentes: OSDev
 // https://wiki.osdev.org/PC_Speaker
@@ -21,9 +29,12 @@ void play_sound(uint32_t nFrequence)
     {
         outb(0x61, tmp | 3);
     }
+    player = get_pid();
 }
 
-void nosound() {
+void nosound() 
+{
     uint8_t tmp = inb(0x61) & 0xFC;
     outb(0x61, tmp);
+    player = INVALID_PID;
 }

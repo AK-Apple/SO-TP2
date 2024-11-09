@@ -61,4 +61,6 @@ extern int sys_sem_close(int64_t path);
 extern int8_t sys_create_pipe(fd_t* fd_buffer);
 extern int sys_close_pipe(fd_t fd);
 
+extern void sys_ticks_sleep(uint64_t ticks);
+
 #endif //TPE_ARQUI_SYSCALLS_H
