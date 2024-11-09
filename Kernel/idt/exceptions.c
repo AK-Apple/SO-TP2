@@ -5,7 +5,7 @@
 #include "exceptions.h"
 #include "IO.h"
 #include "lib.h"
-#include "process.h"
+#include "registers.h"
 
 #define ZERO_EXCEPTION_ID 0
 #define INVALID_OPCODE_ID 1
@@ -13,9 +13,9 @@
 static void zero_division();
 static void invalid_opcode();
 
-static const char* zero_division_exception_message = "Error Divide by Zero Exception";
+static const char* zero_division_exception_message = "Divide by Zero Exception\n";
 
-static const char* invalid_opcode_exception_message = "Error Invalid Opcode Exception";
+static const char* invalid_opcode_exception_message = "Invalid Opcode Exception\n";
 
 void exceptionDispatcher(int exception, StackedRegisters* stack_pointer) {
     sys_clearScreen();
@@ -25,17 +25,14 @@ void exceptionDispatcher(int exception, StackedRegisters* stack_pointer) {
     else if (exception == INVALID_OPCODE_ID){
         invalid_opcode();
     }
-
-    print_regs(*stack_pointer);
+    print_registers(*stack_pointer);
     printf_error("[kernel] Killing process with pid=%d because it caused an exception.\n", get_pid());
 }
 
 static void zero_division() {
     sys_write(2 ,zero_division_exception_message, buflen(zero_division_exception_message));
-    printf("\n");
 }
 
 static void invalid_opcode() {
     sys_write(2, invalid_opcode_exception_message, buflen(invalid_opcode_exception_message));
-    printf("\n");
 }

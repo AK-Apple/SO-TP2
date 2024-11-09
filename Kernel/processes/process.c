@@ -9,12 +9,14 @@
 #include "sleep_manager.h"
 #include "time.h"
 #include "sound.h"
-
+#include "tickets.h"
+#include "registers.h"
 
 
 typedef struct ProcessBlock
 {
     uint64_t stack_pointer;
+    uint64_t rbp;
     State process_state;
     pid_t parent_pid;
     Priority priority;
@@ -23,7 +25,6 @@ typedef struct ProcessBlock
     char **argv;
     fd_t file_descriptors[MAX_FILE_DESCRIPTORS];
     pid_t pid_to_wait;
-    StackedRegisters regs;
     uint8_t is_sleeping;
     StdinOption stdin_options;
 } ProcessBlock;
@@ -32,32 +33,8 @@ Stack stacks[MAX_PROCESS_BLOCKS] = {0};
 ProcessBlock blocks[MAX_PROCESS_BLOCKS] = {0};
 pid_t running_pid = 0;
 pid_t foreground_pid = 0;
-StackedRegisters saved_regs = {0};
-char regs_captured = 0;
-pid_t available_pids[MAX_PROCESS_BLOCKS] = {0};
-uint64_t current_available_pid_index = 0;
-uint64_t biggest_pid = 0;
+Tickets tickets_pid = {0};
 int64_t last_exit_code = 0;
-
-pid_t request_pid()
-{
-    if (current_available_pid_index >= biggest_pid)
-    {
-        if (biggest_pid >= MAX_PROCESS_BLOCKS)
-        {
-            printf_error("[scheduler] RAN OUT OF PID!!\n");
-            return INVALID_PID;
-        }
-        biggest_pid++;
-        return current_available_pid_index++;
-    }
-    return available_pids[current_available_pid_index++];
-}
-
-void free_pid(pid_t pid)
-{
-    available_pids[--current_available_pid_index] = pid;
-}
 
 void exit(int64_t return_value)
 {
@@ -132,7 +109,7 @@ pid_t kill_process(pid_t pid, int recursive)
         blocks[pid].file_descriptors[i] = DEVNULL;
     }
     last_exit_code = -1;
-    free_pid(pid);
+    free_ticket(&tickets_pid, pid);
     scheduler_remove(priority, pid);
 
     return pid;
@@ -141,46 +118,6 @@ pid_t kill_process(pid_t pid, int recursive)
 int get_process_status(pid_t pid)
 {
     return blocks[pid].process_state;
-}
-
-void save_regs() {
-    saved_regs = blocks[running_pid].regs;
-    regs_captured = 1;
-}
-
-void print_regs(StackedRegisters regs){
-    printf("\nRAX  : 0x%16lx", regs.rax);
-    printf("\nRBX  : 0x%16lx", regs.rbx); 
-    printf("\nRCX  : 0x%16lx", regs.rcx); 
-    printf("\nRDX  : 0x%16lx", regs.rdx); 
-    printf("\nRDI  : 0x%16lx", regs.rdi); 
-    printf("\nRSI  : 0x%16lx", regs.rsi); 
-    printf("\nRBP  : 0x%16lx", regs.rbp); 
-    printf("\nRSP  : 0x%16lx", regs.rsp); 
-    printf("\nR08  : 0x%16lx", regs.r8);
-    printf("\nR09  : 0x%16lx", regs.r9);
-    printf("\nR10  : 0x%16lx", regs.r10); 
-    printf("\nR11  : 0x%16lx", regs.r11); 
-    printf("\nR12  : 0x%16lx", regs.r12); 
-    printf("\nR13  : 0x%16lx", regs.r13); 
-    printf("\nR14  : 0x%16lx", regs.r14); 
-    printf("\nR15  : 0x%16lx", regs.r15); 
-    printf("\nRIP  : 0x%16lx", regs.rip); 
-    printf("\nFLAG : 0x%16lx", regs.rflags);
-    printf("\nCS   : 0x%16lx", regs.cs);
-    printf("\nSS   : 0x%16lx", regs.ss);
-    printf("\n");
-}
-
-void print_saved_regs()
-{
-    if (!regs_captured) {
-        printf("No regs saved. Press left alt to save regs");
-        print_regs(blocks[running_pid].regs);
-    }
-    else {
-        print_regs(saved_regs);
-    }
 }
 
 uint64_t schedule(uint64_t running_stack_pointer)
@@ -192,7 +129,7 @@ uint64_t schedule(uint64_t running_stack_pointer)
     wake_available();
 
     blocks[running_pid].stack_pointer = running_stack_pointer;
-    blocks[running_pid].regs = *(StackedRegisters *) running_stack_pointer;
+    blocks[running_pid].rbp = ((StackedRegisters *)running_stack_pointer)->rbp;
     if(blocks[running_pid].process_state == RUNNING) {
         blocks[running_pid].process_state = READY;
     }
@@ -224,7 +161,7 @@ static void process_entry_point()
 static uint64_t initialize_stack(pid_t new_pid, int argc, char **argv)
 {
     memset(stacks[new_pid], 0, sizeof(Stack));
-    uint64_t rsp = (uint64_t) stacks[new_pid] + STACK_SIZE; 
+    uint64_t rsp = (uint64_t)&stacks[new_pid][STACK_SIZE - sizeof(char *)]; 
     uint64_t rsp_argv = rsp;
     rsp -= argc * sizeof(char **);
     for(int i = 0; i < argc; i++) {
@@ -251,14 +188,14 @@ static uint64_t initialize_stack(pid_t new_pid, int argc, char **argv)
     stacked_registers->rsp = rsp;
     stacked_registers->rbp = rsp + sizeof(StackedRegisters);
 
-    blocks[new_pid].regs = *stacked_registers;
+    blocks[new_pid].rbp = stacked_registers->rbp;
 
     return rsp;
 }
 
 pid_t create_process(Program program, int argc, char **argv, fd_t fds[])
 {
-    pid_t new_pid = request_pid();
+    pid_t new_pid = request_ticket(&tickets_pid);
     if (new_pid == INVALID_PID)
     {
         return INVALID_PID;
@@ -288,14 +225,14 @@ pid_t create_process(Program program, int argc, char **argv, fd_t fds[])
 void create_init_process()
 {
     static char *init_args[] = {"INIT"};
-    running_pid = 0;
-    memset(blocks, 0, sizeof(ProcessBlock) * MAX_PROCESS_BLOCKS);
-    memset(available_pids, 0, sizeof(available_pids));
-    biggest_pid = 0;
-    current_available_pid_index = 0;
-    last_exit_code = 0;
+    memset(blocks, 0, sizeof(blocks));
+    memset(stacks, 0, sizeof(stacks));
+    initialize_tickets(&tickets_pid, stacks, sizeof(Stack), MAX_PROCESS_BLOCKS);
 
-    pid_t pid = request_pid(); 
+    pid_t pid = request_ticket(&tickets_pid); 
+
+    running_pid = 0;
+    last_exit_code = 0;
     blocks[0].stack_pointer = 0;   // Se va a actualizar. el proceso INIT va a usar otro stack
     blocks[0].process_state = RUNNING;
     blocks[0].parent_pid = get_pid(); 
@@ -346,11 +283,6 @@ void set_pending_action(PendingAction action) {
     yield();
 }
 
-int get_processes_count()
-{
-    return current_available_pid_index;
-}
-
 pid_t get_pid()
 {
     return running_pid;
@@ -369,7 +301,7 @@ void get_all_processes()
             printf("%3d : %4ld : ", i, blocks[i].parent_pid);
             int priority = blocks[i].priority;
             printf_color("%s", PROCESS_STATE_COLOR[priority+1], PRIORITY_STRING[priority]);
-            printf(" : %16lx : %16lx : ", blocks[i].stack_pointer, blocks[i].regs.rbp);
+            printf(" : %16lx : %16lx : ", blocks[i].stack_pointer, blocks[i].rbp);
             uint64_t process_state = blocks[i].process_state;
             printf_color(PROCESS_STATE_STRING[process_state], PROCESS_STATE_COLOR[process_state]);
             printf(" : %s\n", blocks[i].argc > 0 ? blocks[i].argv[0] : "UNKNOWN PROCESS");

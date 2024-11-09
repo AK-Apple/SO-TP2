@@ -3,36 +3,27 @@
 
 #include <stdint.h>
 #include "shared.h"
+#include "registers.h"
 
 #define MAX_PROCESS_BLOCKS 64 
 #define MAX_FILE_DESCRIPTORS 16
-#define STACK_SIZE (1 << 12)  /* 4KB */
+#define STACK_SIZE (1L << 13)  /* 8KB */
 #define INVALID_PID (-1)
 #define MAX_PRIORITY 5
-typedef uint64_t Stack[STACK_SIZE];
+typedef uint8_t Stack[STACK_SIZE];
 
 typedef uint64_t (*Program)(uint64_t, const char*[]);
 
-typedef struct ProcessSnapshot
-{
-    char *p_name;
-    uint64_t pid;
-    uint64_t priority;
-    Stack stack;
-    void *base_pointer;
-    uint64_t foreground;
-} ProcessSnapshot;
-
 typedef enum
 {
-    UNAVAILABLE = 0, // Assigned 0 by default
+    UNAVAILABLE = 0,
     RUNNING,
     READY,
     BLOCKED
 } State;
 
 typedef enum {
-    NONE,
+    NONE = 0,
     KILL_FOREGROUND,
     FOREGROUND_TO_BACKGROUND,
     BLOCK_FOREGROUND,
@@ -66,10 +57,6 @@ void sys_set_fd(pid_t pid, fd_t fd_index, fd_t value);
 
 int64_t get_last_exit_code();
 
-void save_regs();
-
-void print_saved_regs();
-
 void set_pending_action(PendingAction action);
 
 void set_foreground(pid_t pid);
@@ -85,32 +72,5 @@ void set_stdin_options(StdinOption stdin_option);
 StdinOption get_stdin_options();
 
 // -------- SO ----------
-
-typedef struct StackedRegisters
-{
-    uint64_t r15;
-    uint64_t r14;
-    uint64_t r13;
-    uint64_t r12;
-    uint64_t r11;
-    uint64_t r10;
-    uint64_t r9;
-    uint64_t r8;
-    uint64_t rsi;
-    uint64_t rdi;
-    uint64_t rbp;
-    uint64_t rdx;
-    uint64_t rcx;
-    uint64_t rbx;
-    uint64_t rax;
-    uint64_t rip;
-    uint64_t cs;
-    uint64_t rflags;
-    uint64_t rsp;
-    uint64_t ss;
-} StackedRegisters;
-
-void print_regs(StackedRegisters regs);
-
 
 #endif

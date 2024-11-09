@@ -187,4 +187,4 @@ sys_set_stdin_options:
 	Syscall 39
 
 SECTION .data
-std_fds 	dq 		0, 1, 2
+std_fds 	dq 		-1, 1, 2
