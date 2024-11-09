@@ -25,7 +25,7 @@ typedef struct ProcessSnapshot
 
 typedef enum
 {
-    UNAVAILABLE, // Assigned 0 by default
+    UNAVAILABLE = 0, // Assigned 0 by default
     RUNNING,
     READY,
     BLOCKED
@@ -79,6 +79,10 @@ pid_t get_foreground();
 fd_t get_fd(fd_t index);
 
 void set_sleeping_state(uint8_t is_sleeping, pid_t pid);
+
+void set_stdin_options(StdinOption stdin_option);
+
+StdinOption get_stdin_options();
 
 // -------- SO ----------
 

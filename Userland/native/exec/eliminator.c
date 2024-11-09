@@ -76,7 +76,7 @@ void move_player() {
 
     // Move the tail
     if (player.tail_length > 0) {
-        for (int i = player.tail_length - 1; i > 0; i--) {
+        for (int i = player.tail_length; i > 0; i--) {
             player.tail[i] = player.tail[i - 1];
         }
         player.tail[0].x = player.x;
@@ -95,8 +95,6 @@ void draw() {
 }
 
 void handle_input() {
-    // Simple input handling (replace with appropriate input mechanism)
-    // This is just a placeholder to demonstrate the logic.
     char ch = getKey();
     switch (ch) {
         case 'w':
@@ -108,13 +106,6 @@ void handle_input() {
         case 'q':
             end_game();
             break;
-    }
-}
-
-void delay(int target_ticks) {
-    int start_ticks = sys_ticks_elapsed();
-    while (sys_ticks_elapsed() - start_ticks < target_ticks) {
-        // Busy-wait loop
     }
 }
 
@@ -167,7 +158,21 @@ void printBorders(void) {
     }
 }
 
+pid_t play_song_in_background()
+{
+    char* argv_aux[] = {"RETRO_SONG", "1"};
+    fd_t fds[] = {DEVNULL, STDOUT, STDERR};
+    return sys_create_process_fd(play_infinite_music_cmd, 2, argv_aux, fds);
+}
+pid_t play_you_lost()
+{
+    char* argv_aux[] = {"YOU_LOST", "3"};
+    fd_t fds[] = {DEVNULL, STDOUT, STDERR};
+    return sys_create_process_fd(play_music_cmd, 2, argv_aux, fds);
+}
+
 void eliminator() {
+    sys_set_stdin_options(BLOCK_DISABLED);
     char quit_game =0;
     while (!quit_game){
         sys_clear();
@@ -175,21 +180,20 @@ void eliminator() {
         sys_clear();
         init();
 
-        int startingPoint = sys_secondsElapsed();
+        int startingPoint = sys_secondsElapsed(); // suena "RETRO_SONG"
         int lastScore = 0;
         printBorders();
+        pid_t song_pid = play_song_in_background();
         while (!game_over) {
             handleScore(startingPoint, lastScore);
             handle_input();
             move_player();
             draw();
-            if (!next_part_instantly()){
-                play_song(1);       // suena "RETRO_SONG"
-            }
-            delay(ticks_delay);
+            sys_ticks_sleep(ticks_delay);
         }
-        play_song(3);               // suena "YOU_LOST"
-        while (next_part());
+        sys_kill_process(song_pid, 0);
+        song_pid = play_you_lost();               // suena "YOU_LOST"
+        sys_wait_pid(song_pid);
 
         game_over = 0;
 

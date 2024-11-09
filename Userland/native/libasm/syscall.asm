@@ -40,6 +40,7 @@ GLOBAL sys_request_pipe
 GLOBAL sys_close_pipe
 GLOBAL sys_set_foreground
 GLOBAL sys_ticks_sleep
+GLOBAL sys_set_stdin_options
 
 %macro Syscall 1
 	push    rbp 
@@ -181,6 +182,9 @@ sys_close_pipe:
 
 sys_ticks_sleep:
 	Syscall 38
+
+sys_set_stdin_options:
+	Syscall 39
 
 SECTION .data
 std_fds 	dq 		0, 1, 2

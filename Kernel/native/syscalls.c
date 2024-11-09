@@ -62,7 +62,8 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
         (Syscall)create_pipe, // Syscall 36
         (Syscall)close_pipe_end, // Syscall 37
 
-        (Syscall)ticks_sleep_2,// Syscall 38
+        (Syscall)ticks_sleep_2,  // Syscall 38
+        (Syscall)set_stdin_options // Syscall 39
 
     };
     if(id >= sizeof(syscalls) / sizeof(syscalls[0])) {

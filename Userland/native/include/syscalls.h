@@ -62,5 +62,6 @@ extern int8_t sys_create_pipe(fd_t* fd_buffer);
 extern int sys_close_pipe(fd_t fd);
 
 extern void sys_ticks_sleep(uint64_t ticks);
+extern void sys_set_stdin_options(StdinOption stdin_option);
 
 #endif //TPE_ARQUI_SYSCALLS_H

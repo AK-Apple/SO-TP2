@@ -14,7 +14,8 @@ static char stdinArr[SIZE_BUFFER] = {0};
 static int sizeIn = 0;
 static int startsIn = 0;
 
-const AsciiMap map[] = {
+const AsciiMap map[] = 
+{
         {'\xFF', 0x20, 0x0, 2}, // CTRL + D (EOF)
         {'\x0',  0x0, 0x0, 0},  // -
         {'\x1',  0x0, 0x0, 0},
@@ -181,7 +182,8 @@ static void putIn(char c){
     unblock(get_foreground());
 }
 
-int get_stdin() {
+int get_stdin() 
+{
     if(sizeIn <= 0) {
         sizeIn = 0;
         block(get_foreground());
@@ -195,7 +197,22 @@ int get_stdin() {
     return c;
 }
 
-void keyboard_handler() {
+int get_stdin_no_block()
+{
+    if(sizeIn <= 0) {
+        sizeIn = 0;
+        return 0;
+    }
+    int c = stdinArr[startsIn % SIZE_BUFFER];
+    startsIn++;
+    startsIn = startsIn % SIZE_BUFFER;
+    sizeIn--;
+
+    return c;
+}
+
+void keyboard_handler() 
+{
     char i = getKey();      // llamada a Assembler
     int key = mapKey(i, keyFlag);
     switch (i) {

@@ -16,14 +16,20 @@ uint64_t screen_y = 0;
 uint8_t fontSize = 1;
 static uint64_t global_foreground_color = 0x00FFFFFF;
 
-int sys_read(int fd_index, char* buf, int count){
+
+
+
+int sys_read(int fd_index, char* buf, int count)
+{
+    int (*stdin_getter)() = get_stdin_options() == BLOCK_ENABLED ? get_stdin : get_stdin_no_block;
+    
     int fd = get_fd(fd_index);
     int i=0;
     if (fd == STDIN)
     {
         for (i=0; i<count; i++)
         {
-            buf[i] = get_stdin();
+            buf[i] = stdin_getter();
             if ((int) buf[i] == -1)
 				return i + 1;
         }

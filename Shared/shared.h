@@ -39,4 +39,10 @@ typedef struct Memory_Info {
 
 typedef int64_t pid_t;
 
+typedef enum
+{
+    BLOCK_ENABLED = 0, // Assigned 0 by default
+    BLOCK_DISABLED,
+} StdinOption;
+
 #endif

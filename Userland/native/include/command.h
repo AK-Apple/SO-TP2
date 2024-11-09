@@ -19,7 +19,9 @@ void print_help();
 void divide(uint64_t argc, char *argv[]);
 void invalidOpcode();
 void changeSize(uint64_t argc, char *argv[]);
+
 void play_music_cmd(uint64_t argc, char *argv[]);
+void play_infinite_music_cmd(uint64_t argc, char *argv[]) ;
 
 void kill_process(uint64_t argc, char *argv[]);
 

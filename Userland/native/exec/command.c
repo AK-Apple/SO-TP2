@@ -66,7 +66,8 @@ int64_t echo_cmd(uint64_t argc, char *argv[]) {
     return 0;
 }
 
-void play_music_cmd(uint64_t argc, char *argv[]) {
+void play_music_cmd(uint64_t argc, char *argv[]) 
+{
     uint64_t song_id = 1;
     if(argc >= 2) {
         song_id = satoi(argv[1]);
@@ -75,7 +76,21 @@ void play_music_cmd(uint64_t argc, char *argv[]) {
         }
     }
     play_song_continuous(song_id);
-    // while (next_part()); // esto bloquea la consola, quiza en un futura hacer que corra en background
+}
+
+void play_infinite_music_cmd(uint64_t argc, char *argv[]) 
+{
+    uint64_t song_id = 1;
+    if(argc >= 2) {
+        song_id = satoi(argv[1]);
+        if(song_id < 1 || song_id > 3) {
+            song_id = 1;
+        }
+    }
+    while(1)
+    {
+        play_song_continuous(song_id);
+    }
 }
 
 void divide(uint64_t argc, char *argv[]) {

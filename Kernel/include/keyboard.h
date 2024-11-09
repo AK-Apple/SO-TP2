@@ -12,5 +12,6 @@ extern char getKey();   // de libasm.asm
 int mapKey(char character, int flags[2]);
 void keyboard_handler();
 int get_stdin();
+int get_stdin_no_block();
 
 #endif

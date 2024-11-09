@@ -10,6 +10,8 @@
 #include "time.h"
 #include "sound.h"
 
+
+
 typedef struct ProcessBlock
 {
     uint64_t stack_pointer;
@@ -23,6 +25,7 @@ typedef struct ProcessBlock
     pid_t pid_to_wait;
     StackedRegisters regs;
     uint8_t is_sleeping;
+    StdinOption stdin_options;
 } ProcessBlock;
 
 Stack stacks[MAX_PROCESS_BLOCKS] = {0}; 
@@ -439,4 +442,14 @@ pid_t get_fd(fd_t index){
 void set_sleeping_state(uint8_t is_sleeping, pid_t pid)
 {
     blocks[pid].is_sleeping = is_sleeping;
+}
+
+StdinOption get_stdin_options()
+{
+    return blocks[running_pid].stdin_options;
+}
+
+void set_stdin_options(StdinOption stdin_option)
+{
+    blocks[running_pid].stdin_options = stdin_option;
 }
