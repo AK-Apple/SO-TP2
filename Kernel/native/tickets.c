@@ -13,11 +13,12 @@ int64_t request_ticket(Tickets *tickets) {
         if(tickets->biggest_available_ticket >= tickets->max_ticket) {
             return -1;
         }
+        tickets->used_ticket_count++;
         return tickets->biggest_available_ticket++;
     }
     int64_t ticket = tickets->current_available_ticket;
     tickets->current_available_ticket = *(int64_t *)(tickets->base_address + tickets->chunk_bytes * ticket);
-    
+    tickets->used_ticket_count++;
     return ticket;
 }
 
@@ -25,4 +26,9 @@ void free_ticket(Tickets *tickets, int64_t ticket) {
     int64_t *ticket_address = (int64_t *)(tickets->base_address + tickets->chunk_bytes * ticket);
     *ticket_address = tickets->current_available_ticket;
     tickets->current_available_ticket = ticket;
+    tickets->used_ticket_count--;
+}
+
+uint64_t get_used_ticket_count(Tickets *tickets) {
+    return tickets->used_ticket_count;
 }

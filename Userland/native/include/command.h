@@ -14,14 +14,15 @@ typedef struct {
 } Command;
 
 void print_time();
-void print_help();
+int64_t inforeg(uint64_t argc, char *argv[]);
+void print_processes_state();
 
 void divide(uint64_t argc, char *argv[]);
 void invalidOpcode();
 void changeSize(uint64_t argc, char *argv[]);
 
 void play_music_cmd(uint64_t argc, char *argv[]);
-void play_infinite_music_cmd(uint64_t argc, char *argv[]) ;
+void play_infinite_music_cmd(uint64_t argc, char *argv[]);
 
 void kill_process(uint64_t argc, char *argv[]);
 

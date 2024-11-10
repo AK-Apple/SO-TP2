@@ -36,7 +36,6 @@ static void pipe_to_fd(int64_t pipe, fd_t* fd_buffer)
 static int64_t fd_to_pipe(fd_t fd)
 {
     if (fd < 3){
-        printf_error("File Descriptor [%d] will never point to a pipe. Must be >= 3\n", fd);
         return -1;
     }
     return (fd - 3) / 2;
@@ -64,7 +63,6 @@ int8_t create_pipe(fd_t* fd_buffer)
     int64_t pipe = request_ticket(&tickets_pipe);
     if (pipe >= MAX_PIPES || pipe < 0 || pipes[pipe].available == 1) 
     {
-        printf_error("Pipe couldnt be created\n");
         return 0;
     }
     pipes[pipe].mutex = MUTEX_BASE + (sem_t)pipe;
@@ -93,13 +91,11 @@ int64_t read_pipe_2(fd_t fd, char* buf, int count)
 
     if (is_read_end(fd))
     {
-        printf_error("Cant read from the read-end part of a pipe of file descriptor %d. Pipe ID: [%d]\n", fd, pipe);
         return 0;
     }
 
     if (pipes[pipe].reader_pid != get_pid())
     {
-        printf_error("Cant read from this pid [%d]. Pipe ID: %d, File Descriptor: %d\n", get_pid(), pipe, fd);
         return 0;
     }
     
@@ -147,19 +143,19 @@ int64_t write_pipe_2(fd_t fd, const char* buf, int count)
     int64_t pipe = fd_to_pipe(fd);
 
     if (!pipe_is_valid(pipe)) {
-        printf_error("[kernel] cant write to a closed pipe [%d]%d \n", fd, pipe);
+        // printf_error("[kernel] cant write to a closed pipe [%d]%d \n", fd, pipe);
         return 0;
     }
 
     if (!is_read_end(fd))
     {
-        printf_error("Cant write to the write-end part of a pipe of file descriptor %d. Pipe ID: [%d]\n", fd, pipe);
+        // printf_error("Cant write to the write-end part of a pipe of file descriptor %d. Pipe ID: [%d]\n", fd, pipe);
         return 0;
     }
 
     if (pipes[pipe].writer_pid != get_pid())
     {
-        printf_error("Cant write from this pid [%d]. Should write from pid [%d] instead. Pipe ID: %d, File Descriptor: %d '%s'\n", get_pid(), pipes[pipe].reader_pid, pipe, fd, buf[0] == -1 ?"EOF":"N");
+        // printf_error("Cant write from this pid [%d]. Should write from pid [%d] instead. Pipe ID: %d, File Descriptor: %d '%s'\n", get_pid(), pipes[pipe].reader_pid, pipe, fd, buf[0] == -1 ?"EOF":"N");
         return 0;
     }
     
@@ -204,7 +200,7 @@ void assign_pipe_to_process(fd_t fd, int pid)
     int64_t pipe = fd_to_pipe(fd);
 
     if (!pipe_is_valid(pipe)) {
-        printf_error("[kernel] Wrong file descriptor [%d]. Pipe ID: %d \n", fd, pipe);
+        // printf_error("[kernel] Wrong file descriptor [%d]. Pipe ID: %d \n", fd, pipe);
         return;
     }
 
@@ -216,7 +212,7 @@ void assign_pipe_to_process(fd_t fd, int pid)
         }
         else
         {
-            printf_error("File descriptor [%d] is already occupied\n", fd);
+            // printf_error("File descriptor [%d] is already occupied\n", fd);
         }
     }
     else
@@ -227,7 +223,7 @@ void assign_pipe_to_process(fd_t fd, int pid)
         }
         else
         {
-            printf_error("File descriptor [%d] is already occupied\n", fd);
+            // printf_error("File descriptor [%d] is already occupied\n", fd);
         }
     }
 }
@@ -271,13 +267,13 @@ int64_t read_pipe(fd_t fd, char* buf, int count)
 
     if (is_read_end(fd))
     {
-        printf_error("Cant read from the read-end part of a pipe of file descriptor %d. Pipe ID: [%d]\n", fd, pipe);
+        // printf_error("Cant read from the read-end part of a pipe of file descriptor %d. Pipe ID: [%d]\n", fd, pipe);
         return 0;
     }
 
     if (pipes[pipe].reader_pid != get_pid())
     {
-        printf_error("Cant read from this pid [%d]. Pipe ID: %d, File Descriptor: %d\n", get_pid(), pipe, fd);
+        // printf_error("Cant read from this pid [%d]. Pipe ID: %d, File Descriptor: %d\n", get_pid(), pipe, fd);
         return 0;
     }
     
@@ -286,7 +282,7 @@ int64_t read_pipe(fd_t fd, char* buf, int count)
     do
     {
         sem_wait(pipes[pipe].mutex);
-        char to_read = NULL;
+        char to_read = 0;
         has_read = p_dequeue(&pipes[pipe].buffer, &to_read); // si no lee nada, devuelve 0
         buf[total_read] = to_read;
         total_read += has_read;
@@ -339,19 +335,19 @@ int64_t write_pipe(fd_t fd, const char* buf, int count)
     int64_t pipe = fd_to_pipe(fd);
 
     if (!pipe_is_valid(pipe)) {
-        printf_error("[kernel] cant write to a closed pipe [%d]%d \n", fd, pipe);
+        // printf_error("[kernel] cant write to a closed pipe [%d]%d \n", fd, pipe);
         return 0;
     }
 
     if (!is_read_end(fd))
     {
-        printf_error("Cant write to the write-end part of a pipe of file descriptor %d. Pipe ID: [%d]\n", fd, pipe);
+        // printf_error("Cant write to the write-end part of a pipe of file descriptor %d. Pipe ID: [%d]\n", fd, pipe);
         return 0;
     }
 
     if (pipes[pipe].writer_pid != get_pid())
     {
-        printf_error("Cant write from this pid [%d]. Should write from pid [%d] instead. Pipe ID: %d, File Descriptor: %d '%s'\n", get_pid(), pipes[pipe].reader_pid, pipe, fd, buf[0] == -1 ?"EOF":"N");
+        // printf_error("Cant write from this pid [%d]. Should write from pid [%d] instead. Pipe ID: %d, File Descriptor: %d '%s'\n", get_pid(), pipes[pipe].reader_pid, pipe, fd, buf[0] == -1 ?"EOF":"N");
         return 0;
     }
     

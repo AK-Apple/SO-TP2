@@ -35,7 +35,7 @@ void test_prio() {
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
     sys_change_priority(pids[i], prio[i]);
-  sys_print_all_processes();
+  print_processes_state();
   for(int i = 0; i < 5; i++) {
     bussy_wait(WAIT);
   }

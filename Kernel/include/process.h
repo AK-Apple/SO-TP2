@@ -5,22 +5,9 @@
 #include "shared.h"
 #include "registers.h"
 
-#define MAX_PROCESS_BLOCKS 64 
 #define MAX_FILE_DESCRIPTORS 16
 #define STACK_SIZE (1L << 13)  /* 8KB */
-#define INVALID_PID (-1)
-#define MAX_PRIORITY 5
 typedef uint8_t Stack[STACK_SIZE];
-
-typedef uint64_t (*Program)(uint64_t, const char*[]);
-
-typedef enum
-{
-    UNAVAILABLE = 0,
-    RUNNING,
-    READY,
-    BLOCKED
-} State;
 
 typedef enum {
     NONE = 0,
@@ -39,7 +26,7 @@ pid_t get_pid();
 
 int get_process_status(pid_t pid);
 
-void get_all_processes();
+void get_all_processes(ProcessInfo *info);
 
 void change_priority(pid_t pid, int value);
 

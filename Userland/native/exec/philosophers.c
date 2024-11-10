@@ -168,7 +168,7 @@ int64_t phylo(uint64_t argc, char *argv[]) {
                 printf_error("min phi count\n");
             break;
         case CMD_PS:
-            sys_print_all_processes();
+            print_processes_state();
             break;
         case CMD_CLEAR:
             sys_clear();

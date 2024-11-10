@@ -35,9 +35,9 @@ static Command commands[] = {
     {"time", "Muestra la hora.", (Program)print_time},
     {"eliminator", "Ejecuta el juego eliminator.", (Program)eliminator},
     {"size", "cambia tamanio de letra (entre 1 a 5).", (Program)changeSize, "<font_size>"},
-    {"inforeg", "Muestra los registros guardados. (Presiona `left_alt` para guardar registros)", (Program)sys_getRegs},
+    {"inforeg", "Muestra los registros guardados. (Presiona `left_alt` para guardar registros)", (Program)inforeg},
     {"clear", "Limpia toda la pantalla.", (Program)sys_clear},
-    {"ps", "Lista la informacion de los procesos", (Program)sys_print_all_processes},
+    {"ps", "Lista la informacion de los procesos", (Program)print_processes_state},
     {"kill", "mata un proceso dado un pid", (Program)kill_process, "<pid>"},
     {"mem", "Imprime el estado de la memoria. Muestra la distribucion |size:bytes|size:free, despues stats", (Program)print_meminfo_cmd},
     {"fg", "manda un proceso a foreground", (Program)send_to_foreground, "<pid>"},
@@ -67,7 +67,13 @@ uint64_t change_priority_cmd(uint64_t argc, char *argv[]) {
 
 void print_meminfo_cmd() {
     Memory_Info info = {0};
-    sys_memory_info(&info, MEM_COMPLETE);
+    sys_memory_info(&info);
+    printf_color("Heap from 0x%lx to 0x%lx with allocator type: %s\n", 0x0000AA00, 0, info.base_address, info.end_address, info.allocator_type);
+    printf("Total memory: %lu bytes\n", info.total_memory);
+    printf("Used memory %lu bytes\n", info.used_memory);
+    printf("Free memory %lu bytes\n", info.total_memory - info.used_memory);
+    printf("internal fragmentation %lu bytes\n", info.internal_fragmentation);
+    printf("largest free block %lu bytes (header size %lu bytes)\n", info.largest_free_block, info.header_size);
 }
 
 uint64_t block_cmd(uint64_t argc, char *argv[]) {

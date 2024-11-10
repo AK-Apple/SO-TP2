@@ -2,11 +2,12 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <stdint.h>
 #include <stddef.h>
-#include "../include/command.h"
-#include "../include/stdio.h"
-#include "../include/stdlib.h"
-#include "../include/test_util.h"
-#include "../include/syscalls.h"
+#include "command.h"
+#include "stdio.h"
+#include "stdlib.h"
+#include "test_util.h"
+#include "syscalls.h"
+#include "shell.h"
 
 #define MAX_BLOCKS 255
 
@@ -21,7 +22,7 @@ int64_t test_mm(uint64_t argc, char *argv[]) {
   uint32_t total;
   int use_smart_allocation = 1;
   Memory_Info meminfo = {0};
-  sys_memory_info(&meminfo, MEM_REDUCED);
+  sys_memory_info(&meminfo);
   int64_t max_memory = meminfo.total_memory;
   const uint64_t header_size = meminfo.header_size;
 
@@ -42,7 +43,7 @@ int64_t test_mm(uint64_t argc, char *argv[]) {
     // Request as many blocks as we can
     while (rq < MAX_BLOCKS && total < max_memory) {
       if(use_smart_allocation) {
-        sys_memory_info(&meminfo, MEM_REDUCED);
+        sys_memory_info(&meminfo);
         uint64_t largest_free_block = meminfo.largest_free_block;
         if(largest_free_block <= header_size) break;
         uint64_t size = max_memory < largest_free_block ? max_memory : (largest_free_block - (header_size-2)); 
@@ -59,7 +60,7 @@ int64_t test_mm(uint64_t argc, char *argv[]) {
       }
       else {
         printf_error("failed to allocate %d bytes (%d)\n", mm_rqs[rq].size, mm_rqs[rq].size + header_size);
-        sys_memory_info(&meminfo, MEM_COMPLETE);
+        print_meminfo_cmd();
       }
     }
     uint32_t i;

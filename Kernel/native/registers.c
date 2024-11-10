@@ -1,5 +1,6 @@
 #include "registers.h"
 #include "IO.h"
+#include "shared.h"
 
 StackedRegisters registers = {0};
 
@@ -31,6 +32,6 @@ void print_registers(StackedRegisters regs) {
     printf("\n");
 }
 
-void print_latest_registers() {
-    print_registers(registers);
+void get_latest_registers(StackedRegisters *regs) {
+    *regs = registers;
 }

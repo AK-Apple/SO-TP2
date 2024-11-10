@@ -12,6 +12,7 @@ Tickets se usa para los pid_t y pipeid que necesitan allocs arbitrarios y frees 
 typedef struct {
     void *base_address;
     uint64_t chunk_bytes;
+    uint64_t used_ticket_count;
     int64_t max_ticket;
     int64_t current_available_ticket;
     int64_t biggest_available_ticket;
@@ -22,5 +23,7 @@ void initialize_tickets(Tickets *tickets, void *base_address, uint64_t chunk_byt
 int64_t request_ticket(Tickets *tickets);
 
 void free_ticket(Tickets *tickets, int64_t ticket);
+
+uint64_t get_used_ticket_count(Tickets *tickets);
 
 #endif

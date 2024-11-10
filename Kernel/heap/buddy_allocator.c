@@ -1,7 +1,7 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "memory_allocator.h"
-#include "./../../Shared/shared.h"
+#include "shared.h"
 #include "IO.h"
 #include "lib.h"
 #include <stddef.h>
@@ -144,45 +144,38 @@ void memory_free(void *pointer) {
     make_buddy_header(header, header->bucket_index, allocator.header_buckets[header->bucket_index]);
 }
 
-void memory_info(Memory_Info *info, Memory_Info_Mode mode) {
+void memory_info(Memory_Info *info) {
     uint64_t total_memory = index_to_size(allocator.max_bucket_index);
     uint64_t used_memory = 0;
     uint64_t internal_fragmentation = 0;
     void *current_pointer = allocator.base_address;
-    uint64_t largest_free_block_bytes = largest_free_block();
-    uint64_t end_address = (uint64_t)allocator.base_address + total_memory - 1;
-
-    memset(info, 0, sizeof(Memory_Info));
-    info->allocator_type = "buddy_binary";
-    info->total_memory = total_memory;
-    info->largest_free_block = largest_free_block_bytes;
-    info->mode = mode;
-    info->header_size = sizeof(Buddy_Header);
-
-    if(mode == MEM_REDUCED) return;
-    printf_color("Heap from 0x%lx to 0x%lx with allocator type: %s\n", 0x0000AA00, allocator.base_address, end_address, info->allocator_type);
+    uint64_t largest_free_block_bytes = 0;
 
     while(current_pointer - allocator.base_address < total_memory) {
         Buddy_Header *header = (Buddy_Header *) current_pointer;
         uint64_t block_size = index_to_size(header->bucket_index);
         if(header->intended_size) {
-            printf_color("|%lu:%lu", 0x00DDDDFF, block_size, header->intended_size);
+            // printf_color("|%lu:%lu", 0x00DDDDFF, block_size, header->intended_size);
             internal_fragmentation += block_size - header->intended_size - sizeof(Buddy_Header);
             used_memory += block_size;
         }
         else {
-            printf_color("|%lu:free", 0x00888888, block_size);
+            // printf_color("|%lu:free", 0x00888888, block_size);
+            if(largest_free_block_bytes < header->bucket_index) {
+                largest_free_block_bytes = header->bucket_index;
+            }
         }
         current_pointer += block_size;
     }
+
+    info->allocator_type = "buddy_binary";
+    info->total_memory = total_memory;
+    info->largest_free_block = index_to_size(largest_free_block_bytes);
+    info->header_size = sizeof(Buddy_Header);
+    info->base_address = (uint64_t)allocator.base_address;
+    info->end_address = (uint64_t)allocator.base_address + total_memory - 1;
     info->used_memory = used_memory;
     info->internal_fragmentation = internal_fragmentation;
     info->free_memory = total_memory- used_memory;
-    printf("\nTotal memory: %lu bytes\n", total_memory);
-    printf("Used memory %lu bytes\n", used_memory);
-    printf("Free memory %lu bytes\n", total_memory - used_memory);
-    printf("internal fragmentation %lu bytes\n", internal_fragmentation);
-    printf("Largest free block %lu bytes\n", largest_free_block_bytes);
 }
-
 #endif

@@ -25,12 +25,13 @@ void exceptionDispatcher(int exception, StackedRegisters* stack_pointer) {
     else if (exception == INVALID_OPCODE_ID){
         invalid_opcode();
     }
+    take_registers_snapshot((uint64_t)stack_pointer);
     print_registers(*stack_pointer);
     printf_error("[kernel] Killing process with pid=%d because it caused an exception.\n", get_pid());
 }
 
 static void zero_division() {
-    sys_write(2 ,zero_division_exception_message, buflen(zero_division_exception_message));
+    sys_write(2, zero_division_exception_message, buflen(zero_division_exception_message));
 }
 
 static void invalid_opcode() {

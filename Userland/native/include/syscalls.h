@@ -1,12 +1,10 @@
 #ifndef TPE_ARQUI_SYSCALLS_H
 #define TPE_ARQUI_SYSCALLS_H
 
-#include "./../../../Shared/shared.h"
+#include "shared.h"
 
 #include <stdint.h>
 #include <stddef.h>
-
-typedef int64_t (*Program)(uint64_t, char*[]);
 
 extern void sys_hlt();
 
@@ -31,14 +29,14 @@ extern int sys_secondsElapsed();
 extern void sys_new_size(int newSize);
 extern int sys_getWindowSize(int elem);
 
-extern void sys_getRegs();
+extern void sys_get_registers(StackedRegisters *registers);
 
 extern int sys_create_process_fd(Program program, int argc, char **argv, fd_t fds[]);
 extern int sys_create_process(Program program, int argc, char **argv);
 extern int sys_kill_process(uint64_t pid, int recursive);
 extern int sys_get_process_status(int pid);
 extern int sys_get_pid();
-extern void sys_print_all_processes();
+extern void sys_get_processes_info(ProcessInfo *info);
 extern void sys_change_priority(uint64_t pid, uint64_t delta);
 extern int sys_block(int pid);
 extern int sys_unblock(int pid);
@@ -51,7 +49,7 @@ extern void sys_set_foreground(pid_t pid);
 
 extern void *sys_memory_alloc(size_t bytes);
 extern void sys_memory_free(void *pointer);
-extern void sys_memory_info(Memory_Info *info, Memory_Info_Mode mode);
+extern void sys_memory_info(Memory_Info *info);
 
 extern int sys_sem_open(int64_t path, int init);
 extern int sys_sem_wait(int64_t path);

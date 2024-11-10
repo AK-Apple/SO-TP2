@@ -8,6 +8,7 @@
 #include "../include/test_util.h"
 #include "../include/sounds.h"
 #include "../include/string.h"
+#include "shared.h"
 
 #define REG_SIZE 17
 #define SECONDS 0
@@ -46,6 +47,60 @@ int filter(int argc, char *argv[]) {
             putchar(input_char);
     }
     return 0;
+}
+
+int64_t inforeg(uint64_t argc, char *argv[]) {
+    StackedRegisters registers = {0};
+    sys_get_registers(&registers);
+    printf("\nRAX  : 0x%16lx", registers.rax);
+    printf("\nRBX  : 0x%16lx", registers.rbx); 
+    printf("\nRCX  : 0x%16lx", registers.rcx); 
+    printf("\nRDX  : 0x%16lx", registers.rdx); 
+    printf("\nRDI  : 0x%16lx", registers.rdi); 
+    printf("\nRSI  : 0x%16lx", registers.rsi); 
+    printf("\nRBP  : 0x%16lx", registers.rbp); 
+    printf("\nRSP  : 0x%16lx", registers.rsp); 
+    printf("\nR08  : 0x%16lx", registers.r8);
+    printf("\nR09  : 0x%16lx", registers.r9);
+    printf("\nR10  : 0x%16lx", registers.r10); 
+    printf("\nR11  : 0x%16lx", registers.r11); 
+    printf("\nR12  : 0x%16lx", registers.r12); 
+    printf("\nR13  : 0x%16lx", registers.r13); 
+    printf("\nR14  : 0x%16lx", registers.r14); 
+    printf("\nR15  : 0x%16lx", registers.r15); 
+    printf("\nRIP  : 0x%16lx", registers.rip); 
+    printf("\nFLAG : 0x%16lx", registers.rflags);
+    printf("\nCS   : 0x%16lx", registers.cs);
+    printf("\nSS   : 0x%16lx", registers.ss);
+    printf("\n");
+    return 0;
+}
+
+void print_processes_state() {
+    static char *PROCESS_STATE_STRING[] = {"UNKNOWN", "RUNNING", "READY  ", "BLOCKED"};
+    static uint64_t PROCESS_STATE_COLOR[] = {0x00999999, 0x0000FF00, 0x00CCDD00, 0x00FF0000};
+    static char *PRIORITY_STRING[] = {"LOW ", "MID ", "HIGH", "NONE"};
+    printf("pid : ppid : prio : stack_pointer_64 : base_pointer_64  : status  : process_name\n");
+    ProcessInfo ps = {0};
+    sys_get_processes_info(&ps);
+    if(ps.entries == NULL) {
+        printf_error("no se pudo imprimir process info porque se quedo sin memoria dinamica\n");
+        return;
+    }
+    for (int i = 0; i < ps.count; i++)
+    {
+        printf("%3d : %4ld : ", ps.entries[i].pid, ps.entries[i].ppid);
+        int priority = ps.entries[i].priority;
+        printf_color("%s", PROCESS_STATE_COLOR[priority+1], 0, PRIORITY_STRING[priority]);
+        printf(" : %16lx : %16lx : ", ps.entries[i].rsp, ps.entries[i].rbp);
+        uint64_t process_state = ps.entries[i].status;
+        printf_color(PROCESS_STATE_STRING[process_state], PROCESS_STATE_COLOR[process_state], 0);
+        printf(" : %s ", ps.entries[i].name);
+        if(ps.entries[i].pid == ps.foreground_pid)
+            printf_color("(foreground)", COLOR_GREEN, 0);
+        putchar('\n');
+    }
+    sys_memory_free(ps.entries);
 }
 
 int64_t echo_cmd(uint64_t argc, char *argv[]) {
