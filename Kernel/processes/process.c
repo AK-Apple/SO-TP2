@@ -271,6 +271,8 @@ pid_t create_process(Program program, int argc, char **argv, fd_t fds[])
     blocks[new_pid].program = program;
     blocks[new_pid].argc = argc;
     blocks[new_pid].pid_to_wait = 0;
+    blocks[new_pid].is_sleeping = 0;
+    blocks[new_pid].stdin_options = BLOCK_ENABLED;
 
     for(int i = 0; i < STD_FILE_DESCRIPTORS; i++) 
     {

@@ -22,7 +22,7 @@ static uint64_t global_foreground_color = 0x00FFFFFF;
 int sys_read(int fd_index, char* buf, int count)
 {
     int (*stdin_getter)() = get_stdin_options() == BLOCK_ENABLED ? get_stdin : get_stdin_no_block;
-    
+
     int fd = get_fd(fd_index);
     int i=0;
     if (fd == STDIN)
@@ -37,6 +37,11 @@ int sys_read(int fd_index, char* buf, int count)
     }
     else if (fd > 2)
     {
+        if (get_stdin_options() == BLOCK_DISABLED)
+        {
+            printf_error("BLOCK_DISABLED not implemented on pipes");
+            return 0;
+        }
         return read_pipe(fd, buf, count);
     }
     else if(fd == DEVNULL) {
