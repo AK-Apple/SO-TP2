@@ -5,7 +5,6 @@
 #include "shared.h"
 #include "registers.h"
 
-#define MAX_FILE_DESCRIPTORS 16
 #define STACK_SIZE (1L << 13)  /* 8KB */
 typedef uint8_t Stack[STACK_SIZE];
 

@@ -19,7 +19,7 @@ static Command commands[] = {
     {"testprio", "Ejecuta test de prioridades. countdown es el busy waiting de los procesos, por defecto = 17000000.", (Program)test_prio, "<countdown>"},
     {"testsync", "Ejecuta test de sincronizacion. count=countdown, sem:0=sin sincronizacion|1=usar sincronizacion.", (Program)test_sync, "<count> <sem>"},
     {"testmman", "Ejecuta test de memoria. smart allocation:0=apagado|1=prendido.", (Program)test_mm, "<max> <smart>"},
-    {"testpipe", "Ejecuta test de named pipes.", (Program)test_pipe},
+    {"testpipe", "Ejecuta test de pipes.", (Program)test_pipe},
     {"ps", "Lista la informacion de los procesos.", (Program)print_processes_state},
     {"kill", "Mata un proceso dado un pid.", (Program)kill_process, "<pid>"},
     {"nice", "Cambia la prioridad de un proceso dado su PID y la nueva prioridad. prio:0=low ; 1=mid ; 2=high", (Program)change_priority_cmd, "<pid> <prio>"},

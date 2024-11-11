@@ -62,6 +62,10 @@ int buildImage(array_t fileArray, char *output_file) {
 
 	//First, write the kernel
 	FILE *source = fopen(fileArray.array[0], "r");
+	if (source == NULL) {
+		fclose(target);
+		return FALSE;
+	} 
 	write_file(target, source);
 
 	//Write how many extra binaries we got.
@@ -72,6 +76,10 @@ int buildImage(array_t fileArray, char *output_file) {
 	int i;
 	for (i = 1 ; i < fileArray.length ; i++) {
 		FILE *source = fopen(fileArray.array[i], "r");
+		if (source == NULL) {
+			fclose(target);
+			return FALSE;;
+		}
 		
 		//Write the file size;
 		write_size(target, fileArray.array[i]);
@@ -105,6 +113,7 @@ int write_size(FILE *target, char *filename) {
 	stat(filename, &st);
 	uint32_t size = st.st_size;
 	fwrite(&size, sizeof(uint32_t), 1, target);
+	return TRUE;
 }
 
 

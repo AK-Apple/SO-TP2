@@ -24,7 +24,7 @@ typedef struct ProcessBlock {
     Program program;
     int argc;
     char **argv;
-    fd_t file_descriptors[MAX_FILE_DESCRIPTORS];
+    fd_t file_descriptors[STD_FILE_DESCRIPTORS];
     pid_t pid_to_wait;
     uint8_t is_sleeping;
     StdinOption stdin_options;
@@ -100,7 +100,7 @@ pid_t kill_process(pid_t pid, int recursive)
     blocks[pid].process_state = STATUS_UNAVAILABLE;
     blocks[pid].stack_pointer = 0;
 
-    for(int i = 0; i < MAX_FILE_DESCRIPTORS; i++) 
+    for(int i = 0; i < STD_FILE_DESCRIPTORS; i++) 
     {
         fd_t pipe_id = blocks[pid].file_descriptors[i];
         if(pipe_id >= STD_FILE_DESCRIPTORS) 
@@ -395,7 +395,7 @@ pid_t wait_pid(pid_t pid)
 
 pid_t get_fd(fd_t index)
 {
-    if (index >= MAX_FILE_DESCRIPTORS || index < 0) return DEVNULL;
+    if (index >= STD_FILE_DESCRIPTORS || index < 0) return DEVNULL;
     return blocks[get_pid()].file_descriptors[index];
 }
 
