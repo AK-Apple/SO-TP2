@@ -46,7 +46,7 @@ int64_t get_last_exit_code();
 
 void set_pending_action(PendingAction action);
 
-void set_foreground(pid_t pid);
+pid_t set_foreground(pid_t pid);
 
 pid_t get_foreground();
 

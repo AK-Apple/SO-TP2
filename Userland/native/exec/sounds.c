@@ -108,9 +108,7 @@ void play_song_continuous(int song_id)
         }
         default:
         {
-            song = NULL; 
-            song_length = 0; 
-            break;
+            return;
         }
     }
     for (int i=0; i < song_length; i++)

@@ -45,7 +45,7 @@ extern uint64_t sys_wait_pid(uint64_t pid);
 extern void sys_set_fd(int pid, fd_t fd_index, fd_t value);
 extern void sys_exit(uint64_t return_value);
 extern int64_t sys_get_exit_code();
-extern void sys_set_foreground(pid_t pid);
+extern pid_t sys_set_foreground(pid_t pid);
 
 extern void *sys_memory_alloc(size_t bytes);
 extern void sys_memory_free(void *pointer);
