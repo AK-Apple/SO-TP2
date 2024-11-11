@@ -34,10 +34,6 @@ MusicalNote you_lost[] = {             // song id 3
     Gs4, G4, F4, E4, SILENCE
 };
 
-
-// ---------------------------------------------------------------------------------
-
-
 void playNote(MusicalNote note)
 {
     switch (note){
@@ -88,6 +84,7 @@ void play_song_continuous(int song_id)
     int song_length = 0;
     MusicalNote* song;
     switch(song_id){
+        default:
         case 1: 
         {
             song = retro_song; 
@@ -104,12 +101,6 @@ void play_song_continuous(int song_id)
         {
             song = you_lost; 
             song_length = YOU_LOST_LENGTH; 
-            break;
-        }
-        default:
-        {
-            song = NULL; 
-            song_length = 0; 
             break;
         }
     }

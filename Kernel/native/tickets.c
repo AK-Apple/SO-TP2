@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "tickets.h"
 
 void initialize_tickets(Tickets *tickets, void *base_address, uint64_t chunk_bytes, int64_t max_ticket) {
