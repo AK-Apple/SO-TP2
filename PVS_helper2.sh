@@ -1,6 +1,6 @@
 #!/bin/bash
 
-read -p "Esta parte del código no ha sido testeada. Seguro que desea remover los encabezados? (y/n): " confirm3
+read -p "¿Seguro que desea remover los encabezados? (y/n): " confirm3
 
 if [[ $confirm3 =~ ^[Yy]$ ]]; then
     find . -name "*.c" | while read -r line; do 

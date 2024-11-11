@@ -1,12 +1,5 @@
 #!/bin/bash
 
-# Verifica si se está ejecutando en el directorio correcto
-read -p "¿Estás seguro de que estás en el directorio correcto para agregar encabezados a TODOS los archivos .c? (y/n): " confirm
-if [[ $confirm != "y" ]]; then
-    echo "Cancelado."
-    exit 1
-fi
-
 # Agregar encabezado a los archivos .c
 read -p "Agregar encabezados? (y/n): " confirm2
 
@@ -44,7 +37,7 @@ plog-converter -a '64:1,2,3;GA:1,2,3;OP:1,2,3' -t tasklist -o report.tasks PVS-S
 echo "Removiendo encabezados de los archivos .c..."
 
 # Ask for confirmation
-read -p "Esta parte del código no ha sido testeada. Seguro que desea remover los encabezados? (y/n): " confirm3
+read -p "¿Desea remover los encabezados? (y/n): " confirm3
 
 if [[ $confirm3 =~ ^[Yy]$ ]]; then
     find . -name "*.c" | while read -r line; do 

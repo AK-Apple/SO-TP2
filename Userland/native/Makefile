@@ -1,17 +1,21 @@
 include ../Makefile.inc
 
 MODULE=0000-sampleCodeModule.bin
-SOURCES=$(wildcard *.c)
-SOURCES_EXEC=$(wildcard exec/*.c)
-SOURCES_LIBC=$(wildcard libc/*.c)
-SOURCES_ASM=$(wildcard libasm/*.asm)
 
-OBJECTS=$(SOURCES:.c=.o)
-OBJECTS_EXEC=$(SOURCES_EXEC:.c=.o)
-OBJECTS_LIBC=$(SOURCES_LIBC:.c=.o)
-OBJECTS_ASM=$(SOURCES_ASM:.asm=.o)
+# List of directories with source files
+SRC_DIRS = . exec libc
+ASM_DIRS = libasm
 
-TOTAL_OBJ= $(OBJECTS) $(OBJECTS_ASM) $(OBJECTS_EXEC) $(OBJECTS_LIBC)
+# Collect source files
+SOURCES = $(foreach dir, $(SRC_DIRS), $(wildcard $(dir)/*.c))
+SOURCES_ASM = $(wildcard $(ASM_DIRS)/*.asm)
+
+# Convert source files to object files
+OBJECTS = $(SOURCES:.c=.o) $(SOURCES_ASM:.asm=.o)
+
+# Total object files
+TOTAL_OBJ = $(OBJECTS)
+
 
 all: $(MODULE)
 
