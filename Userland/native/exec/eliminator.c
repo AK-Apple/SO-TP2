@@ -33,8 +33,8 @@ int adjust(int coords){
 }
 
 void init() {
-    width = sys_getWindowSize(0);
-    height = sys_getWindowSize(1);
+    width = sys_get_window_size(0);
+    height = sys_get_window_size(1);
     player.x = adjust(width / 2);
     player.y = adjust(height / 2);
     player.dir = 'd';  // Initialize direction to right
@@ -89,13 +89,13 @@ void move_player() {
 }
 
 void draw() {
-    putSquare(0xFFFF00, player.x, player.y, SQUARE_SIZE);  // Draw player as yellow square
+    put_square(0xFFFF00, player.x, player.y, SQUARE_SIZE);  // Draw player as yellow square
     // Draw tail
-    putSquare(0x00FF00, player.tail[player.tail_length-1].x, player.tail[player.tail_length-1].y, SQUARE_SIZE);  // Draw tail as green squares
+    put_square(0x00FF00, player.tail[player.tail_length-1].x, player.tail[player.tail_length-1].y, SQUARE_SIZE);  // Draw tail as green squares
 }
 
 void handle_input() {
-    char ch = getKey();
+    char ch = get_key();
     switch (ch) {
         case 'w':
         case 's':
@@ -109,7 +109,7 @@ void handle_input() {
     }
 }
 
-void printMenu() {
+void print_menu() {
 
     printf("Welcome to THE GAME\nPress a number from 1 to 5 for difficulty\n");
     char difficulty;
@@ -127,34 +127,34 @@ void printMenu() {
 
 }
 
-void gameOver(int score) {
+void run_gamer_over(int score) {
     printf_color("\n\tGame Over!\n", 0xFF0000, 0x000000);
     printf("\tYour score was: %d\n", score);
     printf("\n Press q to quit the game, press w to try again\n");
 }
 
-void handleScore(int startingPoint, int lastScore) {
-    int score = sys_secondsElapsed()-startingPoint;
-    if (score > lastScore) {
+void handle_score(int starting_point, int last_score) {
+    int score = sys_seconds_elapsed()-starting_point;
+    if (score > last_score) {
         for(int i=0; i<12; i++){     // borra el score anterior
             putchar(0x08);
         }
         printf("score: %d", score);
-        lastScore = score;
+        last_score = score;
     }
 }
 
-void printBorders(void) {
+void print_borders(void) {
     for(int i=0; i<width; i+=SQUARE_SIZE){
-        putSquare(0xFF0000, i, 0, SQUARE_SIZE); 
-        putSquare(0xFF0000, i, adjust(height)-SQUARE_SIZE, SQUARE_SIZE); 
-        putSquare(0xFF0000, i, adjust(height), SQUARE_SIZE); 
+        put_square(0xFF0000, i, 0, SQUARE_SIZE); 
+        put_square(0xFF0000, i, adjust(height)-SQUARE_SIZE, SQUARE_SIZE); 
+        put_square(0xFF0000, i, adjust(height), SQUARE_SIZE); 
 
     }
     for(int j=0; j<height; j+=SQUARE_SIZE){
-        putSquare(0xFF0000, 0, j, SQUARE_SIZE); 
-        putSquare(0xFF0000, adjust(width)-SQUARE_SIZE, j, SQUARE_SIZE); 
-        putSquare(0xFF0000, adjust(width), j, SQUARE_SIZE); 
+        put_square(0xFF0000, 0, j, SQUARE_SIZE); 
+        put_square(0xFF0000, adjust(width)-SQUARE_SIZE, j, SQUARE_SIZE); 
+        put_square(0xFF0000, adjust(width), j, SQUARE_SIZE); 
     }
 }
 
@@ -176,16 +176,16 @@ void eliminator() {
     char quit_game =0;
     while (!quit_game){
         sys_clear();
-        printMenu();
+        print_menu();
         sys_clear();
         init();
 
-        int startingPoint = sys_secondsElapsed(); // suena "RETRO_SONG"
-        int lastScore = 0;
-        printBorders();
+        int starting_point = sys_seconds_elapsed(); // suena "RETRO_SONG"
+        int last_score = 0;
+        print_borders();
         pid_t song_pid = play_song_in_background();
         while (!game_over) {
-            handleScore(startingPoint, lastScore);
+            handle_score(starting_point, last_score);
             handle_input();
             move_player();
             draw();
@@ -197,11 +197,11 @@ void eliminator() {
 
         game_over = 0;
 
-        int endingPoint = sys_secondsElapsed();
-        int score = endingPoint - startingPoint;
+        int endingPoint = sys_seconds_elapsed();
+        int score = endingPoint - starting_point;
         sys_clear();
 
-        gameOver(score);
+        run_gamer_over(score);
 
         char selected = 0;
         char input;

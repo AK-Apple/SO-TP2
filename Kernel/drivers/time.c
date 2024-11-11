@@ -43,14 +43,14 @@ uint64_t seconds_elapsed()
 }
 
 
-uint8_t getFormat(uint8_t num) {
+uint8_t get_format(uint8_t num) {
     int dec = num & 240;
     dec = dec >> 4;
     int units = num & 15;
     return dec * 10 + units;
 }
 
-uint8_t sys_getTime(int descriptor) {
+uint8_t sys_get_time(int descriptor) {
     uint8_t toReturn = getRTC(descriptor);
-    return getFormat(toReturn);
+    return get_format(toReturn);
 }

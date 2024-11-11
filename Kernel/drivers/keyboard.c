@@ -9,11 +9,11 @@
 
 #define SIZE_BUFFER 1024
 
-int keyFlag[4] = {0,0}; // index 0: bloq-mayus ; index 1: {1=shift ; 2=CTRL ; 3=alt}
+int key_flag[4] = {0,0}; // index 0: bloq-mayus ; index 1: {1=shift ; 2=CTRL ; 3=alt}
 // el stdin es un array cíclico
-static char stdinArr[SIZE_BUFFER] = {0};  
-static int sizeIn = 0;
-static int startsIn = 0;
+static char stdin_array[SIZE_BUFFER] = {0};  
+static int size_in = 0;
+static int starts_in = 0;
 
 const AsciiMap map[] = 
 {
@@ -154,7 +154,7 @@ const AsciiMap map[] =
         {'\xf1', 0x27, 0x0, 0},
 };
 
-int mapKey(char character, int flags[2]) {
+int map_key(char character, int flags[2]) {
     for (int i = 0 ; i < sizeof(map)/sizeof(map[0]) ; i++) {
         if (map[i].make_code == character) {
             if (map[i].character >= 'A' && map[i].character <= 'Z') {  // es una letra
@@ -171,74 +171,74 @@ int mapKey(char character, int flags[2]) {
     return '\0';
 }
 
-static void putIn(char c){
+static void put_in(char c) {
     // caso especial donde se pasa del límite: no se pueden agregar caracteres
-    if (sizeIn >= SIZE_BUFFER-1) return;
+    if (size_in >= SIZE_BUFFER-1) return;
 
     // mete c en el vector cíclico
-    int pos = (startsIn + sizeIn) % SIZE_BUFFER;
+    int pos = (starts_in + size_in) % SIZE_BUFFER;
 
-    stdinArr[pos] = c;
-    sizeIn++;
+    stdin_array[pos] = c;
+    size_in++;
     unblock(get_foreground());
 }
 
 int get_stdin() 
 {
-    if(sizeIn <= 0) {
-        sizeIn = 0;
+    if(size_in <= 0) {
+        size_in = 0;
         block(get_foreground());
     }
 
-    int c = stdinArr[startsIn % SIZE_BUFFER];
-    startsIn++;
-    startsIn = startsIn % SIZE_BUFFER;
-    sizeIn--;
+    int c = stdin_array[starts_in % SIZE_BUFFER];
+    starts_in++;
+    starts_in = starts_in % SIZE_BUFFER;
+    size_in--;
 
     return c;
 }
 
 int get_stdin_no_block()
 {
-    if(sizeIn <= 0) {
-        sizeIn = 0;
+    if(size_in <= 0) {
+        size_in = 0;
         return 0;
     }
-    int c = stdinArr[startsIn % SIZE_BUFFER];
-    startsIn++;
-    startsIn = startsIn % SIZE_BUFFER;
-    sizeIn--;
+    int c = stdin_array[starts_in % SIZE_BUFFER];
+    starts_in++;
+    starts_in = starts_in % SIZE_BUFFER;
+    size_in--;
 
     return c;
 }
 
 void keyboard_handler(uint64_t rsp) 
 {
-    char i = getKey();      // llamada a Assembler
-    int key = mapKey(i, keyFlag);
+    char i = get_key();      // llamada a Assembler
+    int key = map_key(i, key_flag);
     switch (i) {
         case '\x3A':    // bloq-mayus
-            keyFlag[0] = !keyFlag[0];
+            key_flag[0] = !key_flag[0];
             break;
         case '\x36':    // right-shift pressed
         case '\x2A':    // left-shift pressed
-            keyFlag[0] = !keyFlag[0];
-            keyFlag[1] = 1;
+            key_flag[0] = !key_flag[0];
+            key_flag[1] = 1;
             break;
         case '\xAA':    // left-shift released
         case '\xB6':    // right-shift released
-            keyFlag[0] = !keyFlag[0];
-            keyFlag[1] = 0;
+            key_flag[0] = !key_flag[0];
+            key_flag[1] = 0;
             break;
         case '\x9D':    // left-ctrl released
         case '\xB8':    // left-alt released
-            keyFlag[1] = 0;
+            key_flag[1] = 0;
             break;
         case '\x1D':    // left-ctrl pressed
-            keyFlag[1] = 2;
+            key_flag[1] = 2;
             break;
         case '\x38':    // left-alt pressed (guarda registros)
-            keyFlag[1] = 3;
+            key_flag[1] = 3;
             take_registers_snapshot(rsp);
             break;
         default:
@@ -256,7 +256,7 @@ void keyboard_handler(uint64_t rsp)
                 set_pending_action(FOREGROUND_TO_BACKGROUND);
                 break;
             default:
-                putIn(key);
+                put_in(key);
             }
             break;
     }

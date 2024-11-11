@@ -21,8 +21,8 @@ uint64_t change_priority_cmd(uint64_t argc, char *argv[]);
 void print_meminfo_cmd();
 
 void divide(uint64_t argc, char *argv[]);
-void invalidOpcode();
-void changeSize(uint64_t argc, char *argv[]);
+void invalid_opcode();
+void change_size(uint64_t argc, char *argv[]);
 
 void play_music_cmd(uint64_t argc, char *argv[]);
 void play_infinite_music_cmd(uint64_t argc, char *argv[]);

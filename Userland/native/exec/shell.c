@@ -37,10 +37,10 @@ static Command commands[] = {
     {"song", "Pone musica con beeps. Con song_id:1|2|3", (Program)play_music_cmd, "<song_id>"},
     {"time", "Muestra la hora.", (Program)print_time},
     {"eliminator", "Ejecuta el juego eliminator.", (Program)eliminator},
-    {"size", "Cambia tamanio de letra (entre 1 a 5).", (Program)changeSize, "<font_size>"},
+    {"size", "Cambia tamanio de letra (entre 1 a 5).", (Program)change_size, "<font_size>"},
     {"inforeg", "Muestra los registros guardados. (Presiona `left_alt` para guardar registros)", (Program)inforeg},
     {"div", "Divide num/den", (Program)divide, "<num> <den>"},
-    {"invalidopcode", "Muestra excepcion de codigo invalido.", (Program)invalidOpcode},
+    {"invalidopcode", "Muestra excepcion de codigo invalido.", (Program)invalid_opcode},
 };
 
 pid_t play_os_initializing()

@@ -214,13 +214,13 @@ void divide(uint64_t argc, char *argv[]) {
     }
 }
 
-void invalidOpcode() {
+void invalid_opcode() {
     printf("executing invalid opcode...\n");
-    static uint8_t invalidOpcodes[] = {0x06, 0x07};
-    ((void (*)()) invalidOpcodes)();
+    static uint8_t invalid_opcodes[] = {0x06, 0x07};
+    ((void (*)()) invalid_opcodes)();
 }
 
-void changeSize(uint64_t argc, char *argv[]) {
+void change_size(uint64_t argc, char *argv[]) {
     uint32_t new_size = 1;
     if (argc >= 2) {
         new_size = satoi(argv[1]);

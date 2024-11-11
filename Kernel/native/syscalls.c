@@ -23,13 +23,13 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
         (Syscall)seconds_sleep,// Syscall 2
         (Syscall)sys_read, // Syscall 3
         (Syscall)sys_write, // Syscall 3
-        (Syscall)sys_clearScreen, // Syscall 5
-        (Syscall)putPixel, // Syscall 6
+        (Syscall)sys_clear_screen, // Syscall 5
+        (Syscall)put_pixel, // Syscall 6
         (Syscall)sys_new_size, // Syscall 7
-        (Syscall)sys_getTime, // Syscall 8
+        (Syscall)sys_get_time, // Syscall 8
         (Syscall)seconds_elapsed, // Syscall 9
         (Syscall)ticks_elapsed, // Syscall 10
-        (Syscall)sys_getSize, // Syscall 11
+        (Syscall)sys_get_size, // Syscall 11
         (Syscall)nosound, // Syscall 12
         (Syscall)get_latest_registers, // Syscall 13
 

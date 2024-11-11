@@ -18,7 +18,7 @@ static const char* zero_division_exception_message = "Divide by Zero Exception\n
 static const char* invalid_opcode_exception_message = "Invalid Opcode Exception\n";
 
 void exceptionDispatcher(int exception, StackedRegisters* stack_pointer) {
-    sys_clearScreen();
+    sys_clear_screen();
     if (exception == ZERO_EXCEPTION_ID){
         zero_division();
     }

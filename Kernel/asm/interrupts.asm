@@ -22,7 +22,7 @@ GLOBAL _exception06Handler
 EXTERN exit
 EXTERN schedule
 EXTERN int80Dispacher
-EXTERN irqDispatcher
+EXTERN irq_dispatcher
 EXTERN exceptionDispatcher
 
 EXTERN int80_write
@@ -104,7 +104,7 @@ SECTION .text
 
 	mov rdi, %1 ; pasaje de parametro
 	mov rsi, rsp
-	call irqDispatcher
+	call irq_dispatcher
 
 	; signal pic EOI (End of Interrupt)
 	mov al, 20h
@@ -124,7 +124,7 @@ SECTION .text
 	pushState
 
 	mov rdi, 0
-	call irqDispatcher
+	call irq_dispatcher
 
 	mov rdi, rsp
 	call schedule

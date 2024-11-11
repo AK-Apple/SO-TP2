@@ -5,8 +5,6 @@
 #include "string.h"
 #include "stdio.h"
 
-uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base);
-
 int getchar() {
     char buf[2] = {0};
     sys_read(STDIN, buf, 1);
@@ -58,7 +56,7 @@ int64_t atoi_index(const char *str, uint64_t *index) {
     return result;
 }
 
-uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base) {
+uint32_t uint_to_base(uint64_t value, char * buffer, uint32_t base) {
     char *p = buffer;
     char *p1, *p2;
     uint32_t digits = 0;
@@ -117,19 +115,19 @@ char* itoa(int value, char* result, int base) {
     return result;
 }
 
-void putPixel(uint32_t hexColor, uint64_t x, uint64_t y){
-    sys_putPixel(hexColor, x, y);
+void put_pixel(uint32_t hexColor, uint64_t x, uint64_t y){
+    sys_put_pixel(hexColor, x, y);
 }
 
-void putSquare(uint32_t hexColor, uint64_t x, uint64_t y, uint64_t size) {
+void put_square(uint32_t hexColor, uint64_t x, uint64_t y, uint64_t size) {
     for(int i=0; i<size; i++) {
         for (int j=0; j<size; j++) {
-            putPixel(hexColor, x+j, y+i);
+            put_pixel(hexColor, x+j, y+i);
         }
     }
 }
 
-char getKey() {
+char get_key() {
     char c[1];
     if(sys_read(STDIN, c, 1) <= 0){
         c[0] = 0;

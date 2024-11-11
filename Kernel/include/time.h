@@ -20,7 +20,7 @@ uint64_t seconds_elapsed();
 #define YEAR 09
 
 extern uint8_t getRTC(uint64_t descriptor); // de libasm.asm
-uint8_t sys_getTime(int descriptor);
+uint8_t sys_get_time(int descriptor);
 
 void dont_handle_ticks();
 
