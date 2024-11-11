@@ -81,20 +81,9 @@ static Buddy_Header *get_its_buddy(Buddy_Header *header) {
     return (Buddy_Header *) ((uint64_t) allocator.base_address + (position ^ index_to_size(header->bucket_index)));
 }
 
-static size_t largest_free_block() {
-    uint64_t bucket_index = allocator.max_bucket_index;
-
-    while(bucket_index > 0 && !allocator.header_buckets[bucket_index])
-        bucket_index--;
-    
-    if(bucket_index == 0 && !allocator.header_buckets[bucket_index])
-        return 0;
-
-    return index_to_size(bucket_index);
-}
-
 void initialize_memory_allocator(void *base_address, uint64_t total_bytes) {
     total_bytes = 1L << log(total_bytes, 2);
+    base_address += sizeof(Buddy_Header) - (uint64_t)base_address % sizeof(Buddy_Header);
     uint64_t bucket_index = size_to_bucket_index(total_bytes);
     allocator.max_bucket_index = bucket_index;
     allocator.base_address = base_address;

@@ -1,13 +1,13 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-#include "../include/command.h"
-#include "../include/syscalls.h"
-#include "../include/stdio.h"
-#include "../include/stdlib.h"
-#include "../include/eliminator.h"
-#include "../include/test_util.h"
-#include "../include/sounds.h"
-#include "../include/string.h"
+#include "command.h"
+#include "syscalls.h"
+#include "stdio.h"
+#include "stdlib.h"
+#include "eliminator.h"
+#include "test_util.h"
+#include "sounds.h"
+#include "string.h"
 #include "shared.h"
 
 #define REG_SIZE 17
@@ -80,20 +80,20 @@ void print_processes_state() {
     static char *PROCESS_STATE_STRING[] = {"UNKNOWN", "RUNNING", "READY  ", "BLOCKED"};
     static uint64_t PROCESS_STATE_COLOR[] = {0x00999999, 0x0000FF00, 0x00CCDD00, 0x00FF0000};
     static char *PRIORITY_STRING[] = {"LOW ", "MID ", "HIGH", "NONE"};
-    printf("pid : ppid : prio : stack_pointer_64 : base_pointer_64  : status  : process_name\n");
     ProcessInfo ps = {0};
     sys_get_processes_info(&ps);
     if(ps.entries == NULL) {
         printf_error("no se pudo imprimir process info porque se quedo sin memoria dinamica\n");
         return;
     }
+    printf("\npid : ppid : prio : stack_pointer_64 : base_pointer_64  : status  : process_name\n");
     for (int i = 0; i < ps.count; i++)
     {
         printf("%3d : %4ld : ", ps.entries[i].pid, ps.entries[i].ppid);
-        int priority = ps.entries[i].priority;
+        Priority priority = ps.entries[i].priority;
         printf_color("%s", PROCESS_STATE_COLOR[priority+1], 0, PRIORITY_STRING[priority]);
         printf(" : %16lx : %16lx : ", ps.entries[i].rsp, ps.entries[i].rbp);
-        uint64_t process_state = ps.entries[i].status;
+        ProcessStatus process_state = ps.entries[i].status;
         printf_color(PROCESS_STATE_STRING[process_state], PROCESS_STATE_COLOR[process_state], 0);
         printf(" : %s ", ps.entries[i].name);
         if(ps.entries[i].pid == ps.foreground_pid)

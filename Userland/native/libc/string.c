@@ -16,6 +16,18 @@ int is_whitespace(char c) {
     return c == '\n' || c == ' ' || c == '\t';
 }
 
+int is_digit(char c) {
+    return c >= '0' && c <= '9'; 
+}
+
+int is_integer(char *str) {
+    while(*str) {
+        if(!is_digit(*str)) return 0;
+        str++;
+    }
+    return 1;
+}
+
 int trim_end(char* str, char c) {
     int i = 0;
     if (!str[i]) return 0;

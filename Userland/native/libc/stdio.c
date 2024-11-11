@@ -163,10 +163,13 @@ static uint64_t vfprintf_color(int fd, char *fmt, uint64_t foreground, uint64_t 
                 repeat_char(fd, '0', padding - len);
             }
             sys_write(fd, buf, len);
+            i++;
         } else {
-            sys_write(fd, &fmt[i], 1);
+            uint64_t j = i;
+            while(fmt[j] && fmt[j] != '%') j++;
+            sys_write(fd, &fmt[i], j - i);
+            i = j;
         }
-        i++;
     }
 
     if(foreground != default_foreground_color) {

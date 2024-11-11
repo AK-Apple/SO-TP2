@@ -1,11 +1,12 @@
 
+MMAN=USE_BUDDY_ALLOCATOR
 all:  bootloader kernel userland image
 
 bootloader:
 	cd Bootloader; make all
 
 kernel:
-	cd Kernel; make all
+	cd Kernel; make all MMAN=-D$(MMAN)
 
 userland:
 	cd Userland; make all
