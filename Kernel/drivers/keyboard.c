@@ -5,6 +5,7 @@
 #include "IO.h"
 #include "lib.h"
 #include "process.h"
+#include "registers.h"
 
 #define SIZE_BUFFER 1024
 
@@ -211,7 +212,7 @@ int get_stdin_no_block()
     return c;
 }
 
-void keyboard_handler() 
+void keyboard_handler(uint64_t rsp) 
 {
     char i = getKey();      // llamada a Assembler
     int key = mapKey(i, keyFlag);
@@ -238,7 +239,7 @@ void keyboard_handler()
             break;
         case '\x38':    // left-alt pressed (guarda registros)
             keyFlag[1] = 3;
-            save_regs();
+            take_registers_snapshot(rsp);
             break;
         default:
             switch (key)

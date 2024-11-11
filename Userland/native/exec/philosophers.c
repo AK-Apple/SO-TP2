@@ -14,6 +14,8 @@
 #define CMD_REMOVE 'r'
 #define CMD_PS 'p'
 #define CMD_CLEAR 'c'
+#define CMD_SWAP_DISPLAY 'd'
+#define CMD_USAGE 'u'
 typedef enum {
     INVALID = 0,
     THINKING,
@@ -23,6 +25,7 @@ typedef enum {
 
 int64_t mutex_sem_id = 0;
 int64_t philosopher_count = 0;
+int64_t display_complete = 0;
 PHILOSOPHER_STATE state[MAX_PHILOSOPHER_COUNT] = {0};
 PHILOSOPHER_STATE pids[MAX_PHILOSOPHER_COUNT] = {0};
 
@@ -39,10 +42,10 @@ static int right(int i) {
 }
 
 static void print_state() {
-    // const char state_str[] = {'_', 'T', 'H', 'E'};
-    const char state_str[] = {'_', '.', '.', 'E'};
+    const char state_str1[] = {'_', 'T', 'H', 'E'};
+    const char state_str2[] = {'_', '.', '.', 'E'};
     for(int i = 0; i < philosopher_count; i++) {
-        printf("%c ", state_str[state[i]]);
+        printf("%c ", display_complete ? state_str1[state[i]] : state_str2[state[i]]);
     }
     putchar('\n');
 }
@@ -58,7 +61,7 @@ static void test(int i) {
 static void take_forks(int i) {
     sys_sem_wait(mutex_sem_id);
     state[i] = HUNGRY;
-    // print_state();
+    print_state();
     test(i);
     sys_sem_post(mutex_sem_id);
     sys_sem_wait(philosopher_sem_id(i));
@@ -75,7 +78,7 @@ static void put_forks(int i) {
 
 static int64_t philosopher(uint64_t argc, char *argv[]) {
     int i = atoi(argv[1]);
-    printf("Empieza el filosofo numero %d\n", i);
+    printf_color("Empieza el filosofo numero %d\n", COLOR_GREEN, 0, i);
     state[i] = THINKING;
     while(1) {
         sys_sleep(SECONDS_THINK);
@@ -115,6 +118,7 @@ static void add_philosopher() {
 static void remove_philosopher() {
     int i = philosopher_count - 1;
     sys_sem_wait(mutex_sem_id);
+    printf_color("Echando al filosofo numero %d\n", COLOR_GREEN, 0, i);
     while(state[left(i)] == EATING && state[right(i)] == EATING) {
         sys_sem_post(mutex_sem_id);
         sys_sem_wait(philosopher_sem_id(i));
@@ -128,12 +132,20 @@ static void remove_philosopher() {
     philosopher_count--;
     print_state();
     sys_sem_post(mutex_sem_id);
+}
 
-    
+static void print_usage() {
+    printf("toca '%c' para agregar a un filosofo (maximo %d)\n", CMD_ADD, MAX_PHILOSOPHER_COUNT);
+    printf("toca '%c' para remover a un filosofo (minimo %d)\n", CMD_REMOVE, MIN_PHILOSOPHER_COUNT);
+    printf("toca '%c' para imprimir el estado de los procesos (ps)\n", CMD_PS);
+    printf("toca '%c' para limpiar la pantalla\n", CMD_CLEAR);
+    printf("toca '%c' para cambiar modo de display (por default esta el incompleto, el completo especifica mas que es un '.')\n", CMD_SWAP_DISPLAY);
+    printf("toca '%c' para mostrar esta lista\n", CMD_USAGE);
 }
 
 int64_t phylo(uint64_t argc, char *argv[]) {
     mutex_sem_id = sys_get_pid();
+    print_usage();
     if(sys_sem_open(mutex_sem_id, 1) == SEM_ERROR) {
         printf_error("phylo error: init sem\n");
         return -1;
@@ -156,16 +168,22 @@ int64_t phylo(uint64_t argc, char *argv[]) {
                 printf_error("min phi count\n");
             break;
         case CMD_PS:
-            sys_print_all_processes();
+            print_processes_state();
             break;
         case CMD_CLEAR:
             sys_clear();
+            break;
+        case CMD_SWAP_DISPLAY:
+            display_complete = !display_complete;
+            break;
+        case CMD_USAGE:
+            print_usage();
             break;
         default:
             break;
         }
     }
-    printf("Echando a los filosofos\n");
+    printf_color("Echando a todos los filosofos\n", COLOR_GREEN, 0);
     while(philosopher_count > 0) {
         remove_philosopher();
     }

@@ -31,7 +31,7 @@ $(KERNEL): $(LOADEROBJECT) $(STATICLIBS) $(TOTAL_OBJ)
 	$(LD) $(LDFLAGS) -T kernel.ld -o $(KERNEL) $(LOADEROBJECT) $(STATICLIBS) $(TOTAL_OBJ)
 	$(LD) $(LDFLAGS) -T kernel.ld --oformat=elf64-x86-64 -o kernel.elf $(LOADEROBJECT) $(STATICLIBS) $(TOTAL_OBJ)
 %.o: %.c
-	$(GCC) $(GCCFLAGS) -I./include -I../Shared -c $< -o $@
+	$(GCC) $(GCCFLAGS) -I./include -I../Shared $(MMAN) -c $< -o $@
 
 %.o : %.asm
 	$(ASM) $(ASMFLAGS) $< -o $@

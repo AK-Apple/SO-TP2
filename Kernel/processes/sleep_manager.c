@@ -1,6 +1,7 @@
 #include "process.h"
 #include "time.h"
 #include "IO.h"
+#include <stdint.h>
 
 #define UINT64_MAX -1
 

@@ -12,6 +12,7 @@
 #include "pipes.h"
 #include "scheduler.h"
 #include "sleep_manager.h"
+#include "registers.h"
 
 typedef uint64_t (*Syscall)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t);
 
@@ -30,7 +31,7 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
         (Syscall)ticks_elapsed, // Syscall 10
         (Syscall)sys_getSize, // Syscall 11
         (Syscall)nosound, // Syscall 12
-        (Syscall)print_saved_regs, // Syscall 13
+        (Syscall)get_latest_registers, // Syscall 13
 
         (Syscall)set_foreground_color, // Syscall 14
 

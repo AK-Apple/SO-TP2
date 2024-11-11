@@ -63,31 +63,3 @@ int scheduler_remove(Priority priority, pid_t pid) {
 int scheduler_consume_quantum() {
     return scheduler.remaining_quantum--;
 }
-
-void scheduler_print() {
-    char *PRIORITY_STR[] = {"LOW", "MID", "HIGH", "NONE"};
-    for(int queue_index = 0; queue_index < PRIORITY_NONE; queue_index++) {
-        printf("\n%s PRIORITY: ", PRIORITY_STR[queue_index]);
-        for(int i = 0; i < scheduler.count[queue_index]; i++) {
-            printf("%d%c", scheduler.queue[queue_index][i], scheduler.index[queue_index] == i ? ']' : ' ');
-        }
-    }
-    printf("\n");
-}
-
-
-
-/* %3
-HIGH: 1 2
-MID:  3 4 5
-LOW:  6 7
-
-1 2 3 1 2 4 1 2 5 1 2 6 1 2 3 1 2 4 1 2 5 1 2 7 1 2 3 1 2 4
-*/
-/* %3
-HIGH: 1
-MID: 2 3
-LOW: 4 5 6
-
-1 2 1 3 1 2 1 4 1 2 1 3 1 2 1 5 1 
-*/

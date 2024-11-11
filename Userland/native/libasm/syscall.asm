@@ -13,13 +13,13 @@ GLOBAL sys_ticks_elapsed
 GLOBAL sys_secondsElapsed
 GLOBAL sys_new_size
 GLOBAL sys_getWindowSize
-GLOBAL sys_getRegs
+GLOBAL sys_get_registers
 GLOBAL sys_create_process
 GLOBAL sys_create_process_fd
 GLOBAL sys_kill_process
 GLOBAL sys_get_process_status
 GLOBAL sys_get_pid
-GLOBAL sys_print_all_processes
+GLOBAL sys_get_processes_info
 GLOBAL sys_change_priority
 GLOBAL sys_block
 GLOBAL sys_unblock
@@ -104,7 +104,7 @@ sys_new_size:
 sys_getWindowSize:
 	Syscall 11
 
-sys_getRegs:
+sys_get_registers:
 	Syscall 13
 
 sys_create_process:
@@ -123,7 +123,7 @@ sys_get_process_status:
 sys_get_pid:
 	Syscall 18
 
-sys_print_all_processes:
+sys_get_processes_info:
 	Syscall 19
 
 sys_change_priority:
@@ -187,4 +187,4 @@ sys_set_stdin_options:
 	Syscall 39
 
 SECTION .data
-std_fds 	dq 		0, 1, 2
+std_fds 	dq 		-1, 1, 2

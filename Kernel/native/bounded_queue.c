@@ -25,7 +25,6 @@ uint8_t is_empty(queue_t* q) {
 // Enqueue function
 uint8_t enqueue(queue_t* q, int value) {
     if (is_full(q)) {
-        printf("Queue is full!\n");
         return 0; // Indicate failure
     }
     q->rear = (q->rear + 1) % MAX_SIZE; // Circular increment

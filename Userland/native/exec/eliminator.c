@@ -162,13 +162,13 @@ pid_t play_song_in_background()
 {
     char* argv_aux[] = {"RETRO_SONG", "1"};
     fd_t fds[] = {DEVNULL, STDOUT, STDERR};
-    return sys_create_process_fd(play_infinite_music_cmd, 2, argv_aux, fds);
+    return sys_create_process_fd((Program)play_infinite_music_cmd, 2, argv_aux, fds);
 }
 pid_t play_you_lost()
 {
     char* argv_aux[] = {"YOU_LOST", "3"};
     fd_t fds[] = {DEVNULL, STDOUT, STDERR};
-    return sys_create_process_fd(play_music_cmd, 2, argv_aux, fds);
+    return sys_create_process_fd((Program)play_music_cmd, 2, argv_aux, fds);
 }
 
 void eliminator() {

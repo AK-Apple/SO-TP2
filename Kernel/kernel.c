@@ -13,6 +13,7 @@
 #include "defs.h"
 #include "keyboard.h"
 #include "scheduler.h"
+#include "pipes.h"
 
 #define MB (1L << 20)
 
@@ -59,6 +60,7 @@ int main()
 {
     create_init_process();
     load_idt();
+    initialize_pipes();
     static char *argv_shell[] = {"shell"};
 
     fd_t fds[] = {STDIN, STDOUT, STDERR};

@@ -9,13 +9,16 @@
 #include "sleep_manager.h"
 #include "time.h"
 #include "sound.h"
-
+#include "tickets.h"
+#include "registers.h"
+#include "memory_allocator.h"
 
 
 typedef struct ProcessBlock
 {
     uint64_t stack_pointer;
-    State process_state;
+    uint64_t rbp;
+    ProcessStatus process_state;
     pid_t parent_pid;
     Priority priority;
     Program program;
@@ -23,7 +26,6 @@ typedef struct ProcessBlock
     char **argv;
     fd_t file_descriptors[MAX_FILE_DESCRIPTORS];
     pid_t pid_to_wait;
-    StackedRegisters regs;
     uint8_t is_sleeping;
     StdinOption stdin_options;
 } ProcessBlock;
@@ -32,32 +34,8 @@ Stack stacks[MAX_PROCESS_BLOCKS] = {0};
 ProcessBlock blocks[MAX_PROCESS_BLOCKS] = {0};
 pid_t running_pid = 0;
 pid_t foreground_pid = 0;
-StackedRegisters saved_regs = {0};
-char regs_captured = 0;
-pid_t available_pids[MAX_PROCESS_BLOCKS] = {0};
-uint64_t current_available_pid_index = 0;
-uint64_t biggest_pid = 0;
+Tickets tickets_pid = {0};
 int64_t last_exit_code = 0;
-
-pid_t request_pid()
-{
-    if (current_available_pid_index >= biggest_pid)
-    {
-        if (biggest_pid >= MAX_PROCESS_BLOCKS)
-        {
-            printf_error("[scheduler] RAN OUT OF PID!!\n");
-            return INVALID_PID;
-        }
-        biggest_pid++;
-        return current_available_pid_index++;
-    }
-    return available_pids[current_available_pid_index++];
-}
-
-void free_pid(pid_t pid)
-{
-    available_pids[--current_available_pid_index] = pid;
-}
 
 void exit(int64_t return_value)
 {
@@ -119,7 +97,7 @@ pid_t kill_process(pid_t pid, int recursive)
     blocks[pid].parent_pid = 0;
     Priority priority = blocks[pid].priority;
     blocks[pid].priority = 0;
-    blocks[pid].process_state = UNAVAILABLE;
+    blocks[pid].process_state = STATUS_UNAVAILABLE;
     blocks[pid].stack_pointer = 0;
 
     for(int i = 0; i < MAX_FILE_DESCRIPTORS; i++) 
@@ -132,7 +110,7 @@ pid_t kill_process(pid_t pid, int recursive)
         blocks[pid].file_descriptors[i] = DEVNULL;
     }
     last_exit_code = -1;
-    free_pid(pid);
+    free_ticket(&tickets_pid, pid);
     scheduler_remove(priority, pid);
 
     return pid;
@@ -141,46 +119,6 @@ pid_t kill_process(pid_t pid, int recursive)
 int get_process_status(pid_t pid)
 {
     return blocks[pid].process_state;
-}
-
-void save_regs() {
-    saved_regs = blocks[running_pid].regs;
-    regs_captured = 1;
-}
-
-void print_regs(StackedRegisters regs){
-    printf("\nRAX  : 0x%16lx", regs.rax);
-    printf("\nRBX  : 0x%16lx", regs.rbx); 
-    printf("\nRCX  : 0x%16lx", regs.rcx); 
-    printf("\nRDX  : 0x%16lx", regs.rdx); 
-    printf("\nRDI  : 0x%16lx", regs.rdi); 
-    printf("\nRSI  : 0x%16lx", regs.rsi); 
-    printf("\nRBP  : 0x%16lx", regs.rbp); 
-    printf("\nRSP  : 0x%16lx", regs.rsp); 
-    printf("\nR08  : 0x%16lx", regs.r8);
-    printf("\nR09  : 0x%16lx", regs.r9);
-    printf("\nR10  : 0x%16lx", regs.r10); 
-    printf("\nR11  : 0x%16lx", regs.r11); 
-    printf("\nR12  : 0x%16lx", regs.r12); 
-    printf("\nR13  : 0x%16lx", regs.r13); 
-    printf("\nR14  : 0x%16lx", regs.r14); 
-    printf("\nR15  : 0x%16lx", regs.r15); 
-    printf("\nRIP  : 0x%16lx", regs.rip); 
-    printf("\nFLAG : 0x%16lx", regs.rflags);
-    printf("\nCS   : 0x%16lx", regs.cs);
-    printf("\nSS   : 0x%16lx", regs.ss);
-    printf("\n");
-}
-
-void print_saved_regs()
-{
-    if (!regs_captured) {
-        printf("No regs saved. Press left alt to save regs");
-        print_regs(blocks[running_pid].regs);
-    }
-    else {
-        print_regs(saved_regs);
-    }
 }
 
 uint64_t schedule(uint64_t running_stack_pointer)
@@ -192,13 +130,13 @@ uint64_t schedule(uint64_t running_stack_pointer)
     wake_available();
 
     blocks[running_pid].stack_pointer = running_stack_pointer;
-    blocks[running_pid].regs = *(StackedRegisters *) running_stack_pointer;
-    if(blocks[running_pid].process_state == RUNNING) {
-        blocks[running_pid].process_state = READY;
+    blocks[running_pid].rbp = ((StackedRegisters *)running_stack_pointer)->rbp;
+    if(blocks[running_pid].process_state == STATUS_RUNNING) {
+        blocks[running_pid].process_state = STATUS_READY;
     }
 
     running_pid = scheduler_next_pid();
-    blocks[running_pid].process_state = RUNNING;
+    blocks[running_pid].process_state = STATUS_RUNNING;
 
     return blocks[running_pid].stack_pointer;
 }
@@ -217,14 +155,14 @@ pid_t get_foreground() {
 static void process_entry_point()
 {
     exit(
-        blocks[running_pid].program(blocks[running_pid].argc, (const char **) blocks[running_pid].argv)
+        blocks[running_pid].program(blocks[running_pid].argc, blocks[running_pid].argv)
     );
 }
 
 static uint64_t initialize_stack(pid_t new_pid, int argc, char **argv)
 {
     memset(stacks[new_pid], 0, sizeof(Stack));
-    uint64_t rsp = (uint64_t) stacks[new_pid] + STACK_SIZE; 
+    uint64_t rsp = (uint64_t)&stacks[new_pid][STACK_SIZE - sizeof(char *)]; 
     uint64_t rsp_argv = rsp;
     rsp -= argc * sizeof(char **);
     for(int i = 0; i < argc; i++) {
@@ -251,21 +189,21 @@ static uint64_t initialize_stack(pid_t new_pid, int argc, char **argv)
     stacked_registers->rsp = rsp;
     stacked_registers->rbp = rsp + sizeof(StackedRegisters);
 
-    blocks[new_pid].regs = *stacked_registers;
+    blocks[new_pid].rbp = stacked_registers->rbp;
 
     return rsp;
 }
 
 pid_t create_process(Program program, int argc, char **argv, fd_t fds[])
 {
-    pid_t new_pid = request_pid();
+    pid_t new_pid = request_ticket(&tickets_pid);
     if (new_pid == INVALID_PID)
     {
         return INVALID_PID;
     }
 
     blocks[new_pid].stack_pointer = initialize_stack(new_pid, argc, argv);
-    blocks[new_pid].process_state = READY;
+    blocks[new_pid].process_state = STATUS_READY;
     blocks[new_pid].parent_pid = running_pid;
     blocks[new_pid].priority = PRIORITY_MID;
     blocks[new_pid].program = program;
@@ -290,16 +228,16 @@ pid_t create_process(Program program, int argc, char **argv, fd_t fds[])
 void create_init_process()
 {
     static char *init_args[] = {"INIT"};
-    running_pid = 0;
-    memset(blocks, 0, sizeof(ProcessBlock) * MAX_PROCESS_BLOCKS);
-    memset(available_pids, 0, sizeof(available_pids));
-    biggest_pid = 0;
-    current_available_pid_index = 0;
-    last_exit_code = 0;
+    memset(blocks, 0, sizeof(blocks));
+    memset(stacks, 0, sizeof(stacks));
+    initialize_tickets(&tickets_pid, stacks, sizeof(Stack), MAX_PROCESS_BLOCKS);
 
-    pid_t pid = request_pid(); 
+    pid_t pid = request_ticket(&tickets_pid); 
+
+    running_pid = 0;
+    last_exit_code = 0;
     blocks[0].stack_pointer = 0;   // Se va a actualizar. el proceso INIT va a usar otro stack
-    blocks[0].process_state = RUNNING;
+    blocks[0].process_state = STATUS_RUNNING;
     blocks[0].parent_pid = get_pid(); 
     blocks[0].priority = PRIORITY_LOW;
     blocks[0].argc = sizeof(init_args) / sizeof(init_args[0]);
@@ -348,45 +286,41 @@ void set_pending_action(PendingAction action) {
     yield();
 }
 
-int get_processes_count()
-{
-    return current_available_pid_index;
-}
-
 pid_t get_pid()
 {
     return running_pid;
 }
 
-void get_all_processes()
+void get_all_processes(ProcessInfo *info)
 {
-    static char *PROCESS_STATE_STRING[] = {"UNKNOWN", "RUNNING", "READY  ", "BLOCKED"};
-    static uint64_t PROCESS_STATE_COLOR[] = {0x00999999, 0x0000FF00, 0x00CCDD00, 0x00FF0000};
-    static char *PRIORITY_STRING[] = {"LOW ", "MID ", "HIGH", "NONE"};
-    printf("pid : ppid : prio : stack_pointer_64 : base_pointer_64  : status  : process_name\n");
-    for (int i = 0; i < MAX_PROCESS_BLOCKS; i++)
+    info->count = get_used_ticket_count(&tickets_pid);
+    info->foreground_pid = foreground_pid;
+    info->entries = memory_alloc(info->count * sizeof(struct ProcessInfoEntry));
+    if(info->entries == NULL) return;
+    for (int i = 0, j = 0; i < MAX_PROCESS_BLOCKS; i++)
     {
-        if (blocks[i].process_state != UNAVAILABLE)
+        if (blocks[i].process_state != STATUS_UNAVAILABLE)
         {
-            printf("%3d : %4ld : ", i, blocks[i].parent_pid);
-            int priority = blocks[i].priority;
-            printf_color("%s", PROCESS_STATE_COLOR[priority+1], PRIORITY_STRING[priority]);
-            printf(" : %16lx : %16lx : ", blocks[i].stack_pointer, blocks[i].regs.rbp);
-            uint64_t process_state = blocks[i].process_state;
-            printf_color(PROCESS_STATE_STRING[process_state], PROCESS_STATE_COLOR[process_state]);
-            printf(" : %s\n", blocks[i].argc > 0 ? blocks[i].argv[0] : "UNKNOWN PROCESS");
+            info->entries[j].pid = i;
+            info->entries[j].ppid = blocks[i].parent_pid;
+            info->entries[j].priority = blocks[i].priority;
+            info->entries[j].rsp = blocks[i].stack_pointer;
+            info->entries[j].rbp = blocks[i].rbp;
+            info->entries[j].status = blocks[i].process_state;
+            memcpy(info->entries[j].name, blocks[i].argc > 0 ? blocks[i].argv[0] : "UNKNOWN PROCESS", PROCESS_NAME_LEN);
+            j++;
         }
     }
 }
 
 void change_priority(pid_t pid, int value){
-    if(pid == 0 || value > PRIORITY_HIGH || blocks[pid].process_state == UNAVAILABLE) {
+    if(pid == 0 || value > PRIORITY_HIGH || blocks[pid].process_state == STATUS_UNAVAILABLE) {
         return;
     }
     Priority previous_priority = blocks[pid].priority;
     if(previous_priority != value) {
         scheduler_remove(previous_priority, pid);
-        if(blocks[pid].process_state != BLOCKED)
+        if(blocks[pid].process_state != STATUS_BLOCKED)
             scheduler_insert(value, pid);
         blocks[pid].priority = value;
     }
@@ -409,25 +343,25 @@ void sys_set_fd(pid_t pid, fd_t fd_index, fd_t fd) {
 }
 
 pid_t block_no_yield(pid_t pid) {
-    if (pid >= MAX_PROCESS_BLOCKS || pid < 1 || blocks[pid].process_state == UNAVAILABLE)
+    if (pid >= MAX_PROCESS_BLOCKS || pid < 1 || blocks[pid].process_state == STATUS_UNAVAILABLE)
         return -1;
-    blocks[pid].process_state = BLOCKED;
+    blocks[pid].process_state = STATUS_BLOCKED;
     scheduler_remove(blocks[pid].priority, pid);
     return 0;
 }
 
 pid_t unblock(pid_t pid)
 {
-    if (pid >= MAX_PROCESS_BLOCKS || pid < 1 || blocks[pid].process_state != BLOCKED || blocks[pid].is_sleeping)
+    if (pid >= MAX_PROCESS_BLOCKS || pid < 1 || blocks[pid].process_state != STATUS_BLOCKED || blocks[pid].is_sleeping)
         return -1;
-    blocks[pid].process_state = READY;
+    blocks[pid].process_state = STATUS_READY;
     scheduler_insert(blocks[pid].priority, pid);
     return pid;
 }
 
 pid_t wait_pid(pid_t pid)
 {
-    if(blocks[pid].process_state == UNAVAILABLE) return pid;
+    if(blocks[pid].process_state == STATUS_UNAVAILABLE) return pid;
     int ppid = blocks[pid].parent_pid;
     blocks[ppid].pid_to_wait = pid;
     block(ppid);

@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include "shared.h"
 
-
+void initialize_pipes();
 int8_t create_pipe(fd_t* fd_buffer);
 int64_t read_pipe(fd_t fd, char* buf, int count);
 int64_t write_pipe(fd_t fd, const char* buf, int count);

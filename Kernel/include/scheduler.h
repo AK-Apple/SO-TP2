@@ -20,7 +20,6 @@ pid_t scheduler_next_pid();
 int scheduler_insert(Priority priority, pid_t pid);
 int scheduler_remove(Priority priority, pid_t pid);
 int scheduler_consume_quantum();
-void scheduler_print();
 void yield();
 
 
