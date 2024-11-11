@@ -13,7 +13,7 @@
 
 uint64_t screen_x = 0;
 uint64_t screen_y = 0;
-uint8_t fontSize = 1;
+uint8_t font_size = 1;
 static uint64_t global_foreground_color = 0x00FFFFFF;
 
 
@@ -54,7 +54,7 @@ int sys_read(int fd_index, char* buf, int count)
 
 static void print_str(char *str) {
     for (int i = 0; str[i] != '\0'; i++) {
-        putOut(str[i]);
+        put_out(str[i]);
     }
 }
 
@@ -92,19 +92,19 @@ static uint64_t vprintf(char *fmt, va_list vars) {
                     k_print_integer(va_arg(vars, uint64_t), padding, 2);
                     break;
                 case 'c':
-                    putOut(va_arg(vars, int));
+                    put_out(va_arg(vars, int));
                     break;
                 case 's':
                     print_str(va_arg(vars, char*));
                     break;
                 case '%':
-                    putOut('%');
+                    put_out('%');
                     break;
                 default:
                     break;
             }
         } else {
-            putOut(fmt[i]);
+            put_out(fmt[i]);
         }
         i++;
     }
@@ -112,16 +112,16 @@ static uint64_t vprintf(char *fmt, va_list vars) {
 }
 
 int xOutOfBounds(uint64_t * x) {
-    return *x + FONT_WIDTH * fontSize >= getWidth() || (int)*x < 0;     // casteo a int para que me tome que existen los negativos
+    return *x + FONT_WIDTH * font_size >= get_width() || (int)*x < 0;     // casteo a int para que me tome que existen los negativos
 }
 
 int yOutOfBounds(uint64_t * y) {
-    return *y + FONT_HEIGHT * fontSize >= getHeight() || (int)*y < 0;
+    return *y + FONT_HEIGHT * font_size >= get_height() || (int)*y < 0;
 }
 
 void newLine(uint64_t * x, uint64_t * y) {
     *x = 0;
-    *y += FONT_HEIGHT * fontSize;
+    *y += FONT_HEIGHT * font_size;
 }
 
 // imprime caracter y modifica coordenadas. Usado para representar el stdout
@@ -131,7 +131,7 @@ void putCharAt(uint8_t c, uint64_t * x, uint64_t * y, uint64_t foreColor, uint64
     }
 
     if (yOutOfBounds(y)) {
-        clearScreen(backgroundColor);
+        clear_screen(backgroundColor);
         *y = 0;
     }
 
@@ -141,22 +141,22 @@ void putCharAt(uint8_t c, uint64_t * x, uint64_t * y, uint64_t foreColor, uint64
     for (int i = 0; i < FONT_HEIGHT ; i++) {
         for (int j = 0; j < FONT_WIDTH ; j++) {
             uint8_t squareIsOn = charMap[i][j];
-            putSquare(squareIsOn ? foreColor : backgroundColor, *x + j * fontSize, *y + i * fontSize, fontSize);
+            put_square(squareIsOn ? foreColor : backgroundColor, *x + j * font_size, *y + i * font_size, font_size);
         }
     }
-    *x += FONT_WIDTH * fontSize;
+    *x += FONT_WIDTH * font_size;
 }
 
 void deleteCharAt(uint64_t * x, uint64_t * y, uint64_t backgroundColor) {
     if (*x == 0 && *y == 0) return;         // no borra si no hay nada
-    *x -= FONT_WIDTH * fontSize;
+    *x -= FONT_WIDTH * font_size;
     if (xOutOfBounds(x)) {
-        int lastX = ((getWidth() -1) / (FONT_WIDTH * fontSize) - 1 ) * (FONT_WIDTH * fontSize);  // esto hay que ponerlo en otro lado
+        int lastX = ((get_width() -1) / (FONT_WIDTH * font_size) - 1 ) * (FONT_WIDTH * font_size);  // esto hay que ponerlo en otro lado
         *x = lastX;
-        *y -= FONT_HEIGHT * fontSize;
+        *y -= FONT_HEIGHT * font_size;
     }
     putCharAt(' ', x, y, backgroundColor, backgroundColor);
-    *x -= FONT_WIDTH * fontSize;
+    *x -= FONT_WIDTH * font_size;
 }
 
 void putCharColoured(char c, uint64_t foreGround, uint64_t backGround) {
@@ -173,10 +173,6 @@ void putCharColoured(char c, uint64_t foreGround, uint64_t backGround) {
             putCharAt(c, &screen_x, &screen_y, foreGround, backGround);
             break;
     }
-}
-
-void putChar(char c) {
-    putCharColoured(c, 0xFFFFFF, BG_COLOR);
 }
 
 void printf(char * fmt, ...) {
@@ -211,7 +207,7 @@ void printf_error(char * fmt, ...) {
 }
 
 // Funciones que manejan stdin, stdout y stderr
-void putOut(char c){
+void put_out(char c){
     putCharColoured(c, global_foreground_color, BG_COLOR);
 }
 
@@ -234,7 +230,7 @@ void sys_write(int fd_index, const char* buf, int count)
     {
         for(int i=0; i<count; i++)
         {
-            putOut(buf[i]);
+            put_out(buf[i]);
         }
     }
     if (fd==2)
@@ -256,14 +252,14 @@ void sys_new_size(int newSize){
     _cli();               //por las dudas paro los in/out (antes generaba bugs)
     if (newSize < 1 || newSize > 5)
         return;
-    fontSize = newSize;
-    sys_clearScreen();
+    font_size = newSize;
+    sys_clear_screen();
     _sti();
 }
 
 // resetea coordenadas
-void sys_clearScreen(){
-    clearScreen(BG_COLOR);
+void sys_clear_screen(){
+    clear_screen(BG_COLOR);
     screen_y = 0;
     screen_x = 0;
 }

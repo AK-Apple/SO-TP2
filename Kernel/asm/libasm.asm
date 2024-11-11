@@ -2,7 +2,7 @@ GLOBAL cpuVendor
 GLOBAL force_timer_tick
 GLOBAL setup_kernel_restart
 EXTERN main
-EXTERN getStackBase
+EXTERN get_stack_base
 
 section .text
 	
@@ -40,8 +40,8 @@ getRTC:
 	ret
 
 ; lo agarra keyboard.h
-GLOBAL getKey
-getKey:
+GLOBAL get_key
+get_key:
         push 	rbp
         mov     rbp, rsp
 
@@ -107,7 +107,7 @@ release:
 
 
 setup_kernel_restart:
-	call getStackBase
+	call get_stack_base
 	mov rsp, rax
 	call main
 

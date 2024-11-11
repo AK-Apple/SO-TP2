@@ -8,11 +8,11 @@ GLOBAL sys_sleep
 GLOBAL sys_sound
 GLOBAL sys_nosound
 GLOBAL sys_clear
-GLOBAL sys_putPixel
+GLOBAL sys_put_pixel
 GLOBAL sys_ticks_elapsed
-GLOBAL sys_secondsElapsed
+GLOBAL sys_seconds_elapsed
 GLOBAL sys_new_size
-GLOBAL sys_getWindowSize
+GLOBAL sys_get_window_size
 GLOBAL sys_get_registers
 GLOBAL sys_create_process
 GLOBAL sys_create_process_fd
@@ -89,19 +89,19 @@ sys_nosound:
 sys_clear:
 	Syscall 5
 
-sys_putPixel:
+sys_put_pixel:
 	Syscall 6
 
 sys_ticks_elapsed:
 	Syscall 10
 
-sys_secondsElapsed:
+sys_seconds_elapsed:
 	Syscall 9
 
 sys_new_size:
 	Syscall 7
 
-sys_getWindowSize:
+sys_get_window_size:
 	Syscall 11
 
 sys_get_registers:

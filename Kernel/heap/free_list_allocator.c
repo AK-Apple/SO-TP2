@@ -8,22 +8,22 @@
 #include "lib.h"
 
 #ifndef USE_BUDDY_ALLOCATOR
-typedef struct Allocation_Header {
+typedef struct AllocationHeader {
     uint64_t size;
     union {
         uint64_t intended_size;
-        struct Allocation_Header *next;
+        struct AllocationHeader *next;
     };
-} Allocation_Header;
+} AllocationHeader;
 
-typedef struct Free_List_Allocator {
+typedef struct FreeListAllocator {
     void *base_address;
     uint64_t total_bytes;
-    Allocation_Header *free_list;
-} Free_List_Allocator;
-Free_List_Allocator allocator = {0};
+    AllocationHeader *free_list;
+} FreeListAllocator;
+FreeListAllocator allocator = {0};
 
-static void coalesce_node(Allocation_Header *node) {
+static void coalesce_node(AllocationHeader *node) {
     if(node == NULL) return; 
     if(node->next && (void *)((void *)node + node->size) == node->next) {
         node->size += node->next->size;
@@ -32,24 +32,24 @@ static void coalesce_node(Allocation_Header *node) {
 }
 
 void initialize_memory_allocator(void *base_address, uint64_t total_bytes) {
-    total_bytes -= total_bytes % sizeof(Allocation_Header);
-    base_address += sizeof(Allocation_Header) - (uint64_t)base_address % sizeof(Allocation_Header);
+    total_bytes -= total_bytes % sizeof(AllocationHeader);
+    base_address += sizeof(AllocationHeader) - (uint64_t)base_address % sizeof(AllocationHeader);
     allocator.base_address = base_address;
     allocator.total_bytes = total_bytes;
 
-    Allocation_Header *first_node = (Allocation_Header *)base_address;
+    AllocationHeader *first_node = (AllocationHeader *)base_address;
     first_node->size = total_bytes;
     first_node->next = NULL;
     allocator.free_list = first_node;
 }
 void *memory_alloc(size_t bytes) {
     if(bytes == 0) return NULL;
-    size_t required_size = sizeof(Allocation_Header) * ((bytes - 1) / sizeof(Allocation_Header) + 2);
+    size_t required_size = sizeof(AllocationHeader) * ((bytes - 1) / sizeof(AllocationHeader) + 2);
 
-    Allocation_Header *list_iter = allocator.free_list;
-    Allocation_Header *best_node = NULL;
-    Allocation_Header *prev_node = NULL;
-    Allocation_Header *best_node_prev = NULL;
+    AllocationHeader *list_iter = allocator.free_list;
+    AllocationHeader *best_node = NULL;
+    AllocationHeader *prev_node = NULL;
+    AllocationHeader *best_node_prev = NULL;
     while(list_iter) {
         if(required_size <= list_iter->size && (!best_node || list_iter->size < best_node->size)) {
             best_node = list_iter;
@@ -62,8 +62,8 @@ void *memory_alloc(size_t bytes) {
     if(best_node == NULL) return NULL;
 
     uint64_t remaining_size = best_node->size - required_size;
-    if(remaining_size == sizeof(Allocation_Header)) {
-        required_size += sizeof(Allocation_Header);
+    if(remaining_size == sizeof(AllocationHeader)) {
+        required_size += sizeof(AllocationHeader);
         remaining_size = 0;
     }
     if(remaining_size > 0) {
@@ -76,21 +76,21 @@ void *memory_alloc(size_t bytes) {
         allocator.free_list = best_node->next;
     }
 
-    Allocation_Header *header = (Allocation_Header *)((uint64_t)best_node + remaining_size);
+    AllocationHeader *header = (AllocationHeader *)((uint64_t)best_node + remaining_size);
     header->size = required_size;
     header->intended_size = bytes;
 
-    return (void *)header + sizeof(Allocation_Header);
+    return (void *)header + sizeof(AllocationHeader);
 }
 void memory_free(void *pointer) {
     if(pointer == NULL) return;
-    Allocation_Header *free_node = (Allocation_Header *)(pointer - sizeof(Allocation_Header));
-    Allocation_Header *list_iter = allocator.free_list;
-    Allocation_Header *prev_node = NULL;
+    AllocationHeader *free_node = (AllocationHeader *)(pointer - sizeof(AllocationHeader));
+    AllocationHeader *list_iter = allocator.free_list;
+    AllocationHeader *prev_node = NULL;
 
     free_node->next = NULL;
 
-    while(list_iter && (Allocation_Header *)pointer > list_iter) {
+    while(list_iter && (AllocationHeader *)pointer > list_iter) {
         prev_node = list_iter;
         list_iter = list_iter->next;
     }
@@ -106,7 +106,7 @@ void memory_free(void *pointer) {
     coalesce_node(prev_node);
 }
 void memory_info(Memory_Info *info) {
-    Allocation_Header *list_iter = allocator.free_list;
+    AllocationHeader *list_iter = allocator.free_list;
     void *current_pointer = allocator.base_address;
     uint64_t total_memory = allocator.total_bytes;
     uint64_t internal_fragmentation = 0;
@@ -114,7 +114,7 @@ void memory_info(Memory_Info *info) {
     uint64_t largest_free_block_bytes = 0;
 
     while(current_pointer - allocator.base_address < total_memory) {
-        Allocation_Header *node = (Allocation_Header *)current_pointer;
+        AllocationHeader *node = (AllocationHeader *)current_pointer;
         if(node == list_iter) {
             if(largest_free_block_bytes < node->size) {
                 largest_free_block_bytes = node->size;
@@ -125,14 +125,14 @@ void memory_info(Memory_Info *info) {
         }
         else {
             // printf_color("|%lu:%lu", 0x00DDDDFF, node->size, node->intended_size);
-            internal_fragmentation += node->size - node->intended_size - sizeof(Allocation_Header);
+            internal_fragmentation += node->size - node->intended_size - sizeof(AllocationHeader);
             current_pointer += node->size;
             used_memory += node->size;
         }
     }
     
     info->allocator_type = "free_list";
-    info->header_size = sizeof(Allocation_Header);
+    info->header_size = sizeof(AllocationHeader);
     info->total_memory = allocator.total_bytes;
     info->base_address = (uint64_t)allocator.base_address;
     info->end_address = (uint64_t)allocator.base_address + total_memory - 1;

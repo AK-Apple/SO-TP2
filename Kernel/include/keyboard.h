@@ -10,8 +10,8 @@ typedef struct {
     int specialFlag; // 0 for normally-accessed, 1 for shift-accessed, 2 for ctrl-accessed, 3 for alt-accessed
 } AsciiMap;
 
-extern char getKey();   // de libasm.asm
-int mapKey(char character, int flags[2]);
+extern char get_key();   // de libasm.asm
+int map_key(char character, int flags[2]);
 void keyboard_handler(uint64_t rsp);
 int get_stdin();
 int get_stdin_no_block();

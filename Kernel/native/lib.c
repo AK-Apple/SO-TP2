@@ -6,7 +6,7 @@
 #include "IO.h"
 #include "interrupts.h"
 
-uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base) {
+uint32_t uint_to_base(uint64_t value, char * buffer, uint32_t base) {
 	char *p = buffer;
 	char *p1, *p2;
 	uint32_t digits = 0;
@@ -118,10 +118,10 @@ void k_print_integer(uint64_t number, uint64_t padding, uint64_t base) {
 
     }
     for(uint64_t i = length; i < padding; i++) 
-        putOut('0');
+        put_out('0');
     while (length-- || numberReverse > 0) {
         int remainder = numberReverse % base;
-        putOut((remainder > 9) ? (remainder - 10) + 'A' : remainder + '0');
+        put_out((remainder > 9) ? (remainder - 10) + 'A' : remainder + '0');
         numberReverse /= base;
     }
 }

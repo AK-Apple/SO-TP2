@@ -22,12 +22,12 @@ extern void sys_nosound();
 extern void sys_clear();
 
 extern void print_help();
-extern void sys_putPixel(uint32_t hexColor, uint64_t x, uint64_t y);
+extern void sys_put_pixel(uint32_t hex_color, uint64_t x, uint64_t y);
 extern int sys_ticks_elapsed();
-extern int sys_secondsElapsed();
+extern int sys_seconds_elapsed();
 
 extern void sys_new_size(int newSize);
-extern int sys_getWindowSize(int elem);
+extern int sys_get_window_size(int elem);
 
 extern void sys_get_registers(StackedRegisters *registers);
 

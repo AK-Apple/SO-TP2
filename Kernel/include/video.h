@@ -7,16 +7,16 @@
 #define ERR_FORE_COLOR 0x00ff0000
 #define BG_COLOR 0x00000000
 
-void putPixel(uint32_t hexColor, uint64_t x, uint64_t y);
-void putSquare(uint32_t hexColor, uint64_t x, uint64_t y, uint64_t size);
-int getWidth();
-int getHeight();
+void put_pixel(uint32_t hex_color, uint64_t x, uint64_t y);
+void put_square(uint32_t hex_color, uint64_t x, uint64_t y, uint64_t size);
+int get_width();
+int get_height();
 
 // 0 --> getWidth   (o cualquier cosa que no sea 1)
 // 1 --> getHeight
-int sys_getSize(int id);
+int sys_get_size(int id);
 
-void clearScreen(uint32_t hexColor);
+void clear_screen(uint32_t hex_color);
 
 
 
