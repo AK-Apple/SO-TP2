@@ -39,10 +39,18 @@ docker run -v ${PWD}:/root --security-opt seccomp:unconfined -ti agodio/itba-so-
 cd root
 ```
 
-3. Compilar:
+3. Compilar utilizando el memory manager FREE LIST (default) o el BUDDY BINARY:
+
+#### OPCIÓN 1: Con el FREE LIST
 
 ```sh
 make
+```
+
+#### OPCIÓN 2: Con el BUDDY BINARY
+
+```sh
+make buddy
 ```
 
 4. Ejecutar FUERA DEL DOCKER con QEMU (en una terminal aparte o haciendo exit antes):
@@ -57,96 +65,19 @@ make
 ./run.sh -d
 ```
 
-## Comandos Built-in de la Shell (no crean procesos)
-
-### help
-
-Muestra la lista de comandos
-
-### song \<song_id>
-
-Pone música con beeps según \<song_id>.
-
-#### Canciones
-
-- song_id = 1: Eliminator
-- song_id = 2: Iniciando SO
-- song_id = 3: ¡Perdiste!
-
-### time
-
-Muestra la hora.
-
-### eliminator
-
-Ejecuta el juego eliminator.
-
-### size \<font_size>
-
-Cambia el tamaño de letra a \<font_size>, el cual es un número del 1 al 5.
-
-### div \<num> \<den>
-
-Devuelve \<num> / \<den>.
-
-### invalidopcode
-
-Ejecuta código invalido (y muestra excepción).
-
-### inforeg
-
-Muestra los registros guardados. (Presiona 'Left Alt' para guardar registros.)
-
-### clear
-
-Limpia toda la pantalla.
-
-### ps
-
-Lista la información de los procesos.
-
-### kill \<pid>
-
-Mata el proceso de pid = \<pid>.
-
-### mem
-
-Imprime el estado de la memoria. Utiliza el siguiente formato:
-
-\<memoria ocupada>:bytes | \<memoria libre>:free | \<memoria ocupada>:bytes ...
-
-Luego imprime:
-
-- Total memory (memoria total)
-- Used memory (memoria usada)
-- Free memory (memoria libre)
-- Internal fragmentation (fragmentación interna)
-- Largest free block (bloque libre más largo)
-
-### fg \<pid>
-
-Manda el proceso con pid = \<pid> a foreground.
-
-### block \<pid>
-
-Cambia el estado del proceso de pid = \<pid>:
-
-- Si estaba BLOCKED (bloqueado), pasa a READY (listo)
-- Si estaba READY (listo), pasa a BLOCKED (bloqueado)
-
-### nice \<pid> \<prio>
-
-Cambia la prioridad del proces de pid = \<pid>. \<prio> indica el nivel de prioridad (de 1 a 5).
-
-## Comandos de la Shell que crean procesos
+## Comandos de la Shell
 
 ### \<comando> &
 
 Escribir '&' al final del comando para ejecutaro en background.
 
+### \<comando_1> | \<comando_2>
+
+Escribir dos comandos separados por '|' para pipear cmd1 a cmd2
+
 ### testproc \<max_proc>
 
-Ejecuta test de proceso.
+Ejecuta test de procesos.
 
 ### testprio
 
@@ -181,9 +112,113 @@ Ejecuta test de memoria. Hace mallocs y libera memoria infinitamente.
 - Si el bloque libre más grande es más pequeño que el header, se deja de reservar memoria.
 - La cantidad máxima de memoria reservada está limitada por el bloque libre más grande.
 
+### testpipe
+Ejecuta test de pipes.
+TODO: sacar la parte de "NAMED" en help
+
+### ps
+
+Lista la información de los procesos.
+
+### kill \<pid>
+
+Mata el proceso de pid = \<pid>.
+
+### nice \<pid> \<prio>
+
+Cambia la prioridad del proces de pid = \<pid>. \<prio> indica el nivel de prioridad (de 1 a 5).
+
+### block \<pid>
+
+Cambia el estado del proceso de pid = \<pid>:
+
+- Si estaba BLOCKED (bloqueado), pasa a READY (listo)
+- Si estaba READY (listo), pasa a BLOCKED (bloqueado)
+
+### fg \<pid>
+
+Manda el proceso con pid = \<pid> a foreground.
+
+### mem
+
+Imprime el estado de la memoria. Utiliza el siguiente formato:
+
+\<memoria ocupada>:bytes | \<memoria libre>:free | \<memoria ocupada>:bytes ...
+
+Luego imprime:
+
+- Total memory (memoria total)
+- Used memory (memoria usada)
+- Free memory (memoria libre)
+- Internal fragmentation (fragmentación interna)
+- Largest free block (bloque libre más largo)
+
+### wc
+
+Cuenta la catidad de líneas del STDIN terminando con EOF.
+
+### cat
+
+Printea el input.
+
+### filter
+
+Filtra las vocales del input.
+
+### phylo
+
+Ejecuta el programa de los filósofos comensales. Cada sección representa un filósofo. Cuando este come, aparece una "E". Si no, aparece un punto ('.'). En caso de que aún no se haya sentado el filósofo en la mesa, aparece un guión bajo ('_').
+
+#### controles
+
+- 'a': Agrega un filósofo
+- 'r': Remueve un filósofo
+
 ### loop \<secs_wait> \<msg>
 
 Imprime su pid con un saludo cada tanto tiempo determinado por \<secs_wait>. También imprime un mensaje determinado por \<msg>.
+
+### clear
+
+Limpia toda la pantalla.
+
+### help
+
+Muestra la lista de comandos. (Antes de eso, limpia toda la pantalla)
+
+### song \<song_id>
+
+Pone música con beeps según \<song_id>.
+
+#### Canciones
+
+- song_id = 1: Eliminator
+- song_id = 2: Iniciando SO
+- song_id = 3: ¡Perdiste!
+
+### time
+
+Muestra la hora.
+
+### eliminator
+
+Ejecuta el juego eliminator.
+
+### size \<font_size>
+
+Cambia el tamaño de letra a \<font_size>, el cual es un número del 1 al 5.
+
+### inforeg
+
+Muestra los registros guardados. (Presiona 'Left Alt' para guardar registros.)
+
+### div \<num> \<den>
+
+Devuelve \<num> / \<den>.
+
+### invalidopcode
+
+Ejecuta código invalido (y muestra excepción).
 
 ## Hotkeys
 
@@ -197,12 +232,21 @@ Bloquar al proceso en foreground y volver a la shell.
 
 ### ctrl x
 
-Mandar al proceso en foreground a background y volver a la shell
+Mandar al proceso en foreground a background y volver a la shell.
 
 ### ctrl d
 
-Para enviar EOF (end of file)
+Para enviar EOF (end of file).
 
 ### left_alt
 
-Para guardar registros
+Para guardar registros.
+
+### ctrl a
+
+Para escribir el caracter '&' (es la alternativa a shift+6).
+
+### ctrl p
+
+Para escribir el caracter '|' (es la alternativa a escribir '|' en teclado castellano).
+

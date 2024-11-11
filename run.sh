@@ -7,7 +7,7 @@ QEMU_CMD="qemu-system-x86_64 $FLAG -hda Image/x64BareBonesImage.qcow2 -m 512"
 
 if [[ "$(uname)" == "Linux" ]]; then
     # Linux specific execution
-    sudo $QEMU_CMD
+    $QEMU_CMD
 else
     # macOS specific execution
     export AUDIO_DRIVER="coreaudio"
