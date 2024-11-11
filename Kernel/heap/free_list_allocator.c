@@ -31,7 +31,8 @@ static void coalesce_node(Allocation_Header *node) {
     }
 }
 
-void initialize_memory_allocator(void *base_address, uint64_t total_bytes) {
+void initialize_memory_allocator(void *base_address, uint64_t total_bytes) 
+{
     total_bytes -= total_bytes % sizeof(Allocation_Header);
     base_address += sizeof(Allocation_Header) - (uint64_t)base_address % sizeof(Allocation_Header);
     allocator.base_address = base_address;
@@ -42,7 +43,8 @@ void initialize_memory_allocator(void *base_address, uint64_t total_bytes) {
     first_node->next = NULL;
     allocator.free_list = first_node;
 }
-void *memory_alloc(size_t bytes) {
+void *memory_alloc(size_t bytes) 
+{
     if(bytes == 0) return NULL;
     size_t required_size = sizeof(Allocation_Header) * ((bytes - 1) / sizeof(Allocation_Header) + 2);
 
@@ -82,7 +84,8 @@ void *memory_alloc(size_t bytes) {
 
     return (void *)header + sizeof(Allocation_Header);
 }
-void memory_free(void *pointer) {
+void memory_free(void *pointer) 
+{
     if(pointer == NULL) return;
     Allocation_Header *free_node = (Allocation_Header *)(pointer - sizeof(Allocation_Header));
     Allocation_Header *list_iter = allocator.free_list;
@@ -105,7 +108,8 @@ void memory_free(void *pointer) {
     coalesce_node(free_node);
     coalesce_node(prev_node);
 }
-void memory_info(Memory_Info *info) {
+void memory_info(Memory_Info *info) 
+{
     Allocation_Header *list_iter = allocator.free_list;
     void *current_pointer = allocator.base_address;
     uint64_t total_memory = allocator.total_bytes;

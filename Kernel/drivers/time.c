@@ -5,6 +5,7 @@
 #include "interrupts.h"
 #include "process.h"
 #include "IO.h"
+#include "sleep_manager.h"
 
 uint8_t dont_handle_ticks_flag = 0;
 
@@ -25,6 +26,7 @@ void timer_handler()
     }
     else
     {
+        wake_available();
         ticks++;
     }
 }

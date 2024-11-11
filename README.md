@@ -18,13 +18,21 @@ El objetivo de este TP es continuar el sistema operativo creado en arqui, agrega
 docker pull agodio/itba-so-multi-platform:3.0
 ```
 
-2. Una vez que estés en el entorno de desarrollo, compila y ejecuta el programa utilizando el siguiente comando:
+2. Una vez que estés en el entorno de desarrollo, compila y ejecuta el programa utilizando el siguiente comando
+
+OPCIÓN 1: Con el FREE LIST (default)
 
 ```sh
 ./compExec.sh
 ```
 
-### Otra alternativa es compilar y ejecutar por separado:
+OPCIÓN 2: Con el BUDDY BINARY
+
+```sh
+./compExec.sh buddy
+```
+
+### Opción 2: Compilar y ejecutar por separado
 
 1. Bajar el archivo de docker:
 
@@ -41,13 +49,13 @@ cd root
 
 3. Compilar utilizando el memory manager FREE LIST (default) o el BUDDY BINARY:
 
-#### OPCIÓN 1: Con el FREE LIST
+OPCIÓN 1: Con el FREE LIST (default)
 
 ```sh
 make
 ```
 
-#### OPCIÓN 2: Con el BUDDY BINARY
+OPCIÓN 2: Con el BUDDY BINARY
 
 ```sh
 make buddy
@@ -63,6 +71,12 @@ make buddy
 
 ```sh
 ./run.sh -d
+```
+
+6. (Recomendable) Limpiar el repositorio con make clean:
+
+```sh
+make clean
 ```
 
 ## Comandos de la Shell

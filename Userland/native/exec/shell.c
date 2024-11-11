@@ -15,31 +15,31 @@
 #define MAX_BUF 1024
 
 static Command commands[] = {
-    {"testproc", "ejecuta test de proceso", (Program)test_processes, "<max_proc>"},
-    {"testprio", "ejecuta test de prioridades. countdown es el busy waiting de los procesos, por defecto = 17000000", (Program)test_prio, "<countdown>"},
-    {"testsync", "ejecuta test de sincronizacion. count=countdown, sem:0=sin sincronizacion|1=usar sincronizacion", (Program)test_sync, "<count> <sem>"},
-    {"testmman", "ejecuta test de memoria. smart allocation:0=apagado|1=prendido", (Program)test_mm, "<max> <smart>"},
-    {"testpipe", "ejecuta test de named pipes", (Program)test_pipe},
+    {"testproc", "Ejecuta test de proceso", (Program)test_processes, "<max_proc>"},
+    {"testprio", "Ejecuta test de prioridades. countdown es el busy waiting de los procesos, por defecto = 17000000", (Program)test_prio, "<countdown>"},
+    {"testsync", "Ejecuta test de sincronizacion. count=countdown, sem:0=sin sincronizacion|1=usar sincronizacion", (Program)test_sync, "<count> <sem>"},
+    {"testmman", "Ejecuta test de memoria. smart allocation:0=apagado|1=prendido", (Program)test_mm, "<max> <smart>"},
+    {"testpipe", "Ejecuta test de named pipes", (Program)test_pipe},
     {"ps", "Lista la informacion de los procesos", (Program)print_processes_state},
-    {"kill", "mata un proceso dado un pid", (Program)kill_process, "<pid>"},
+    {"kill", "Mata un proceso dado un pid", (Program)kill_process, "<pid>"},
     {"nice", "Cambia la prioridad de un proceso dado su PID y la nueva prioridad. prio:0=low ; 1=mid ; 2=high", (Program)change_priority_cmd, "<pid> <prio>"},
     {"block", "Cambia el estado de un proceso entre bloqueado y listo dado su PID.", (Program)block_cmd, "<pid>"},
-    {"fg", "manda un proceso a foreground", (Program)send_to_foreground, "<pid>"},
+    {"fg", "Manda un proceso a foreground", (Program)send_to_foreground, "<pid>"},
     {"mem", "Imprime el estado de la memoria.", (Program)print_meminfo_cmd},
-    {"wc", "cuenta la cantidad de lineas del stdin terminando con EOF(Ctrl+D)", (Program)wc},
-    {"cat", "printea el input", (Program)cat},
+    {"wc", "Cuenta la cantidad de lineas del stdin terminando con EOF(Ctrl+D)", (Program)wc},
+    {"cat", "Printea el input", (Program)cat},
     {"filter", "Filtra las vocales del input", (Program)filter},
-    {"phylo", "ejecuta programa de phylo", (Program)phylo},
+    {"phylo", "Ejecuta programa de phylo", (Program)phylo},
     {"loop", "Imprime su ID con un saludo cada una determinada cantidad de segundos. msg es un mensaje opcional", (Program)endless_loop_print_seconds, "<secs_wait> <msg>"},
-    {"echo", "imprime en stdout los argumentos que le pasas", (Program)echo_cmd, "<args...>"},
+    {"echo", "Imprime en stdout los argumentos que le pasas", (Program)echo_cmd, "<args...>"},
     {"clear", "Limpia toda la pantalla.", (Program)sys_clear},
     {"help", "Muestra la lista de comandos.", (Program)print_help},
-    {"song", "pone musica con beeps. Con song_id:1|2|3", (Program)play_music_cmd, "<song_id>"},
+    {"song", "Pone musica con beeps. Con song_id:1|2|3", (Program)play_music_cmd, "<song_id>"},
     {"time", "Muestra la hora.", (Program)print_time},
     {"eliminator", "Ejecuta el juego eliminator.", (Program)eliminator},
-    {"size", "cambia tamanio de letra (entre 1 a 5).", (Program)changeSize, "<font_size>"},
+    {"size", "Cambia tamanio de letra (entre 1 a 5).", (Program)changeSize, "<font_size>"},
     {"inforeg", "Muestra los registros guardados. (Presiona `left_alt` para guardar registros)", (Program)inforeg},
-    {"div", "divide num/den", (Program)divide, "<num> <den>"},
+    {"div", "Divide num/den", (Program)divide, "<num> <den>"},
     {"invalidopcode", "Muestra excepcion de codigo invalido.", (Program)invalidOpcode},
 };
 
@@ -54,9 +54,9 @@ void print_help() {
     sys_clear();
     printf("Comandos disponibles:\n");
     printf_color("<command> &", COLOR_GREEN, 0);
-    printf("              : escribir '&' al final del comando para ejecutarlo en background\n");
+    printf("              : Escribir '&' al final del comando para ejecutarlo en background\n");
     printf_color("<command1> | <command2>", COLOR_GREEN, 0);
-    printf("  : escribir dos comandos separados por '|'  para pipear cmd1 a cmd2 \n");
+    printf("  : Escribir dos comandos separados por '|'  para pipear cmd1 a cmd2 \n");
     for (int i = 0 ; i < sizeof(commands)/sizeof(commands[0]) ; i++) {
         printf_color(commands[i].title, COLOR_ORANGE, 0);
         uint64_t total_len = strlen(commands[i].title);
@@ -70,19 +70,19 @@ void print_help() {
 
     printf("Hotkeys:\n");
     printf_color("ctrl c", COLOR_GREEN, 0);
-    printf("   : matar al proceso en foreground y volver a la shell\n");
+    printf("   : Matar al proceso en foreground y volver a la shell\n");
     printf_color("ctrl z", COLOR_GREEN, 0);
-    printf("   : bloquear al proceso en foreground y volver a la shell\n");
+    printf("   : Bloquear al proceso en foreground y volver a la shell\n");
     printf_color("ctrl x", COLOR_GREEN, 0);
-    printf("   : mandar al proceso en foreground a background y volver a la shell\n");
+    printf("   : Mandar al proceso en foreground a background y volver a la shell\n");
     printf_color("ctrl d", COLOR_GREEN, 0);
-    printf("   : para enviar EOF (end of file)\n");
+    printf("   : Para enviar EOF (end of file)\n");
     printf_color("left_alt", COLOR_GREEN, 0);
-    printf(" : para guardar registros\n");
+    printf(" : Para guardar registros\n");
     printf_color("ctrl a", COLOR_GREEN, 0);
-    printf("   : para escribir el caracter '&' (es la alternativa a shift+6)\n");
+    printf("   : Para escribir el caracter '&' (es la alternativa a shift+6)\n");
     printf_color("ctrl p", COLOR_GREEN, 0);
-    printf("   : para escribir el caracter '|' (es la alternativa a escribir '|' en teclado castellano)\n");
+    printf("   : Para escribir el caracter '|' (es la alternativa a escribir '|' en teclado castellano)\n");
 }
 
 int64_t send_to_foreground(uint64_t argc, char *argv[]) {

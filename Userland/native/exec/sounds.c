@@ -107,7 +107,7 @@ void play_song_continuous(int song_id)
     for (int i=0; i < song_length; i++)
     {
         playNote(song[i]);
-        sys_ticks_sleep(5);
+        sys_ticks_sleep(4);
         sys_nosound();
     }
     

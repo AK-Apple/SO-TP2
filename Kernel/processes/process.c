@@ -128,8 +128,6 @@ uint64_t schedule(uint64_t running_stack_pointer)
         return running_stack_pointer;
     }
 
-    wake_available();
-
     blocks[running_pid].stack_pointer = running_stack_pointer;
     blocks[running_pid].rbp = ((StackedRegisters *)running_stack_pointer)->rbp;
     if(blocks[running_pid].process_state == STATUS_RUNNING) {

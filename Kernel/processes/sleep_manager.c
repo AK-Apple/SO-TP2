@@ -4,6 +4,7 @@
 #include "time.h"
 #include "IO.h"
 #include <stdint.h>
+#include "sleep_manager.h"
 
 // Código modificado de GeeksForGeeks: https://www.geeksforgeeks.org/c-program-to-implement-priority-queue/ 
 
