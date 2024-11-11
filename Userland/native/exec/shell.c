@@ -1,14 +1,14 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-#include "../include/shell.h"
-#include "../include/syscalls.h"
-#include "../include/command.h"
-#include "../include/eliminator.h"
-#include "../include/stdio.h"
-#include "../include/stdlib.h"
-#include "../include/string.h"
-#include "../include/sounds.h"
-#include "../include/test_util.h"
+#include "shell.h"
+#include "syscalls.h"
+#include "command.h"
+#include "eliminator.h"
+#include "stdio.h"
+#include "stdlib.h"
+#include "string.h"
+#include "sounds.h"
+#include "test_util.h"
 #include "shared.h"
 
 
@@ -48,59 +48,6 @@ pid_t play_os_initializing()
     char* argv_aux[] = {"OS_INITIALIZING song", "2"};
     fd_t fds[] = {DEVNULL, STDOUT, STDERR};
     return sys_create_process_fd((Program)play_music_cmd, 2, argv_aux, fds);
-}
-
-uint64_t change_priority_cmd(uint64_t argc, char *argv[]) {
-    if(argc < 3) {
-        printf_error("wrong argcount.\nnice <pid> <prio>\n");
-        return 1;
-    }
-    int64_t pid = satoi(argv[1]);
-    int64_t priority = satoi(argv[2]);
-    if(sys_get_process_status(pid) == 0) {
-        printf_error("invalid pid %s\n", argv[1]);
-        return 1;
-    }
-    if(priority > PRIORITY_HIGH) {
-        printf_error("invalid priority %s\n", argv[2]);
-        return 1;
-    }
-    sys_change_priority(pid, priority);
-
-    return 0;
-}
-
-void print_meminfo_cmd() {
-    Memory_Info info = {0};
-    sys_memory_info(&info);
-    printf_color("Heap from 0x%lx to 0x%lx with allocator type: %s\n", 0x0000AA00, 0, info.base_address, info.end_address, info.allocator_type);
-    printf("Total memory: %lu bytes\n", info.total_memory);
-    printf("Used memory %lu bytes\n", info.used_memory);
-    printf("Free memory %lu bytes\n", info.total_memory - info.used_memory);
-    printf("internal fragmentation %lu bytes\n", info.internal_fragmentation);
-    printf("largest free block %lu bytes (header size %lu bytes)\n", info.largest_free_block, info.header_size);
-}
-
-uint64_t block_cmd(uint64_t argc, char *argv[]) {
-    if(argc >= 2) {
-        int64_t pid = atoi(argv[1]);
-        if(pid == 0 || sys_get_process_status(pid) == 0) {
-            printf_error("block invalid pid %s\n", argv[1]);
-            return 1;
-        }
-        else if(sys_get_process_status(pid) == 3) {
-            sys_unblock(pid);
-            printf("unblocked process %ld\n", pid);
-        }  
-        else {
-            sys_block(pid);
-            printf("blocked process %ld\n", pid);
-        }
-    }
-    else {
-        printf_error("block recibe 1 argumento; <pid>\n");
-    }
-    return 0;
 }
 
 void print_help() {
@@ -143,15 +90,17 @@ int64_t send_to_foreground(uint64_t argc, char *argv[]) {
         printf_error("usage: fg <pid>\n");
         return -1;
     }
-    int pid = atoi(argv[1]);
+    pid_t pid = atoi(argv[1]);
     if(pid == 0) {
         printf_error("cant send init to foreground\n");
         return -1;
     }
-    int process_state = sys_get_process_status(pid);
-    if(process_state != 0) {
-        sys_set_foreground(pid);
-        printf_color("[shell] running foreground process with pid=%d\n", COLOR_YELLOW, 0, pid);
+    
+    if(sys_set_foreground(pid) == INVALID_PID) {
+        printf_error("could send process to foreground pid=%ld\n", pid);
+    }
+    else {
+        printf_color("[shell] running foreground process with pid=%ld\n", COLOR_YELLOW, 0, pid);
         sys_wait_pid(pid);
     }
     return 0;
@@ -237,7 +186,14 @@ void execute(char command_buffer[]) {
     if(argv1[argc1-1][0] == '\0') argc1--;
 
     Program process1 = find_command(argv1[0]);
-    if(process1) {
+    if(process1 == send_to_foreground) {
+        if(piped) {
+            printf_error("cant pipe stdout of fg command\n");
+            return;
+        }
+        process1(argc1, argv1);
+    }
+    else if(process1) {
         fd_t fds1[] = {STDIN, STDOUT, STDERR};
         const char *fg_bg = "foreground";
         if(piped) {

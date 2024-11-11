@@ -8,6 +8,7 @@ void initialize_tickets(Tickets *tickets, void *base_address, uint64_t chunk_byt
     tickets->max_ticket = max_ticket;
     tickets->current_available_ticket = -1;
     tickets->biggest_available_ticket = 0;
+    tickets->used_ticket_count = 0;
 }
 
 int64_t request_ticket(Tickets *tickets) {

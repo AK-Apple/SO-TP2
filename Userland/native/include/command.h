@@ -16,6 +16,9 @@ typedef struct {
 void print_time();
 int64_t inforeg(uint64_t argc, char *argv[]);
 void print_processes_state();
+uint64_t block_cmd(uint64_t argc, char *argv[]);
+uint64_t change_priority_cmd(uint64_t argc, char *argv[]);
+void print_meminfo_cmd();
 
 void divide(uint64_t argc, char *argv[]);
 void invalidOpcode();

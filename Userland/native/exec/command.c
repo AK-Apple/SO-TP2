@@ -89,7 +89,7 @@ void print_processes_state() {
     printf("\npid : ppid : prio : stack_pointer_64 : base_pointer_64  : status  : process_name\n");
     for (int i = 0; i < ps.count; i++)
     {
-        printf("%3d : %4ld : ", ps.entries[i].pid, ps.entries[i].ppid);
+        printf("%3ld : %4ld : ", ps.entries[i].pid, ps.entries[i].ppid);
         Priority priority = ps.entries[i].priority;
         printf_color("%s", PROCESS_STATE_COLOR[priority+1], 0, PRIORITY_STRING[priority]);
         printf(" : %16lx : %16lx : ", ps.entries[i].rsp, ps.entries[i].rbp);
@@ -148,6 +148,59 @@ void play_infinite_music_cmd(uint64_t argc, char *argv[])
     }
 }
 
+uint64_t change_priority_cmd(uint64_t argc, char *argv[]) {
+    if(argc < 3) {
+        printf_error("wrong argcount.\nnice <pid> <prio>\n");
+        return 1;
+    }
+    int64_t pid = satoi(argv[1]);
+    int64_t priority = satoi(argv[2]);
+    if(sys_get_process_status(pid) == 0) {
+        printf_error("invalid pid %s\n", argv[1]);
+        return 1;
+    }
+    if(priority > PRIORITY_HIGH) {
+        printf_error("invalid priority %s\n", argv[2]);
+        return 1;
+    }
+    sys_change_priority(pid, priority);
+
+    return 0;
+}
+
+void print_meminfo_cmd() {
+    Memory_Info info = {0};
+    sys_memory_info(&info);
+    printf_color("Heap from 0x%lx to 0x%lx with allocator type: %s\n", 0x0000AA00, 0, info.base_address, info.end_address, info.allocator_type);
+    printf("Total memory: %lu bytes\n", info.total_memory);
+    printf("Used memory %lu bytes\n", info.used_memory);
+    printf("Free memory %lu bytes\n", info.total_memory - info.used_memory);
+    printf("internal fragmentation %lu bytes\n", info.internal_fragmentation);
+    printf("largest free block %lu bytes (header size %lu bytes)\n", info.largest_free_block, info.header_size);
+}
+
+uint64_t block_cmd(uint64_t argc, char *argv[]) {
+    if(argc >= 2) {
+        int64_t pid = atoi(argv[1]);
+        if(pid == 0 || sys_get_process_status(pid) == 0) {
+            printf_error("block invalid pid %s\n", argv[1]);
+            return 1;
+        }
+        else if(sys_get_process_status(pid) == 3) {
+            sys_unblock(pid);
+            printf("unblocked process %ld\n", pid);
+        }  
+        else {
+            sys_block(pid);
+            printf("blocked process %ld\n", pid);
+        }
+    }
+    else {
+        printf_error("block recibe 1 argumento; <pid>\n");
+    }
+    return 0;
+}
+
 void divide(uint64_t argc, char *argv[]) {
     if(argc == 3) {
         int64_t a, b;
@@ -180,7 +233,6 @@ void changeSize(uint64_t argc, char *argv[]) {
 
 void kill_process(uint64_t argc, char *argv[]) {
     pid_t pid = satoi(argv[1]);
-    printf("[killing process] pid=%d\n", pid);
     if(argc < 2) {
         printf_error("invalid arguments\n"); 
         return;
@@ -193,7 +245,12 @@ void kill_process(uint64_t argc, char *argv[]) {
     if(argc >= 3) {
         recursive = satoi(argv[2]) == 1;
     }
-    sys_kill_process(pid, recursive);
+    if(sys_kill_process(pid, recursive) == -1) {
+        printf_error("couldnt kill process with pid=%ld\n", pid);
+    }
+    else {
+        printf("[killed process] pid=%ld\n", pid);
+    }
 }
 
 void print_time() {

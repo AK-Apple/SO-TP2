@@ -12,6 +12,7 @@
 #include "tickets.h"
 #include "registers.h"
 #include "memory_allocator.h"
+#define SHELL_PID 1
 
 
 typedef struct ProcessBlock
@@ -64,10 +65,10 @@ static void reasign_children(pid_t pid, int recursive)
 
 pid_t kill_process(pid_t pid, int recursive)
 {
-    if (pid >= MAX_PROCESS_BLOCKS || pid < 1)
+    if (pid >= MAX_PROCESS_BLOCKS || pid < 1 || blocks[pid].process_state == STATUS_UNAVAILABLE)
         return -1;
     
-    if (pid == 1) {
+    if (pid == SHELL_PID) {
         setup_kernel_restart();
     }
 
@@ -85,7 +86,7 @@ pid_t kill_process(pid_t pid, int recursive)
     int ppid = blocks[pid].parent_pid;
     if (pid == foreground_pid) 
     {
-        set_foreground(1);
+        set_foreground(SHELL_PID);
     }
     if(blocks[ppid].pid_to_wait == pid) 
     {
@@ -141,11 +142,15 @@ uint64_t schedule(uint64_t running_stack_pointer)
     return blocks[running_pid].stack_pointer;
 }
 
-void set_foreground(pid_t pid) {
+pid_t set_foreground(pid_t pid) {
+    if(blocks[pid].process_state == STATUS_UNAVAILABLE || (blocks[pid].parent_pid != SHELL_PID && pid != SHELL_PID)) {
+        return INVALID_PID;
+    }
     foreground_pid = pid;
     blocks[pid].file_descriptors[STDIN] = STDIN;
     change_priority(pid, PRIORITY_HIGH);
     unblock(pid);
+    return pid;
 }
 
 pid_t get_foreground() {
@@ -261,10 +266,10 @@ void set_pending_action(PendingAction action) {
         break;
     case BLOCK_FOREGROUND:
         printf_color("^Z Process blocked and sent to background pid=%d\n", COLOR_YELLOW, pid);
-        block(pid);
         blocks[pid].file_descriptors[STDIN] = DEVNULL;
         change_priority(pid, PRIORITY_MID);
-        set_foreground(1);
+        set_foreground(SHELL_PID);
+        block(pid);
         if(blocks[ppid].pid_to_wait == pid) {
             blocks[ppid].pid_to_wait = 0;
             unblock(ppid);
@@ -274,7 +279,7 @@ void set_pending_action(PendingAction action) {
         printf_color("^X Process sent to run in background pid=%d\n", COLOR_YELLOW, pid);
         blocks[pid].file_descriptors[STDIN] = DEVNULL;
         change_priority(pid, PRIORITY_MID);
-        set_foreground(1);
+        set_foreground(SHELL_PID);
         if(blocks[ppid].pid_to_wait == pid) {
             blocks[ppid].pid_to_wait = 0;
             unblock(ppid);
@@ -343,8 +348,9 @@ void sys_set_fd(pid_t pid, fd_t fd_index, fd_t fd) {
 }
 
 pid_t block_no_yield(pid_t pid) {
-    if (pid >= MAX_PROCESS_BLOCKS || pid < 1 || blocks[pid].process_state == STATUS_UNAVAILABLE)
-        return -1;
+    if (pid >= MAX_PROCESS_BLOCKS || pid < 1 || blocks[pid].process_state == STATUS_UNAVAILABLE) {
+        return INVALID_PID;
+    }
     blocks[pid].process_state = STATUS_BLOCKED;
     scheduler_remove(blocks[pid].priority, pid);
     return 0;
@@ -352,8 +358,10 @@ pid_t block_no_yield(pid_t pid) {
 
 pid_t unblock(pid_t pid)
 {
-    if (pid >= MAX_PROCESS_BLOCKS || pid < 1 || blocks[pid].process_state != STATUS_BLOCKED || blocks[pid].is_sleeping)
-        return -1;
+    if (pid >= MAX_PROCESS_BLOCKS || pid < 1 || blocks[pid].process_state != STATUS_BLOCKED || blocks[pid].is_sleeping ||
+        (foreground_pid == running_pid && pid == SHELL_PID && pid != running_pid)) {
+        return INVALID_PID;
+    }
     blocks[pid].process_state = STATUS_READY;
     scheduler_insert(blocks[pid].priority, pid);
     return pid;
@@ -361,8 +369,10 @@ pid_t unblock(pid_t pid)
 
 pid_t wait_pid(pid_t pid)
 {
-    if(blocks[pid].process_state == STATUS_UNAVAILABLE) return pid;
-    int ppid = blocks[pid].parent_pid;
+    pid_t ppid = blocks[pid].parent_pid;
+    if(blocks[pid].process_state == STATUS_UNAVAILABLE || ppid != running_pid) {
+        return INVALID_PID;
+    }
     blocks[ppid].pid_to_wait = pid;
     block(ppid);
 
