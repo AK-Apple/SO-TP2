@@ -37,26 +37,7 @@ uint64_t ticks_elapsed()
 
 uint64_t seconds_elapsed() 
 {
-	return ticks / 18;
-}
-
-void ticks_sleep(uint64_t ticks_to_sleep)
-{
-
-    uint64_t started_at = ticks;
-    while (ticks_elapsed() < started_at + ticks_to_sleep) 
-        _hlt();
-
-    return;
-}
-
-void seconds_sleep(uint64_t seconds_to_sleep)
-{
-    uint64_t started_at = seconds_elapsed();
-    while (seconds_elapsed() < started_at + seconds_to_sleep) 
-        _hlt();
-
-    return;
+	return ticks / TICKS_PER_SECOND;
 }
 
 

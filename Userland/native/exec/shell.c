@@ -49,7 +49,7 @@ pid_t play_os_initializing()
 {
     char* argv_aux[] = {"OS_INITIALIZING song", "2"};
     fd_t fds[] = {DEVNULL, STDOUT, STDERR};
-    return sys_create_process_fd(play_music_cmd, 2, argv_aux, fds);
+    return sys_create_process_fd((Program)play_music_cmd, 2, argv_aux, fds);
 }
 
 uint64_t change_priority_cmd(uint64_t argc, char *argv[]) {

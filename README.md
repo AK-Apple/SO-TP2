@@ -36,12 +36,12 @@ docker pull agodio/itba-so-multi-platform:3.0
 
 ```sh
 docker run -v ${PWD}:/root --security-opt seccomp:unconfined -ti agodio/itba-so-multi-platform:3.0
+cd root
 ```
 
 3. Compilar:
 
 ```sh
-cd root
 make
 ```
 

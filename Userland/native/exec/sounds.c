@@ -38,7 +38,8 @@ MusicalNote you_lost[] = {             // song id 3
 // ---------------------------------------------------------------------------------
 
 
-void playNote(MusicalNote note){
+void playNote(MusicalNote note)
+{
     switch (note){
         case SILENCE: sys_nosound(); break;
         case E2: sys_sound(82); break;
@@ -82,10 +83,6 @@ void playNote(MusicalNote note){
 }
 
 
-
-
-// ---------------------------------- NEW ----------------------------------
-
 void play_song_continuous(int song_id)
 {
     int song_length = 0;
@@ -116,7 +113,8 @@ void play_song_continuous(int song_id)
             break;
         }
     }
-    for (int i=0; i < song_length; i++){
+    for (int i=0; i < song_length; i++)
+    {
         playNote(song[i]);
         sys_ticks_sleep(5);
         sys_nosound();

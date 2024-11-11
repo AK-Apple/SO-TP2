@@ -2,7 +2,7 @@
 NOMBRE=TP2
 
 # abrir docker
-sudo docker run -d -v "$PWD":/root --security-opt seccomp:unconfined -ti --name $NOMBRE agodio/itba-so-multi-platform:3.0
+docker run -d -v "$PWD":/root --security-opt seccomp:unconfined -ti --name $NOMBRE agodio/itba-so-multi-platform:3.0
 
 # compilar
 docker start $NOMBRE

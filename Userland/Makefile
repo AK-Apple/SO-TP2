@@ -12,7 +12,7 @@ sampleDataModule:
 
 clean:
 	cd native; make clean
-	rm -rf *.bin
+	rm -rf *.bin *.elf
 
 
 .PHONY: sampleCodeModule all clean

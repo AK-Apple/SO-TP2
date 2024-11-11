@@ -26,6 +26,6 @@ $(MODULE): $(TOTAL_OBJ)
 	$(ASM) $(ASMFLAGS) $< -o $@
 
 clean:
-	rm -rf *.o exec/*.o libasm/*.o libc/*.o
+	rm -rf $(TOTAL_OBJ)
 
 .PHONY: all clean print

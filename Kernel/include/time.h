@@ -9,6 +9,8 @@ void timer_handler();
 uint64_t ticks_elapsed();
 uint64_t seconds_elapsed();
 
+#define TICKS_PER_SECOND 18
+
 #define SECONDS 00
 #define MINUTES 02
 #define HOURS 04
@@ -19,9 +21,6 @@ uint64_t seconds_elapsed();
 
 extern uint8_t getRTC(uint64_t descriptor); // de libasm.asm
 uint8_t sys_getTime(int descriptor);
-
-void ticks_sleep(uint64_t ticks_to_sleep);
-void seconds_sleep(uint64_t seconds_to_sleep);
 
 void dont_handle_ticks();
 
