@@ -59,14 +59,17 @@ int64_t my_process_inc(uint64_t argc, char *argv[]) {
   return 0;
 }
 
-int64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
+int64_t test_sync(uint64_t argc, char *argv[])      //{n, use_sem, 0}
+{ 
   uint64_t pids[2 * TOTAL_PAIR_PROCESSES] = {0};
   int64_t use_sem = 0;
-  if (argc < 3) {
+  if (argc < 3) 
+  {
     printf_error("needs 2 arguments.\ntest_sync <n> <use_sem>\n");
     return -1;
   }
-  if ((use_sem = satoi(argv[2])) < 0) {
+  if ((use_sem = satoi(argv[2])) < 0) 
+  {
     printf_error("use sem invalid argument %s\n", argv[2]);
     return -1;
   }
@@ -77,12 +80,14 @@ int64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
   global_shared_memory = 0;
 
   uint64_t i;
-  for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
+  for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) 
+  {
     pids[i] = sys_create_process(my_process_inc, sizeof(argvDec)/sizeof(argvDec[0]), argvDec);
     pids[i + TOTAL_PAIR_PROCESSES] = sys_create_process(my_process_inc, sizeof(argvInc)/sizeof(argvInc[0]), argvInc);
   }
 
-  for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
+  for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) 
+  {
     sys_wait_pid(pids[i]);
     sys_wait_pid(pids[i + TOTAL_PAIR_PROCESSES]);
   }

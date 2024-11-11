@@ -13,43 +13,53 @@ static uint64_t default_foreground_color = 0x00FFFFFF;
 
 static uint64_t vfprintf_color(int fd, char *fmt, uint64_t foreground, uint64_t background, va_list vars);
 
-void putchar(char c) {
+void putchar(char c) 
+{
     char buf[] = {c, 0};
     sys_write(STDOUT, buf, 1);
 }
 
-void fputchar(char c, int fd) {
+void fputchar(char c, int fd) 
+{
     char buf[] = {c, 0};
     sys_write(fd, buf, 1);
 }
 
-void putcharColoured(char c, uint64_t foreground, uint64_t background) {
-    if(foreground != default_foreground_color) {
+void putcharColoured(char c, uint64_t foreground, uint64_t background) 
+{
+    if(foreground != default_foreground_color) 
+    {
         sys_set_text_color(foreground);
     }
     
     putchar(c);
 
-    if(foreground != default_foreground_color) {
+    if(foreground != default_foreground_color) 
+    {
         sys_set_text_color(default_foreground_color);
     }
 }
 
-void repeat_char(int fd, char c, int count) {
+void repeat_char(int fd, char c, int count) 
+{
     char buf[count];
     memset(buf, c, count);
     sys_write(fd, buf, count);
 }
 
-void scanf(char * fmt, ...) {
+void scanf(char * fmt, ...) 
+{
     va_list args;
     va_start(args, fmt);
 
     char buf[MAX_BUF] = {0};
 
-    for (int i = 0; fmt[i] != '\0' ; i++) {
-        if (fmt[i++] == '%') {
-            switch (fmt[i]) {
+    for (int i = 0; fmt[i] != '\0' ; i++) 
+    {
+        if (fmt[i++] == '%') 
+        {
+            switch (fmt[i]) 
+            {
                 case 's':
                     gets(va_arg(args, char *), MAX_BUF);
                     break;
@@ -70,7 +80,8 @@ void scanf(char * fmt, ...) {
     va_end(args);
 }
 
-uint64_t printf_color(char * fmt, uint64_t foreground, uint64_t background, ...) {
+uint64_t printf_color(char * fmt, uint64_t foreground, uint64_t background, ...) 
+{
     va_list args;
     va_start(args, background);  
 
@@ -80,7 +91,8 @@ uint64_t printf_color(char * fmt, uint64_t foreground, uint64_t background, ...)
     return i;
 }
 
-uint64_t fprintf_color(int fd, char * fmt, uint64_t foreground, uint64_t background, ...) {
+uint64_t fprintf_color(int fd, char * fmt, uint64_t foreground, uint64_t background, ...) 
+{
     va_list args;
     va_start(args, background);  
 
@@ -90,28 +102,34 @@ uint64_t fprintf_color(int fd, char * fmt, uint64_t foreground, uint64_t backgro
     return i;
 }
 
-void printf_error(char *fmt, ...) {
+void printf_error(char *fmt, ...) 
+{
     va_list args;
     va_start(args, fmt);
     vfprintf_color(STDERR, fmt, default_foreground_color, 0x000000, args); 
     va_end(args);
 }
 
-static uint64_t vfprintf_color(int fd, char *fmt, uint64_t foreground, uint64_t background, va_list vars) {
+static uint64_t vfprintf_color(int fd, char *fmt, uint64_t foreground, uint64_t background, va_list vars) 
+{
     uint64_t i = 0;
 
-    if(foreground != default_foreground_color) {
+    if(foreground != default_foreground_color) 
+    {
         sys_set_text_color(foreground);
     }
 
-    while (fmt[i]) {
-        if (fmt[i] == '%') {
+    while (fmt[i]) 
+    {
+        if (fmt[i] == '%') 
+        {
             char buf[MAX_BUF] = {0};
             i++;
             int64_t padding = atoi_index(fmt, &i);
             padding = (padding == 0) ? 1 : padding;
             int64_t len = 0;
-            switch (fmt[i]) {
+            switch (fmt[i]) 
+            {
                 case 'l':
                     i++;
                     switch (fmt[i])
@@ -159,12 +177,14 @@ static uint64_t vfprintf_color(int fd, char *fmt, uint64_t foreground, uint64_t 
                     break;
             }
             buf[len] = '\0';
-            if(padding - len > 0) {
+            if(padding - len > 0) 
+            {
                 repeat_char(fd, '0', padding - len);
             }
             sys_write(fd, buf, len);
             i++;
-        } else {
+        } else 
+        {
             uint64_t j = i;
             while(fmt[j] && fmt[j] != '%') j++;
             sys_write(fd, &fmt[i], j - i);
@@ -172,20 +192,23 @@ static uint64_t vfprintf_color(int fd, char *fmt, uint64_t foreground, uint64_t 
         }
     }
 
-    if(foreground != default_foreground_color) {
+    if(foreground != default_foreground_color) 
+    {
         sys_set_text_color(default_foreground_color);
     }
     return i;
 }
 
-void printf(char * fmt, ...) {
+void printf(char * fmt, ...) 
+{
     va_list args;
     va_start(args, fmt);
     vfprintf_color(STDOUT, fmt, default_foreground_color, 0x000000, args);
     va_end(args);
 }
 
-void fprinf(int fd, char *fmt, ...) {
+void fprinf(int fd, char *fmt, ...) 
+{
     va_list args;
     va_start(args, fmt);
     vfprintf_color(fd, fmt, default_foreground_color, 0x000000, args);

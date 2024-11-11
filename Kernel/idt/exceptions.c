@@ -17,12 +17,15 @@ static const char* zero_division_exception_message = "Divide by Zero Exception\n
 
 static const char* invalid_opcode_exception_message = "Invalid Opcode Exception\n";
 
-void exceptionDispatcher(int exception, StackedRegisters* stack_pointer) {
+void exceptionDispatcher(int exception, StackedRegisters* stack_pointer) 
+{
     sys_clear_screen();
-    if (exception == ZERO_EXCEPTION_ID){
+    if (exception == ZERO_EXCEPTION_ID)
+    {
         zero_division();
     }
-    else if (exception == INVALID_OPCODE_ID){
+    else if (exception == INVALID_OPCODE_ID)
+    {
         invalid_opcode();
     }
     take_registers_snapshot((uint64_t)stack_pointer);
@@ -30,10 +33,12 @@ void exceptionDispatcher(int exception, StackedRegisters* stack_pointer) {
     printf_error("[kernel] Killing process with pid=%d because it caused an exception.\n", get_pid());
 }
 
-static void zero_division() {
+static void zero_division() 
+{
     sys_write(2, zero_division_exception_message, buflen(zero_division_exception_message));
 }
 
-static void invalid_opcode() {
+static void invalid_opcode() 
+{
     sys_write(2, invalid_opcode_exception_message, buflen(invalid_opcode_exception_message));
 }

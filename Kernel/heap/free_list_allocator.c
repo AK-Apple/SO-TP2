@@ -23,9 +23,11 @@ typedef struct FreeListAllocator {
 } FreeListAllocator;
 FreeListAllocator allocator = {0};
 
-static void coalesce_node(AllocationHeader *node) {
+static void coalesce_node(AllocationHeader *node) 
+{
     if(node == NULL) return; 
-    if(node->next && (void *)((void *)node + node->size) == node->next) {
+    if(node->next && (void *)((void *)node + node->size) == node->next) 
+    {
         node->size += node->next->size;
         node->next = node->next->next;
     }
@@ -52,8 +54,10 @@ void *memory_alloc(size_t bytes)
     AllocationHeader *best_node = NULL;
     AllocationHeader *prev_node = NULL;
     AllocationHeader *best_node_prev = NULL;
-    while(list_iter) {
-        if(required_size <= list_iter->size && (!best_node || list_iter->size < best_node->size)) {
+    while(list_iter) 
+    {
+        if(required_size <= list_iter->size && (!best_node || list_iter->size < best_node->size)) 
+        {
             best_node = list_iter;
             best_node_prev = prev_node;
         }
@@ -64,17 +68,21 @@ void *memory_alloc(size_t bytes)
     if(best_node == NULL) return NULL;
 
     uint64_t remaining_size = best_node->size - required_size;
-    if(remaining_size == sizeof(AllocationHeader)) {
+    if(remaining_size == sizeof(AllocationHeader)) 
+    {
         required_size += sizeof(AllocationHeader);
         remaining_size = 0;
     }
-    if(remaining_size > 0) {
+    if(remaining_size > 0) 
+    {
         best_node->size = remaining_size;
     }
-    else if(best_node_prev) {
+    else if(best_node_prev) 
+    {
         best_node_prev->next = best_node->next;
     }
-    else {
+    else 
+    {
         allocator.free_list = best_node->next;
     }
 
@@ -117,7 +125,8 @@ void memory_info(Memory_Info *info)
     uint64_t used_memory = 0;
     uint64_t largest_free_block_bytes = 0;
 
-    while(current_pointer - allocator.base_address < total_memory) {
+    while(current_pointer - allocator.base_address < total_memory) 
+    {
         AllocationHeader *node = (AllocationHeader *)current_pointer;
         if(node == list_iter) {
             if(largest_free_block_bytes < node->size) {
@@ -127,7 +136,8 @@ void memory_info(Memory_Info *info)
             list_iter = list_iter->next;
             current_pointer += node->size;
         }
-        else {
+        else 
+        {
             // printf_color("|%lu:%lu", 0x00DDDDFF, node->size, node->intended_size);
             internal_fragmentation += node->size - node->intended_size - sizeof(AllocationHeader);
             current_pointer += node->size;

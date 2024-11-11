@@ -24,10 +24,10 @@ int sys_read(int fd_index, char* buf, int count)
     int (*stdin_getter)() = get_stdin_options() == BLOCK_ENABLED ? get_stdin : get_stdin_no_block;
 
     int fd = get_fd(fd_index);
-    int i=0;
+    int i = 0;
     if (fd == STDIN)
     {
-        for (i=0; i<count; i++)
+        for (i = 0; i<count; i++)
         {
             buf[i] = stdin_getter();
             if ((int) buf[i] == -1)
@@ -228,14 +228,14 @@ void sys_write(int fd_index, const char* buf, int count)
     int fd = get_fd(fd_index);
     if (fd==1)
     {
-        for(int i=0; i<count; i++)
+        for(int i = 0; i<count; i++)
         {
             put_out(buf[i]);
         }
     }
     if (fd==2)
     {
-        for(int i=0; i<count; i++)
+        for(int i = 0; i<count; i++)
         {
             putErr(buf[i]);
         }

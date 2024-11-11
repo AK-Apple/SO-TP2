@@ -5,8 +5,9 @@
 #include "command.h"
 #include <stdint.h>
 
-int64_t read_test(uint64_t argc, char *argv[])  {
-    char buffer[20] = { 0 };
+int64_t read_test(uint64_t argc, char *argv[])  
+{
+    char buffer[20] = {0};
     sys_read(0, buffer, 10);
     sys_write(1, buffer, 10);
     sys_read(0, buffer, 8);
@@ -22,7 +23,8 @@ int64_t read_test(uint64_t argc, char *argv[])  {
     return 0;
 }
 
-int64_t write_test(uint64_t argc, char *argv[])  {
+int64_t write_test(uint64_t argc, char *argv[])  
+{
     sys_write(1, "123456789\n", 10);
     sys_write(1, "987654210", 9);
     sys_write(1, "ABC", 3);
@@ -36,7 +38,7 @@ int64_t write_test(uint64_t argc, char *argv[])  {
 int64_t test_pipe(uint64_t argc, char *argv[]) {
     printf("TEST DE PIPES!!\n");
 
-    fd_t test_pipe_fds[2] = { 0 };
+    fd_t test_pipe_fds[2] = {0};
 
     sys_create_pipe(test_pipe_fds);
 

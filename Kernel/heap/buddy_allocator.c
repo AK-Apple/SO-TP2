@@ -35,11 +35,13 @@ BuddyAllocator allocator = {0};
 Dado una cantidad de bytes
 calcula el indice del bucket mas pequeno cuyo tamano es >= bytes
 */
-static size_t size_to_bucket_index(size_t bytes) {
+static size_t size_to_bucket_index(size_t bytes) 
+{
   size_t bucket = 0;
   size_t size = sizeof(BuddyHeader);
 
-  while (size < bytes) {
+  while (size < bytes) 
+  {
     size *= 2;
     bucket++;
   }
@@ -50,23 +52,27 @@ static size_t size_to_bucket_index(size_t bytes) {
 /*
 proceso inverso de size_to_bucket_index
 */
-static uint64_t index_to_size(size_t bucket_index) {
+static uint64_t index_to_size(size_t bucket_index) 
+{
     return 1L << (bucket_index + HEADER_SIZE_LOG2);
 }
 
-static void make_BuddyHeader(BuddyHeader *header, uint64_t bucket_index, BuddyHeader *next) {
+static void make_BuddyHeader(BuddyHeader *header, uint64_t bucket_index, BuddyHeader *next) 
+{
     header->bucket_index = bucket_index;
     header->intended_size = 0;
     header->prev = NULL;
     header->next = next;
-    if(next != NULL) {
+    if(next != NULL) 
+    {
         next->prev = header;
     }
 
     allocator.header_buckets[bucket_index] = header;
 }
 
-static void delete_BuddyHeader(BuddyHeader *header) {
+static void delete_BuddyHeader(BuddyHeader *header) 
+{
     if(header->prev != NULL)
         header->prev->next = header->next;
     else
@@ -76,12 +82,14 @@ static void delete_BuddyHeader(BuddyHeader *header) {
         header->next->prev = header->prev;
 }
 
-static BuddyHeader *get_its_buddy(BuddyHeader *header) {
+static BuddyHeader *get_its_buddy(BuddyHeader *header) 
+{
     uint64_t position = (uint64_t) header - (uint64_t)allocator.base_address;
     return (BuddyHeader *) ((uint64_t) allocator.base_address + (position ^ index_to_size(header->bucket_index)));
 }
 
-void initialize_memory_allocator(void *base_address, uint64_t total_bytes) {
+void initialize_memory_allocator(void *base_address, uint64_t total_bytes) 
+{
     total_bytes = 1L << log(total_bytes, 2);
     base_address += sizeof(BuddyHeader) - (uint64_t)base_address % sizeof(BuddyHeader);
     uint64_t bucket_index = size_to_bucket_index(total_bytes);
@@ -90,17 +98,22 @@ void initialize_memory_allocator(void *base_address, uint64_t total_bytes) {
     make_BuddyHeader((BuddyHeader *)base_address, bucket_index, NULL);
 }
 
-void *memory_alloc(size_t bytes) {
+void *memory_alloc(size_t bytes) 
+{
     uint64_t bucket_index = size_to_bucket_index(bytes + sizeof(BuddyHeader));
-    if(!allocator.header_buckets[bucket_index]) {
+    if(!allocator.header_buckets[bucket_index]) 
+    {
         uint64_t nearest_index = 0;
-        for(uint64_t i = bucket_index + 1; i <= allocator.max_bucket_index && !nearest_index; i++) {
-            if(allocator.header_buckets[i]) {
+        for(uint64_t i = bucket_index + 1; i <= allocator.max_bucket_index && !nearest_index; i++) 
+        {
+            if(allocator.header_buckets[i]) 
+            {
                 nearest_index = i;
             }
         }
         if(!nearest_index) return NULL;
-        while(bucket_index < nearest_index) {
+        while(bucket_index < nearest_index) 
+        {
             BuddyHeader *original_header = allocator.header_buckets[nearest_index];
             delete_BuddyHeader(original_header);
             nearest_index--;
@@ -118,13 +131,15 @@ void *memory_alloc(size_t bytes) {
     return (void *)header + sizeof(BuddyHeader);
 }
 
-void memory_free(void *pointer) {
+void memory_free(void *pointer) 
+{
     BuddyHeader *header = (BuddyHeader *) (pointer - sizeof(BuddyHeader));
     header->intended_size = 0;
 
     BuddyHeader *last_address = allocator.base_address + index_to_size(allocator.max_bucket_index);
     BuddyHeader *BuddyHeader = get_its_buddy(header);
-    while(BuddyHeader < last_address && !BuddyHeader->intended_size && BuddyHeader->bucket_index == header->bucket_index) {
+    while(BuddyHeader < last_address && !BuddyHeader->intended_size && BuddyHeader->bucket_index == header->bucket_index) 
+    {
         delete_BuddyHeader(BuddyHeader);
         header = (header < BuddyHeader) ? header : BuddyHeader;
         header->bucket_index++;
@@ -133,24 +148,28 @@ void memory_free(void *pointer) {
     make_BuddyHeader(header, header->bucket_index, allocator.header_buckets[header->bucket_index]);
 }
 
-void memory_info(Memory_Info *info) {
+void memory_info(Memory_Info *info) 
+{
     uint64_t total_memory = index_to_size(allocator.max_bucket_index);
     uint64_t used_memory = 0;
     uint64_t internal_fragmentation = 0;
     void *current_pointer = allocator.base_address;
     uint64_t largest_free_block_bytes = 0;
 
-    while(current_pointer - allocator.base_address < total_memory) {
+    while(current_pointer - allocator.base_address < total_memory) 
+    {
         BuddyHeader *header = (BuddyHeader *) current_pointer;
         uint64_t block_size = index_to_size(header->bucket_index);
-        if(header->intended_size) {
+        if(header->intended_size) 
+        {
             // printf_color("|%lu:%lu", 0x00DDDDFF, block_size, header->intended_size);
             internal_fragmentation += block_size - header->intended_size - sizeof(BuddyHeader);
             used_memory += block_size;
         }
         else {
             // printf_color("|%lu:free", 0x00888888, block_size);
-            if(largest_free_block_bytes < header->bucket_index) {
+            if(largest_free_block_bytes < header->bucket_index) 
+            {
                 largest_free_block_bytes = header->bucket_index;
             }
         }

@@ -15,26 +15,26 @@
 #define MAX_BUF 1024
 
 static Command commands[] = {
-    {"testproc", "Ejecuta test de proceso", (Program)test_processes, "<max_proc>"},
-    {"testprio", "Ejecuta test de prioridades. countdown es el busy waiting de los procesos, por defecto = 17000000", (Program)test_prio, "<countdown>"},
-    {"testsync", "Ejecuta test de sincronizacion. count=countdown, sem:0=sin sincronizacion|1=usar sincronizacion", (Program)test_sync, "<count> <sem>"},
-    {"testmman", "Ejecuta test de memoria. smart allocation:0=apagado|1=prendido", (Program)test_mm, "<max> <smart>"},
-    {"testpipe", "Ejecuta test de named pipes", (Program)test_pipe},
-    {"ps", "Lista la informacion de los procesos", (Program)print_processes_state},
-    {"kill", "Mata un proceso dado un pid", (Program)kill_process, "<pid>"},
+    {"testproc", "Ejecuta test de proceso.", (Program)test_processes, "<max_proc>"},
+    {"testprio", "Ejecuta test de prioridades. countdown es el busy waiting de los procesos, por defecto = 17000000.", (Program)test_prio, "<countdown>"},
+    {"testsync", "Ejecuta test de sincronizacion. count=countdown, sem:0=sin sincronizacion|1=usar sincronizacion.", (Program)test_sync, "<count> <sem>"},
+    {"testmman", "Ejecuta test de memoria. smart allocation:0=apagado|1=prendido.", (Program)test_mm, "<max> <smart>"},
+    {"testpipe", "Ejecuta test de named pipes.", (Program)test_pipe},
+    {"ps", "Lista la informacion de los procesos.", (Program)print_processes_state},
+    {"kill", "Mata un proceso dado un pid.", (Program)kill_process, "<pid>"},
     {"nice", "Cambia la prioridad de un proceso dado su PID y la nueva prioridad. prio:0=low ; 1=mid ; 2=high", (Program)change_priority_cmd, "<pid> <prio>"},
     {"block", "Cambia el estado de un proceso entre bloqueado y listo dado su PID.", (Program)block_cmd, "<pid>"},
-    {"fg", "Manda un proceso a foreground", (Program)send_to_foreground, "<pid>"},
+    {"fg", "Manda un proceso a foreground.", (Program)send_to_foreground, "<pid>"},
     {"mem", "Imprime el estado de la memoria.", (Program)print_meminfo_cmd},
-    {"wc", "Cuenta la cantidad de lineas del stdin terminando con EOF(Ctrl+D)", (Program)wc},
-    {"cat", "Printea el input", (Program)cat},
-    {"filter", "Filtra las vocales del input", (Program)filter},
-    {"phylo", "Ejecuta programa de phylo", (Program)phylo},
-    {"loop", "Imprime su ID con un saludo cada una determinada cantidad de segundos. msg es un mensaje opcional", (Program)endless_loop_print_seconds, "<secs_wait> <msg>"},
-    {"echo", "Imprime en stdout los argumentos que le pasas", (Program)echo_cmd, "<args...>"},
+    {"wc", "Cuenta la cantidad de lineas del stdin terminando con EOF(Ctrl+D).", (Program)wc},
+    {"cat", "Printea el input.", (Program)cat},
+    {"filter", "Filtra las vocales del input.", (Program)filter},
+    {"phylo", "Ejecuta programa de phylo.", (Program)phylo},
+    {"loop", "Imprime su ID con un saludo cada una determinada cantidad de segundos. msg es un mensaje opcional.", (Program)endless_loop_print_seconds, "<secs_wait> <msg>"},
+    {"echo", "Imprime en stdout los argumentos que le pasas.", (Program)echo_cmd, "<args...>"},
     {"clear", "Limpia toda la pantalla.", (Program)sys_clear},
     {"help", "Muestra la lista de comandos.", (Program)print_help},
-    {"song", "Pone musica con beeps. Con song_id:1|2|3", (Program)play_music_cmd, "<song_id>"},
+    {"song", "Pone musica con beeps. Con song_id:1|2|3.", (Program)play_music_cmd, "<song_id>"},
     {"time", "Muestra la hora.", (Program)print_time},
     {"eliminator", "Ejecuta el juego eliminator.", (Program)eliminator},
     {"size", "Cambia tamanio de letra (entre 1 a 5).", (Program)change_size, "<font_size>"},
@@ -54,9 +54,9 @@ void print_help() {
     sys_clear();
     printf("Comandos disponibles:\n");
     printf_color("<command> &", COLOR_GREEN, 0);
-    printf("              : Escribir '&' al final del comando para ejecutarlo en background\n");
+    printf("              : Escribir '&' al final del comando para ejecutarlo en background.\n");
     printf_color("<command1> | <command2>", COLOR_GREEN, 0);
-    printf("  : Escribir dos comandos separados por '|'  para pipear cmd1 a cmd2 \n");
+    printf("  : Escribir dos comandos separados por '|'  para pipear cmd1 a cmd2. \n");
     for (int i = 0 ; i < sizeof(commands)/sizeof(commands[0]) ; i++) {
         printf_color(commands[i].title, COLOR_ORANGE, 0);
         uint64_t total_len = strlen(commands[i].title);
@@ -70,19 +70,19 @@ void print_help() {
 
     printf("Hotkeys:\n");
     printf_color("ctrl c", COLOR_GREEN, 0);
-    printf("   : Matar al proceso en foreground y volver a la shell\n");
+    printf("   : Matar al proceso en foreground y volver a la shell.\n");
     printf_color("ctrl z", COLOR_GREEN, 0);
-    printf("   : Bloquear al proceso en foreground y volver a la shell\n");
+    printf("   : Bloquear al proceso en foreground y volver a la shell.\n");
     printf_color("ctrl x", COLOR_GREEN, 0);
-    printf("   : Mandar al proceso en foreground a background y volver a la shell\n");
+    printf("   : Mandar al proceso en foreground a background y volver a la shell.\n");
     printf_color("ctrl d", COLOR_GREEN, 0);
-    printf("   : Para enviar EOF (end of file)\n");
+    printf("   : Para enviar EOF (end of file).\n");
     printf_color("left_alt", COLOR_GREEN, 0);
-    printf(" : Para guardar registros\n");
+    printf(" : Para guardar registros.\n");
     printf_color("ctrl a", COLOR_GREEN, 0);
-    printf("   : Para escribir el caracter '&' (es la alternativa a shift+6)\n");
+    printf("   : Para escribir el caracter '&' (es la alternativa a shift+6).\n");
     printf_color("ctrl p", COLOR_GREEN, 0);
-    printf("   : Para escribir el caracter '|' (es la alternativa a escribir '|' en teclado castellano)\n");
+    printf("   : Para escribir el caracter '|' (es la alternativa a escribir '|' en teclado castellano).\n");
 }
 
 int64_t send_to_foreground(uint64_t argc, char *argv[]) {
@@ -134,7 +134,8 @@ void shell() {
     } while (1);
 }
 
-static Program find_command(char *name) {
+static Program find_command(char *name) 
+{
     for (int i = 0; i < sizeof(commands)/sizeof(commands[0]) ; i++)
     {
         if (strcmp(name, commands[i].title) == 0)
@@ -145,7 +146,8 @@ static Program find_command(char *name) {
     return NULL;
 }
 
-void execute(char command_buffer[]) {
+void execute(char command_buffer[]) 
+{
     compact_whitespace(command_buffer);
     int argc_max = charcount(command_buffer, ' ') + 1;
     char* argv1[argc_max]; 
@@ -156,7 +158,8 @@ void execute(char command_buffer[]) {
     int piped = 0;
     int send_to_background = 0;
 
-    for(int i = 0; command_buffer[i]; i++){
+    for(int i = 0; command_buffer[i]; i++)
+    {
         switch (command_buffer[i])
         {
         case ' ':
@@ -168,7 +171,8 @@ void execute(char command_buffer[]) {
             break;
         case '|':
             command_buffer[i] = 0;
-            if(piped) {
+            if(piped) 
+            {
                 printf_error("cant have more than one pipe in command\n");
                 return;
             }
@@ -187,40 +191,46 @@ void execute(char command_buffer[]) {
 
     Program process1 = find_command(argv1[0]);
     if(process1 == send_to_foreground) {
-        if(piped) {
+        if(piped) 
+        {
             printf_error("cant pipe stdout of fg command\n");
             return;
         }
         process1(argc1, argv1);
     }
-    else if(process1) {
+    else if(process1) 
+    {
         fd_t fds1[] = {STDIN, STDOUT, STDERR};
         const char *fg_bg = "foreground";
         if(piped) {
-            fd_t shell_pipe[2] = { 0 };
+            fd_t shell_pipe[2] = {0};
             sys_create_pipe(shell_pipe);
             fd_t fds2[] = {shell_pipe[1], STDOUT, STDERR};
             fds1[STDOUT] = shell_pipe[0];
 
             Program process2 = find_command(argv2[0]);
-            if(process2 == NULL) {
+            if(process2 == NULL) 
+            {
                 printf_error("[shell] second comand is invalid '%s'\n", argv2[0]);
                 return;
             }
             sys_create_process_fd(process2, argc2, argv2, fds2);
         }
-        if(send_to_background) {
+        if(send_to_background) 
+        {
             fds1[STDIN] = DEVNULL;
             fg_bg = "background";
         }
         pid_t pid = sys_create_process_fd(process1, argc1, argv1, fds1);
         printf_color("[shell] Running %s with pid=%d in %s...\n", COLOR_YELLOW, 0, argv1[0], pid, fg_bg);
-        if(!send_to_background) {
+        if(!send_to_background) 
+        {
             sys_set_foreground(pid);
             sys_wait_pid(pid);
         }
     }
-    else {
+    else 
+    {
         printf_error("[shell] invalid command '%s', try 'help' command\n", argv1[0]);
     }    
 }

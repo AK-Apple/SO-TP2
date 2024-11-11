@@ -28,11 +28,13 @@ typedef struct {
 Player player;
 int game_over = 0;
 
-int adjust(int coords){
-    return (coords/SQUARE_SIZE)*SQUARE_SIZE;
+int adjust(int coords)
+{
+    return (coords/SQUARE_SIZE) * SQUARE_SIZE;
 }
 
-void init() {
+void init() 
+{
     width = sys_get_window_size(0);
     height = sys_get_window_size(1);
     player.x = adjust(width / 2);
@@ -41,11 +43,13 @@ void init() {
     player.tail_length = 0;
 }
 
-void end_game() {
+void end_game() 
+{
     game_over = 1;
 }
 
-void add_tail_segment(int x, int y) {
+void add_tail_segment(int x, int y) 
+{
     player.tail[player.tail_length].x = x;
     player.tail[player.tail_length].y = y;
     player.tail_length++;
@@ -56,14 +60,14 @@ void move_player() {
     int new_y = player.y;
 
     switch (player.dir) {
-        case 'w': new_y-= SQUARE_SIZE; break;
-        case 's': new_y+= SQUARE_SIZE; break;
-        case 'a': new_x-= SQUARE_SIZE; break;
-        case 'd': new_x+= SQUARE_SIZE; break;
+        case 'w': new_y -= SQUARE_SIZE; break;
+        case 's': new_y += SQUARE_SIZE; break;
+        case 'a': new_x -= SQUARE_SIZE; break;
+        case 'd': new_x += SQUARE_SIZE; break;
     }
 
     // Check for collisions with wall
-    if (new_x < SQUARE_SIZE || new_x >= width - 2*SQUARE_SIZE || new_y < SQUARE_SIZE || new_y >= height - 2*SQUARE_SIZE) {
+    if (new_x < SQUARE_SIZE || new_x >= width - 2*SQUARE_SIZE || new_y < SQUARE_SIZE || new_y >= height - 2 * SQUARE_SIZE) {
         end_game();
     }
 
@@ -127,16 +131,18 @@ void print_menu() {
 
 }
 
-void run_gamer_over(int score) {
+void run_gamer_over(int score) 
+{
     printf_color("\n\tGame Over!\n", 0xFF0000, 0x000000);
     printf("\tYour score was: %d\n", score);
     printf("\n Press q to quit the game, press w to try again\n");
 }
 
-void handle_score(int starting_point, int last_score) {
+void handle_score(int starting_point, int last_score) 
+{
     int score = sys_seconds_elapsed()-starting_point;
     if (score > last_score) {
-        for(int i=0; i<12; i++){     // borra el score anterior
+        for(int i = 0; i<12; i++){     // borra el score anterior
             putchar(0x08);
         }
         printf("score: %d", score);
@@ -144,8 +150,10 @@ void handle_score(int starting_point, int last_score) {
     }
 }
 
-void print_borders(void) {
-    for(int i=0; i<width; i+=SQUARE_SIZE){
+void print_borders(void) 
+{
+    for(int i = 0; i<width; i+=SQUARE_SIZE)
+    {
         put_square(0xFF0000, i, 0, SQUARE_SIZE); 
         put_square(0xFF0000, i, adjust(height)-SQUARE_SIZE, SQUARE_SIZE); 
         put_square(0xFF0000, i, adjust(height), SQUARE_SIZE); 
@@ -171,10 +179,12 @@ pid_t play_you_lost()
     return sys_create_process_fd((Program)play_music_cmd, 2, argv_aux, fds);
 }
 
-void eliminator() {
+void eliminator() 
+{
     sys_set_stdin_options(BLOCK_DISABLED);
-    char quit_game =0;
-    while (!quit_game){
+    char quit_game = 0;
+    while (!quit_game)
+    {
         sys_clear();
         print_menu();
         sys_clear();
@@ -184,7 +194,8 @@ void eliminator() {
         int last_score = 0;
         print_borders();
         pid_t song_pid = play_song_in_background();
-        while (!game_over) {
+        while (!game_over) 
+        {
             handle_score(starting_point, last_score);
             handle_input();
             move_player();
@@ -205,7 +216,8 @@ void eliminator() {
 
         char selected = 0;
         char input;
-        do {
+        do 
+        {
             input = getchar();
             switch (input) {
                 case 'q': quit_game = 1 ; selected = 1; break;

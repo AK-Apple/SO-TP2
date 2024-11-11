@@ -263,4 +263,3 @@ Para escribir el caracter '&' (es la alternativa a shift+6).
 ### ctrl p
 
 Para escribir el caracter '|' (es la alternativa a escribir '|' en teclado castellano).
-

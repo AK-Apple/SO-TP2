@@ -15,8 +15,7 @@
 #define SHELL_PID 1
 
 
-typedef struct ProcessBlock
-{
+typedef struct ProcessBlock {
     uint64_t stack_pointer;
     uint64_t rbp;
     ProcessStatus process_state;
@@ -124,7 +123,8 @@ int get_process_status(pid_t pid)
 
 uint64_t schedule(uint64_t running_stack_pointer)
 {
-    if(scheduler_consume_quantum() > 0) {
+    if(scheduler_consume_quantum() > 0) 
+    {
         return running_stack_pointer;
     }
 
@@ -140,7 +140,8 @@ uint64_t schedule(uint64_t running_stack_pointer)
     return blocks[running_pid].stack_pointer;
 }
 
-pid_t set_foreground(pid_t pid) {
+pid_t set_foreground(pid_t pid) 
+{
     if(blocks[pid].process_state == STATUS_UNAVAILABLE || (blocks[pid].parent_pid != SHELL_PID && pid != SHELL_PID)) {
         return INVALID_PID;
     }
@@ -151,7 +152,8 @@ pid_t set_foreground(pid_t pid) {
     return pid;
 }
 
-pid_t get_foreground() {
+pid_t get_foreground() 
+{
     return foreground_pid;
 }
 
@@ -253,7 +255,8 @@ void create_init_process()
     scheduler_insert(blocks[0].priority, pid);
 }
 
-void set_pending_action(PendingAction action) {
+void set_pending_action(PendingAction action) 
+{
     pid_t pid = foreground_pid;
     int ppid = blocks[pid].parent_pid;
     switch (action)
@@ -268,7 +271,8 @@ void set_pending_action(PendingAction action) {
         change_priority(pid, PRIORITY_MID);
         set_foreground(SHELL_PID);
         block(pid);
-        if(blocks[ppid].pid_to_wait == pid) {
+        if(blocks[ppid].pid_to_wait == pid) 
+        {
             blocks[ppid].pid_to_wait = 0;
             unblock(ppid);
         }
@@ -278,7 +282,8 @@ void set_pending_action(PendingAction action) {
         blocks[pid].file_descriptors[STDIN] = DEVNULL;
         change_priority(pid, PRIORITY_MID);
         set_foreground(SHELL_PID);
-        if(blocks[ppid].pid_to_wait == pid) {
+        if(blocks[ppid].pid_to_wait == pid) 
+        {
             blocks[ppid].pid_to_wait = 0;
             unblock(ppid);
         }
@@ -316,12 +321,15 @@ void get_all_processes(ProcessInfo *info)
     }
 }
 
-void change_priority(pid_t pid, int value){
-    if(pid == 0 || value > PRIORITY_HIGH || blocks[pid].process_state == STATUS_UNAVAILABLE) {
+void change_priority(pid_t pid, int value)
+{
+    if(pid == 0 || value > PRIORITY_HIGH || blocks[pid].process_state == STATUS_UNAVAILABLE) 
+    {
         return;
     }
     Priority previous_priority = blocks[pid].priority;
-    if(previous_priority != value) {
+    if(previous_priority != value) 
+    {
         scheduler_remove(previous_priority, pid);
         if(blocks[pid].process_state != STATUS_BLOCKED)
             scheduler_insert(value, pid);
@@ -333,20 +341,25 @@ pid_t block(pid_t pid)
 {
     if(block_no_yield(pid) == -1) 
         return -1;
-    if(get_pid() == pid) {
+    if(get_pid() == pid) 
+    {
         yield();
     }
     return pid;
 }
 
-void sys_set_fd(pid_t pid, fd_t fd_index, fd_t fd) {
-    if(pid > 0) {
+void sys_set_fd(pid_t pid, fd_t fd_index, fd_t fd) 
+{
+    if(pid > 0) 
+    {
         blocks[pid].file_descriptors[fd_index] = fd;
     }
 }
 
-pid_t block_no_yield(pid_t pid) {
-    if (pid >= MAX_PROCESS_BLOCKS || pid < 1 || blocks[pid].process_state == STATUS_UNAVAILABLE) {
+pid_t block_no_yield(pid_t pid) 
+{
+    if (pid >= MAX_PROCESS_BLOCKS || pid < 1 || blocks[pid].process_state == STATUS_UNAVAILABLE) 
+    {
         return INVALID_PID;
     }
     blocks[pid].process_state = STATUS_BLOCKED;
@@ -357,7 +370,8 @@ pid_t block_no_yield(pid_t pid) {
 pid_t unblock(pid_t pid)
 {
     if (pid >= MAX_PROCESS_BLOCKS || pid < 1 || blocks[pid].process_state != STATUS_BLOCKED || blocks[pid].is_sleeping ||
-        (foreground_pid == running_pid && pid == SHELL_PID && pid != running_pid)) {
+        (foreground_pid == running_pid && pid == SHELL_PID && pid != running_pid)) 
+        {
         return INVALID_PID;
     }
     blocks[pid].process_state = STATUS_READY;
@@ -368,7 +382,8 @@ pid_t unblock(pid_t pid)
 pid_t wait_pid(pid_t pid)
 {
     pid_t ppid = blocks[pid].parent_pid;
-    if(blocks[pid].process_state == STATUS_UNAVAILABLE || ppid != running_pid) {
+    if(blocks[pid].process_state == STATUS_UNAVAILABLE || ppid != running_pid) 
+    {
         return INVALID_PID;
     }
     blocks[ppid].pid_to_wait = pid;
@@ -378,7 +393,8 @@ pid_t wait_pid(pid_t pid)
 }
 
 
-pid_t get_fd(fd_t index){
+pid_t get_fd(fd_t index)
+{
     if (index >= MAX_FILE_DESCRIPTORS || index < 0) return DEVNULL;
     return blocks[get_pid()].file_descriptors[index];
 }

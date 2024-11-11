@@ -5,22 +5,26 @@
 #include "string.h"
 #include "stdio.h"
 
-int getchar() {
+int getchar() 
+{
     char buf[2] = {0};
     sys_read(STDIN, buf, 1);
     return buf[0];
 }
 
 
-uint64_t gets(char * buf, uint64_t length) {
+uint64_t gets(char * buf, uint64_t length) 
+{
     int c;
     int i = 0;
     do {
         c=getchar();
-        if (c >= 0x20) {
+        if (c >= 0x20) 
+        {
             buf[i] = c;
             putchar(c);
-        } else if (c == '\n') {
+        } else if (c == '\n')
+        {
             buf[i] = '\0';
             putchar('\n');
             return i;
@@ -31,12 +35,15 @@ uint64_t gets(char * buf, uint64_t length) {
     return i;
 }
 
-uint64_t atoi(char * str) { // ascii to integer
+uint64_t atoi(char * str)        // ascii to integer
+{
     uint64_t res = 0;
     int length = strlen(str);
 
-    for (int i = 0; i < length; i++) {
-        if (str[i] < '0' || str[i] > '9') {
+    for (int i = 0; i < length; i++) 
+    {
+        if (str[i] < '0' || str[i] > '9') 
+        {
             return 0;
         }
         res = res * 10 + (str[i] - '0');
@@ -44,11 +51,13 @@ uint64_t atoi(char * str) { // ascii to integer
     return res;
 }
 
-int64_t atoi_index(const char *str, uint64_t *index) {
+int64_t atoi_index(const char *str, uint64_t *index) 
+{
     int64_t result = 0;
 
     // Convert characters to integer
-    while (str[*index] >= '0' && str[*index] <= '9') {
+    while (str[*index] >= '0' && str[*index] <= '9') 
+    {
         result = result * 10 + (str[*index] - '0');
         *index += 1;
     }
@@ -56,11 +65,11 @@ int64_t atoi_index(const char *str, uint64_t *index) {
     return result;
 }
 
-uint32_t uint_to_base(uint64_t value, char * buffer, uint32_t base) {
+uint32_t uint_to_base(uint64_t value, char * buffer, uint32_t base) 
+{
     char *p = buffer;
     char *p1, *p2;
     uint32_t digits = 0;
-
     do
     {
         uint32_t remainder = value % base;
@@ -85,51 +94,62 @@ uint32_t uint_to_base(uint64_t value, char * buffer, uint32_t base) {
     return digits;
 }
 
-char* itoa(int value, char* result, int base) {
-    if (base < 2 || base > 36) { 
+char* itoa(int value, char* result, int base) 
+{
+    if (base < 2 || base > 36) 
+    { 
         *result = '\0'; return result; 
     }
 
     char* ptr = result, *ptr1 = result, tmp_char;
     int tmp_value;
 
-    do {
+    do 
+    {
         tmp_value = value;
         value /= base;
         result++;
         *ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz" [35 + (tmp_value - value * base)];
     } while ( value );
 
-    if (tmp_value < 0) {
+    if (tmp_value < 0) 
+    {
         *ptr++ = '-';
         result++;
     }
     *ptr-- = '\0';
   
     // Reverse the string
-    while(ptr1 < ptr) {
+    while(ptr1 < ptr) 
+    {
         tmp_char = *ptr;
-        *ptr--= *ptr1;
+        *ptr-- = *ptr1;
         *ptr1++ = tmp_char;
     }
     return result;
 }
 
-void put_pixel(uint32_t hexColor, uint64_t x, uint64_t y){
+void put_pixel(uint32_t hexColor, uint64_t x, uint64_t y)
+{
     sys_put_pixel(hexColor, x, y);
 }
 
-void put_square(uint32_t hexColor, uint64_t x, uint64_t y, uint64_t size) {
-    for(int i=0; i<size; i++) {
-        for (int j=0; j<size; j++) {
-            put_pixel(hexColor, x+j, y+i);
+void put_square(uint32_t hexColor, uint64_t x, uint64_t y, uint64_t size) 
+{
+    for(int i = 0; i < size; i++) 
+    {
+        for (int j=0; j < size; j++) 
+        {
+            put_pixel(hexColor, x + j, y + i);
         }
     }
 }
 
-char get_key() {
+char get_key() 
+{
     char c[1];
-    if(sys_read(STDIN, c, 1) <= 0){
+    if(sys_read(STDIN, c, 1) <= 0)
+    {
         c[0] = 0;
     }
     return c[0];

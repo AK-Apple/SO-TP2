@@ -9,19 +9,22 @@
 static uint32_t m_z = 362436069;
 static uint32_t m_w = 521288629;
 
-uint32_t GetUint() {
+uint32_t GetUint() 
+{
   m_z = 36969 * (m_z & 65535) + (m_z >> 16);
   m_w = 18000 * (m_w & 65535) + (m_w >> 16);
   return (m_z << 16) + m_w;
 }
 
-uint32_t GetUniform(uint32_t max) {
+uint32_t GetUniform(uint32_t max) 
+{
   uint32_t u = GetUint();
   return (u + 1.0) * 2.328306435454494e-10 * max;
 }
 
 // Memory
-uint8_t memcheck(void *start, uint8_t value, uint32_t size) {
+uint8_t memcheck(void *start, uint8_t value, uint32_t size) 
+{
   uint8_t *p = (uint8_t *)start;
   uint32_t i;
 
@@ -33,7 +36,8 @@ uint8_t memcheck(void *start, uint8_t value, uint32_t size) {
 }
 
 // Parameters
-int64_t satoi(char *str) {
+int64_t satoi(char *str) 
+{
   uint64_t i = 0;
   int64_t res = 0;
   int8_t sign = 1;
@@ -41,12 +45,14 @@ int64_t satoi(char *str) {
   if (!str)
     return 0;
 
-  if (str[i] == '-') {
+  if (str[i] == '-') 
+  {
     i++;
     sign = -1;
   }
 
-  for (; str[i] != '\0'; ++i) {
+  for (; str[i] != '\0'; ++i) 
+  {
     if (str[i] < '0' || str[i] > '9')
       return 0;
     res = res * 10 + str[i] - '0';
@@ -56,17 +62,21 @@ int64_t satoi(char *str) {
 }
 
 // Dummies
-void bussy_wait(uint64_t n) {
+void bussy_wait(uint64_t n) 
+{
   uint64_t i;
   for (i = 0; i < n; i++);
 }
 
-int64_t endless_loop(int argc, char* argv[]) {
+int64_t endless_loop(int argc, char* argv[]) 
+{
   while (1);
 }
 
-int64_t endless_loop_print_seconds(uint64_t argc, char* argv[]) {
-  if (argc < 2) {
+int64_t endless_loop_print_seconds(uint64_t argc, char* argv[]) 
+{
+  if (argc < 2) 
+  {
     printf_error("[endless_loop_print_seconds] ARGCOUNT INCORRECT\nloop <seconds_wait> <msg>\n");
     return 1;
   }
@@ -74,7 +84,8 @@ int64_t endless_loop_print_seconds(uint64_t argc, char* argv[]) {
 
   // --------- Actual Function ----------
   int64_t pid = sys_get_pid();
-  while (1) {
+  while (1) 
+  {
     if(argc >= 3)
       printf("[%s] ", argv[2]);
     printf("%ld\n", pid);
@@ -83,19 +94,23 @@ int64_t endless_loop_print_seconds(uint64_t argc, char* argv[]) {
   return 0;
 }
 
-int64_t endless_loop_print(int argc, char* argv[]) {
-  if (argc < 2) {
+int64_t endless_loop_print(int argc, char* argv[]) 
+{
+  if (argc < 2) 
+  {
     printf_error("[endless_loop_print] ARGCOUNT INCORRECT\nloop <busy_wait>\n");
     return 1;
   }
   uint64_t wait = satoi(argv[1]);
   int color = 0x00FFFFFF;
-  if(argc >= 3) {
+  if(argc >= 3) 
+  {
     color = satoi(argv[2]);
   }
 
   int64_t pid = sys_get_pid();
-  while (1) {
+  while (1) 
+  {
     printf_color("%d ", color, 0, pid);
     bussy_wait(wait);
   }

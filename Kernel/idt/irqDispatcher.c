@@ -4,7 +4,8 @@
 #include <stdint.h>
 #include "keyboard.h"
 
-void irq_dispatcher(uint64_t irq, uint64_t rsp) {
+void irq_dispatcher(uint64_t irq, uint64_t rsp) 
+{
 	switch (irq) {
 		case 0:
 			timer_handler();

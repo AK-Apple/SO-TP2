@@ -4357,9 +4357,12 @@ char MAPPED_CHARS[4096][8] = {
 	{0, 0, 0, 0, 0, 0, 0, 0}
 };
 
-void get_char_map(char c, uint8_t char_map[FONT_HEIGHT][FONT_WIDTH]) {
-    for (int i = c * FONT_HEIGHT, j = 0 ; j < FONT_HEIGHT ; i++, j++) {
-        for (int k = 0 ; k < FONT_WIDTH ; k++) {
+void get_char_map(char c, uint8_t char_map[FONT_HEIGHT][FONT_WIDTH]) 
+{
+    for (int i = c * FONT_HEIGHT, j = 0 ; j < FONT_HEIGHT ; i++, j++) 
+	{
+        for (int k = 0 ; k < FONT_WIDTH ; k++) 
+		{
             char_map[j][k] = MAPPED_CHARS[i][k];
         }
     }

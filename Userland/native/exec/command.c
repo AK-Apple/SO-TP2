@@ -30,7 +30,8 @@ int wc(int argc, char *argv[]) {
     return 0;
 }
 
-int cat(int argc, char *argv[]) {
+int cat(int argc, char *argv[]) 
+{
     int input_char = 0;
     do {
         input_char = getchar();
@@ -40,7 +41,8 @@ int cat(int argc, char *argv[]) {
     return 0;
 }
 
-int filter(int argc, char *argv[]) {
+int filter(int argc, char *argv[]) 
+{
     int input_char = 0;
     while((input_char = getchar()) != EOF) {
         if(!is_vowel(input_char) && input_char != '\b')
@@ -49,7 +51,8 @@ int filter(int argc, char *argv[]) {
     return 0;
 }
 
-int64_t inforeg(uint64_t argc, char *argv[]) {
+int64_t inforeg(uint64_t argc, char *argv[]) 
+{
     StackedRegisters registers = {0};
     sys_get_registers(&registers);
     printf("\nRAX  : 0x%16lx", registers.rax);
@@ -76,13 +79,15 @@ int64_t inforeg(uint64_t argc, char *argv[]) {
     return 0;
 }
 
-void print_processes_state() {
+void print_processes_state() 
+{
     static char *PROCESS_STATE_STRING[] = {"UNKNOWN", "RUNNING", "READY  ", "BLOCKED"};
     static uint64_t PROCESS_STATE_COLOR[] = {0x00999999, 0x0000FF00, 0x00CCDD00, 0x00FF0000};
     static char *PRIORITY_STRING[] = {"LOW ", "MID ", "HIGH", "NONE"};
     ProcessInfo ps = {0};
     sys_get_processes_info(&ps);
-    if(ps.entries == NULL) {
+    if(ps.entries == NULL) 
+    {
         printf_error("no se pudo imprimir process info porque se quedo sin memoria dinamica\n");
         return;
     }
@@ -103,11 +108,14 @@ void print_processes_state() {
     sys_memory_free(ps.entries);
 }
 
-int64_t echo_cmd(uint64_t argc, char *argv[]) {
-    for(int i = 1; i < argc; i++) {
+int64_t echo_cmd(uint64_t argc, char *argv[]) 
+{
+    for(int i = 1; i < argc; i++) 
+    {
         int last_cut_index = 0;
         for(int j = 0; argv[i][j]; j++) {
-            if(argv[i][j] == '#' && argv[i][j+1] == '?') {
+            if(argv[i][j] == '#' && argv[i][j+1] == '?') 
+            {
                 argv[i][j] = '\0';
                 printf("%s%ld", &argv[i][last_cut_index], sys_get_exit_code());
                 j++;
@@ -148,7 +156,8 @@ void play_infinite_music_cmd(uint64_t argc, char *argv[])
     }
 }
 
-uint64_t change_priority_cmd(uint64_t argc, char *argv[]) {
+uint64_t change_priority_cmd(uint64_t argc, char *argv[]) 
+{
     if(argc < 3) {
         printf_error("wrong argcount.\nnice <pid> <prio>\n");
         return 1;
@@ -168,7 +177,8 @@ uint64_t change_priority_cmd(uint64_t argc, char *argv[]) {
     return 0;
 }
 
-void print_meminfo_cmd() {
+void print_meminfo_cmd() 
+{
     Memory_Info info = {0};
     sys_memory_info(&info);
     printf_color("Heap from 0x%lx to 0x%lx with allocator type: %s\n", 0x0000AA00, 0, info.base_address, info.end_address, info.allocator_type);
@@ -179,7 +189,8 @@ void print_meminfo_cmd() {
     printf("largest free block %lu bytes (header size %lu bytes)\n", info.largest_free_block, info.header_size);
 }
 
-uint64_t block_cmd(uint64_t argc, char *argv[]) {
+uint64_t block_cmd(uint64_t argc, char *argv[]) 
+{
     if(argc >= 2) {
         int64_t pid = atoi(argv[1]);
         if(pid == 0 || sys_get_process_status(pid) == 0) {
@@ -201,7 +212,8 @@ uint64_t block_cmd(uint64_t argc, char *argv[]) {
     return 0;
 }
 
-void divide(uint64_t argc, char *argv[]) {
+void divide(uint64_t argc, char *argv[]) 
+{
     if(argc == 3) {
         int64_t a, b;
         a = satoi(argv[1]);    
@@ -220,7 +232,8 @@ void invalid_opcode() {
     ((void (*)()) invalid_opcodes)();
 }
 
-void change_size(uint64_t argc, char *argv[]) {
+void change_size(uint64_t argc, char *argv[]) 
+{
     uint32_t new_size = 1;
     if (argc >= 2) {
         new_size = satoi(argv[1]);
@@ -231,7 +244,8 @@ void change_size(uint64_t argc, char *argv[]) {
     sys_new_size(new_size);
 }
 
-void kill_process(uint64_t argc, char *argv[]) {
+void kill_process(uint64_t argc, char *argv[]) 
+{
     pid_t pid = satoi(argv[1]);
     if(argc < 2) {
         printf_error("invalid arguments\n"); 
@@ -253,7 +267,8 @@ void kill_process(uint64_t argc, char *argv[]) {
     }
 }
 
-void print_time() {
+void print_time() 
+{
     int hours = sys_time(HOURS);
     int minutes = sys_time(MINUTES);
     int day = sys_time(DAY_OF_THE_MONTH);

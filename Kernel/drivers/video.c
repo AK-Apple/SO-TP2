@@ -51,7 +51,8 @@ VBEInfoPtr VBE_mode_info = (VBEInfoPtr) 0x0000000000005C00;
 
 
 
-void put_pixel(uint32_t hexColor, uint64_t x, uint64_t y) {
+void put_pixel(uint32_t hexColor, uint64_t x, uint64_t y) 
+{
     uint8_t * framebuffer = (uint8_t *) ((uint64_t) VBE_mode_info->framebuffer);
     uint64_t offset = (x * ((VBE_mode_info->bpp)/8)) + (y * VBE_mode_info->pitch);
     framebuffer[offset]     =  (hexColor) & 0xFF;
@@ -59,8 +60,9 @@ void put_pixel(uint32_t hexColor, uint64_t x, uint64_t y) {
     framebuffer[offset+2]   =  (hexColor >> 16) & 0xFF;
 }
 
-void put_square(uint32_t hexColor, uint64_t x, uint64_t y, uint64_t size) {
-    for(int i=0; i<size; i++) {
+void put_square(uint32_t hexColor, uint64_t x, uint64_t y, uint64_t size) 
+{
+    for(int i = 0; i<size; i++) {
         for (int j=0; j<size; j++) {
             put_pixel(hexColor, x+j, y+i);
         }
@@ -68,7 +70,8 @@ void put_square(uint32_t hexColor, uint64_t x, uint64_t y, uint64_t size) {
 }
 
 
-void clear_screen(uint32_t hex_color) {
+void clear_screen(uint32_t hex_color) 
+{
     for (int i = 0; i < VBE_mode_info->height ; i++) {
         for (int j = 0; j < VBE_mode_info->width ; j++) {
             put_pixel(hex_color, j, i);
@@ -76,16 +79,19 @@ void clear_screen(uint32_t hex_color) {
     }
 }
 
-int get_width() {
+int get_width() 
+{
     return VBE_mode_info->width;
 }
 
-int get_height() {
+int get_height() 
+{
     return VBE_mode_info->height;
 }
 
 // 0 --> getWidth   (o cualquier cosa que no sea 1)
 // 1 --> getHeight
-int sys_get_size(int id) {
+int sys_get_size(int id) 
+{
     return id == 1 ? get_height() : get_width();
 }

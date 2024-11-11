@@ -22,7 +22,7 @@ typedef struct
 } pipe_t;
 
 
-pipe_t pipes[MAX_PIPES] = { 0 };
+pipe_t pipes[MAX_PIPES] = {0};
 Tickets tickets_pipe = {0};
 
 // ---------- Funciones Auxiliares -------

@@ -19,7 +19,7 @@ typedef struct {
     int size;
 } priority_queue_t;
 
-priority_queue_t bedroom = { 0 } ;
+priority_queue_t bedroom = {0} ;
 
 void swap(pq_item_t* a, pq_item_t* b)
 {
