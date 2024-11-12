@@ -1,6 +1,6 @@
 # SO TP2 2024 2C
 
-El objetivo de este TP es continuar el sistema operativo creado en arqui, agregando un scheduler de procesos, memoria dinamica, semaforos, pipes.
+El objetivo de este TP es continuar el sistema operativo creado en arqui, agregando un scheduler de procesos, memoria dinámica, semaforos, pipes.
 
 ## Integrantes
 
@@ -155,11 +155,7 @@ Manda el proceso con pid = \<pid> a foreground.
 
 ### mem
 
-Imprime el estado de la memoria. Utiliza el siguiente formato:
-
-\<memoria ocupada>:bytes | \<memoria libre>:free | \<memoria ocupada>:bytes ...
-
-Luego imprime:
+Imprime el estado de la memoria:
 
 - Total memory (memoria total)
 - Used memory (memoria usada)

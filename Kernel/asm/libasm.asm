@@ -1,3 +1,4 @@
+section .note.GNU-stack
 GLOBAL cpuVendor
 GLOBAL force_timer_tick
 GLOBAL setup_kernel_restart

@@ -1,3 +1,4 @@
+section .note.GNU-stack
 section .text
 GLOBAL sys_hlt
 GLOBAL sys_read
