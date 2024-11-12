@@ -276,3 +276,10 @@ void print_time()
     int year = sys_time(YEAR) + 2000;
     printf("%2d:%2d, %2d/%2d/%4d\n", hours, minutes, day, month, year);
 }
+
+void userland_sleep(uint64_t seconds) 
+{
+    uint64_t limit = sys_seconds_elapsed() + seconds;
+    while(sys_seconds_elapsed() < limit)
+        sys_yield();
+}

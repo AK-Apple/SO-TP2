@@ -32,10 +32,11 @@ void kill_process(uint64_t argc, char *argv[]);
 int wc(int argc, char *argv[]);
 int cat(int argc, char *argv[]);
 int filter(int argc, char *argv[]);
+void userland_sleep(uint64_t seconds);
 
-// Getters de "Programs" (un Program es una función para inicializar procesos)
+//  Funciones de tipo "Program" (es decir, una función con la que se inicializa un proceso)
+
 int64_t endless_loop_print_seconds(uint64_t argc, char* argv[]);
-
 int64_t test_processes(uint64_t argc, char *argv[]);
 int64_t test_prio(uint64_t argc, char *argv[]);
 int64_t test_sync(uint64_t argc, char *argv[]);
@@ -43,5 +44,6 @@ int64_t test_mm(uint64_t argc, char *argv[]);
 int64_t test_pipe(uint64_t argc, char *argv[]);
 int64_t phylo(uint64_t argc, char *argv[]);
 int64_t echo_cmd(uint64_t argc, char *argv[]);
+
 
 #endif //TPE_COMMAND_H

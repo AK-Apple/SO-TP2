@@ -29,7 +29,8 @@
 // } PHILOSOPHER_STATE;
 
 // int64_t mutex_sem_id = 0;
-// int64_t aux_sem_id = 1;
+// int64_t add_philosopher_sem_id = 1;
+// int64_t rm_philosopher_sem_id = 2;
 // int64_t philosopher_count = 0;
 // PHILOSOPHER_STATE state[MAX_PHILOSOPHER_COUNT] = {0};
 // PHILOSOPHER_STATE pids[MAX_PHILOSOPHER_COUNT] = {0};
@@ -40,9 +41,9 @@
 //     return mutex_sem_id + 2 + i ;
 // }
 
-// static int right_fork_sem_id(int i, int current_philosopher_count) 
+// static int right_fork_sem_id(int i) 
 // {
-//     return left_fork_sem_id((i >= current_philosopher_count - 1) ?  0 : i + 1) ;
+//     return left_fork_sem_id((i >= philosopher_count - 1) ?  0 : i + 1) ;
 // }
 
 // static void print_state() {
@@ -55,27 +56,27 @@
 //     putchar('\n');
 // }
 
-// static void take_forks(int i, int current_philosopher_count) {
+// static void take_forks(int i) {
 //     // sys_sem_wait(mutex_sem_id);
 //     state[i] = HUNGRY;
 //     print_state();
 //     // sys_sem_post(mutex_sem_id);
 //     if (IS_ODD(i))
 //     {
-//         sys_sem_wait(right_fork_sem_id(i, current_philosopher_count));
+//         sys_sem_wait(right_fork_sem_id(i));
 //         sys_sem_wait(left_fork_sem_id(i));
 //     }
 //     else
 //     {
 //         sys_sem_wait(left_fork_sem_id(i));
-//         sys_sem_wait(right_fork_sem_id(i, current_philosopher_count));
+//         sys_sem_wait(right_fork_sem_id(i));
 //     }
     
 // }
 
-// static void put_forks(int i, int current_philosopher_count) {
+// static void put_forks(int i) {
 //     sys_sem_post(left_fork_sem_id(i));
-//     sys_sem_post(right_fork_sem_id(i, current_philosopher_count));
+//     sys_sem_post(right_fork_sem_id(i));
 // }
 
 // static void eat(int i)
@@ -102,17 +103,32 @@
 //     int current_philosopher_count = 0;
 //     printf("Empieza el filosofo numero %d\n", i);
 //     while(1) {
-//         sys_sem_wait(mutex_sem_id);
-//         sys_sem_post(mutex_sem_id);
+
 //         think(i);
 
-//         if (i == philosopher_count - 2) sys_sem_wait(aux_sem_id);
-//         current_philosopher_count = philosopher_count;
-
-//         take_forks(i, current_philosopher_count);
-//         eat(i);
-//         put_forks(i, current_philosopher_count);
-//         if (i == philosopher_count - 2) sys_sem_post(aux_sem_id);
+//         if (i == philosopher_count - 1)
+//         {
+//             sys_sem_wait(add_philosopher_sem_id);
+//             sys_sem_wait(rm_philosopher_sem_id);
+//             take_forks(i);
+//             eat(i);
+//             put_forks(i);
+//             sys_sem_post(rm_philosopher_sem_id);
+//             sys_sem_post(add_philosopher_sem_id);
+//         }
+//         if (i == philosopher_count -2)
+//         {
+//             sys_sem_wait(rm_philosopher_sem_id);
+//             take_forks(i);
+//             eat(i);
+//             put_forks(i);
+//             sys_sem_post(rm_philosopher_sem_id);
+//         }
+//         else{
+//             take_forks(i);
+//             eat(i);
+//             put_forks(i);
+//         }
 //     }
 //     return 0;
 // }
@@ -121,28 +137,17 @@
 // static void add_philosopher() {
 
 //     int i = philosopher_count;
-    
-//     if (i >= 4) 
-//     {
-//         sys_sem_wait(left_fork_sem_id(0));
-//     }
+
 //     state[i] = INVALID;
 //     sys_sem_wait(mutex_sem_id);
     
 //     if(i >= MAX_PHILOSOPHER_COUNT) {
 //         sys_sem_post(mutex_sem_id);
-
-//         if (i >= 4) sys_sem_post(left_fork_sem_id(0));
-
 //         printf_error("max phi count\n");
 //         return;
 //     }
 //     if(sys_sem_open(left_fork_sem_id(i), 1) == SEM_ERROR) {
 //         sys_sem_post(mutex_sem_id);
-        
-//         if (i >= 4) sys_sem_post(left_fork_sem_id(0));
-
-        
 //         printf_error("error\n");
 //         return;
 //     }
@@ -150,51 +155,47 @@
 //     itoa(i, philosopher_i_str, 10);
 //     char *argv_phi[] = {"philosopher", philosopher_i_str};
 
+//     sys_sem_wait(add_philosopher_sem_id);
+
 //     philosopher_count++;
 
 //     pids[i] = sys_create_process((Program)philosopher, sizeof(argv_phi)/sizeof(argv_phi[0]), argv_phi);
 //     if(pids[i] == -1) {
 //         sys_sem_post(mutex_sem_id);
+//         sys_sem_post(add_philosopher_sem_id);
 //         philosopher_count--;
-//         if (i >= 4) sys_sem_post(left_fork_sem_id(0));
         
 //         return;
 //     }
     
 //     print_state();
-
-//     if (i >= 4) sys_sem_post(left_fork_sem_id(0));
-
+//     sys_sem_post(add_philosopher_sem_id);
 //     sys_sem_post(mutex_sem_id);
 
 // }
 
 // static void remove_philosopher() {
-//     if (philosopher_count <= 4)
-//     {
-//         printf_error("You can have minimum 4 philosophers\n");
-//         return;
-//     }
+
 //     int i = philosopher_count - 1;
 
-//     sys_sem_wait(aux_sem_id);
-//     take_forks(i, philosopher_count);
-
 //     sys_sem_wait(mutex_sem_id);
-//     // if left && right == hungry
+
+//     sys_sem_wait(rm_philosopher_sem_id);
+//     sys_sem_wait(rm_philosopher_sem_id);
+
 
 //     sys_kill_process(pids[i], 0);
-//     sys_wait_pid(pids[i]);
 
 //     pids[i] = -1;
 //     state[i] = INVALID;
     
 //     print_state();
     
-//     sys_sem_post(aux_sem_id);
+//     sys_sem_post(rm_philosopher_sem_id);
+//     sys_sem_post(rm_philosopher_sem_id);
+
 //     sys_sem_post(left_fork_sem_id(i));
 //     sys_sem_close(left_fork_sem_id(i));
-//     sys_sem_post(right_fork_sem_id(i, philosopher_count));
 
 //     philosopher_count--;
     
@@ -204,14 +205,20 @@
 
 // int64_t phylo(uint64_t argc, char *argv[]) {
 //     mutex_sem_id = 0;       // Funciona como ID base para el resto de semáforos
-//     aux_sem_id = mutex_sem_id + 1;
+//     add_philosopher_sem_id = mutex_sem_id + 1;
+//     rm_philosopher_sem_id = mutex_sem_id + 2;
+
 //     philosopher_count = 0;
 //     mutex_sem_id = sys_get_pid();
 //     if(sys_sem_open(mutex_sem_id, 1) == SEM_ERROR) {
 //         printf_error("phylo error: init sem\n");
 //         return -1;
 //     }
-//     if(sys_sem_open(aux_sem_id, 1) == SEM_ERROR) {
+//     if(sys_sem_open(add_philosopher_sem_id, 1) == SEM_ERROR) {
+//         printf_error("phylo error: init sem 2\n");
+//         return -1;
+//     }
+//     if(sys_sem_open(rm_philosopher_sem_id, 2) == SEM_ERROR) {
 //         printf_error("phylo error: init sem 2\n");
 //         return -1;
 //     }
@@ -233,7 +240,7 @@
 //                 printf_error("min phi count\n");
 //             break;
 //         case CMD_PS:
-//             sys_print_all_processes();
+//             print_processes_state();
 //             break;
 //         case CMD_CLEAR:
 //             sys_clear();

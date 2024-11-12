@@ -92,9 +92,9 @@ static int64_t philosopher(uint64_t argc, char *argv[])
     printf_color("Empieza el filosofo numero %d\n", COLOR_GREEN, 0, i);
     state[i] = THINKING;
     while(1) {
-        sys_sleep(SECONDS_THINK);
+        userland_sleep(SECONDS_THINK);
         take_forks(i);
-        sys_sleep(SECONDS_EAT);
+        userland_sleep(SECONDS_EAT);
         put_forks(i);
     }
     return 0;
