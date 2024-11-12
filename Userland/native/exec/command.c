@@ -91,7 +91,7 @@ void print_processes_state()
         printf_error("no se pudo imprimir process info porque se quedo sin memoria dinamica\n");
         return;
     }
-    printf("\npid : ppid : prio : stack_pointer_64 : base_pointer_64  : status  : process_name\n");
+    printf("pid : ppid : prio : stack_pointer_64 : base_pointer_64  : status  : process_name\n");
     for (int i = 0; i < ps.count; i++)
     {
         printf("%3ld : %4ld : ", ps.entries[i].pid, ps.entries[i].ppid);

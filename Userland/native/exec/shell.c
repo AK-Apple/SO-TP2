@@ -120,6 +120,7 @@ void shell() {
         char command[MAX_BUF] = {0};
         while (!break_line) {
             char input_char = getchar();
+            if(input_char == '\0' && i == 0) continue;
             if (!(input_char == '\b' && i == 0) && i < MAX_BUF)
                 putchar(input_char);
             if (input_char == '\n') {

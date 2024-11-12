@@ -45,6 +45,7 @@ int64_t test_prio(uint64_t argc, char *argv[])
   for (i = 0; i < TOTAL_PROCESSES; i++)
     sys_change_priority(pids[i], prio[i]);
   sys_yield();
+  putchar('\n');
   print_processes_state();
   for(int i = 0; i < 5; i++) 
   {
