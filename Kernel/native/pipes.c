@@ -271,3 +271,23 @@ int64_t write_pipe(fd_t fd_read_end, const char* buf, int count)
 
     return total_written;
 }
+/*
+int array_pipe_name_to_pipe_index[pipe_index];
+syscall_create_named_pipe(int PIPE_NAME) {
+    este crea el pipe y llama a request_ticket();
+    mapea el PIPE_NAME a un indice (pipes[pipe])
+    int pipe_index = request_ticket(&tikcest);
+    array_pipe_name_to_pipe_index[PIPE_NAME] = pipe_index ;
+}
+
+syscall_open_named_pipe(int PIPE_ID, int read_or_write_end) {
+    int pipe_index = array_pipe_name_to_pipe_index[PIPE_NAME];
+    assign_fd_to_pipe()
+
+}
+
+createnamedpioe(5);
+opennamedpipe(5);
+
+sys_write(5, "sada", 4)
+*/

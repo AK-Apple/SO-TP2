@@ -41,6 +41,7 @@ static Command commands[] = {
     {"inforeg", "Muestra los registros guardados. (Presiona `left_alt` para guardar registros)", (Program)inforeg},
     {"div", "Divide num/den", (Program)divide, "<num> <den>"},
     {"invalidopcode", "Muestra excepcion de codigo invalido.", (Program)invalid_opcode},
+    {"desafio", "Ejecuta el desafio.", (Program)mvar_test},
 };
 
 pid_t play_os_initializing()

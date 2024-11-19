@@ -42,6 +42,9 @@ GLOBAL sys_close_pipe
 GLOBAL sys_set_foreground
 GLOBAL sys_ticks_sleep
 GLOBAL sys_set_stdin_options
+GLOBAL sys_openMVar
+GLOBAL sys_putMVar
+GLOBAL sys_takeMVar
 
 %macro Syscall 1
 	push    rbp 
@@ -62,6 +65,15 @@ GLOBAL sys_set_stdin_options
     leave   
     ret
 %endmacro
+
+sys_openMVar:
+	Syscall 40
+
+sys_putMVar:
+	Syscall 41
+
+sys_takeMVar:
+	Syscall 42
 
 sys_hlt:
 	Syscall 0

@@ -62,4 +62,8 @@ extern int sys_close_pipe(fd_t fd);
 extern void sys_ticks_sleep(uint64_t ticks);
 extern void sys_set_stdin_options(StdinOption stdin_option);
 
+void sys_openMVar(mvar_t * mvar);
+void sys_putMVar(mvar_t * mvar, int value);
+int sys_takeMVar(mvar_t * mvar);
+
 #endif //TPE_ARQUI_SYSCALLS_H

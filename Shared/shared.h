@@ -95,4 +95,10 @@ typedef struct {
 
 typedef int64_t (*Program)(uint64_t, char*[]);
 
+typedef struct {
+    uint8_t * value;
+    int sem_is_empty; 
+    int sem_is_full;
+} mvar_t;
+
 #endif

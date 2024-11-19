@@ -34,6 +34,7 @@ int cat(int argc, char *argv[]);
 int filter(int argc, char *argv[]);
 void userland_sleep(uint64_t seconds);
 
+void mvar_test();
 //  Funciones de tipo "Program" (es decir, una función con la que se inicializa un proceso)
 
 int64_t endless_loop_print_seconds(uint64_t argc, char* argv[]);

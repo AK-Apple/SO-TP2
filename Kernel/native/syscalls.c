@@ -13,6 +13,7 @@
 #include "scheduler.h"
 #include "sleep_manager.h"
 #include "registers.h"
+#include "mvars.h"
 
 typedef uint64_t (*Syscall)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t);
 
@@ -64,7 +65,10 @@ uint64_t int80Dispacher(uint64_t id, uint64_t param_1, uint64_t param_2, uint64_
         (Syscall)close_pipe_end, // Syscall 37
 
         (Syscall)ticks_sleep,  // Syscall 38
-        (Syscall)set_stdin_options // Syscall 39
+        (Syscall)set_stdin_options, // Syscall 39
+        (Syscall)openMVar, // Syscall 40
+        (Syscall)putMVar, // Syscall 41
+        (Syscall)takeMVar, // Syscall 42
 
     };
     if(id >= sizeof(syscalls) / sizeof(syscalls[0])) {

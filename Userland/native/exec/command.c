@@ -243,6 +243,55 @@ void change_size(uint64_t argc, char *argv[])
     }
     sys_new_size(new_size);
 }
+void mvar_writer(uint64_t argc, char *argv[]) ;
+void mvar_reader(uint64_t argc, char *argv[]) ;
+
+void mvar_test()
+{
+    char* argv[] = {"writer_1", "1"};
+    sys_create_process(mvar_writer, sizeof(argv)/sizeof(argv[0]), argv);
+
+    char* argv2[] = {"writer_2", "2"};
+    sys_create_process(mvar_writer, sizeof(argv2)/sizeof(argv2[0]), argv2);
+
+    char* argv3[] = {"reader_1", "r"};
+    sys_create_process(mvar_reader, sizeof(argv3)/sizeof(argv3[0]), argv3);
+    
+    char* argv4[] = {"reader_2", "g"};
+    sys_create_process(mvar_reader, sizeof(argv4)/sizeof(argv4[0]), argv4);
+}
+
+void mvar_writer(uint64_t argc, char *argv[]) 
+{
+    mvar_t mvar = {0};
+    sys_openMVar(&mvar);
+    pid_t pid = sys_get_pid();
+    int wait = &pid;
+    if(argv[1][0] == '2')
+    for(int i = 0; i < 10000000; i++);
+    while(1) {
+        for(int i = 0; i < wait; i++);
+        wait = (wait * 1000000) % 60000000000;
+        sys_putMVar(&mvar, pid);
+    }
+}
+
+void mvar_reader(uint64_t argc, char *argv[]) {
+    mvar_t mvar = {0};
+    sys_openMVar(&mvar);
+    int color = 0;
+    printf("ARV %s\n", argv[1]);
+    if(argv[1][0] == 'r') {
+        color = 0x00ff0000;
+    }
+    else {
+        color = 0x0000FF00;
+    }
+    while(1) {
+        int value = sys_takeMVar(&mvar);
+        printf_color("%d", color, 0, value);
+    }
+}
 
 void kill_process(uint64_t argc, char *argv[]) 
 {
